@@ -1,0 +1,16 @@
+
+server {
+    listen 8080;
+
+    server_name zed.de.spryker.dev;
+
+    keepalive_timeout 0;
+    access_log  /data/logs/zed-access.log extended;
+
+    root /data/shop/public/Zed;
+
+    set $application_env {{ getv "/spryker/app/env" }};
+    set $application_store {{ getv "/spryker/shop/cc" }};
+
+    include "spryker/zed.conf";
+}

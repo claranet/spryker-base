@@ -1,0 +1,21 @@
+
+server {
+    listen 80 default_server sndbuf=65535 rcvbuf=16384;
+
+    server_name www.de.spryker.dev de.spryker.dev;
+    access_log  /data/logs/yves-access.log extended;
+
+    root /data/shop/public/Yves;
+
+    set $application_env {{ getv "/spryker/app/env" }};
+    set $application_store {{ getv "/spryker/shop/cc" }};
+
+    include "spryker/yves.conf";
+
+    ###
+    ### Rewrite rules
+    ###
+    ### Beware of load balancer heartbeat check (/monitoring/heartbeat), it must stay not rewritten.
+
+}
+

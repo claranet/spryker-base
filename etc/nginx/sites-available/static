@@ -1,11 +1,1 @@
-server {
-
-    listen 1234 default_server;
-
-    server_name static.com.spryker.dev;
-    access_log off;
-
-    root /data/storage/development/static;
-
-    include "spryker/static.conf";
-}
+# placeholder - actual configuration will be written by confd during runtime

@@ -1,0 +1,7 @@
+
+[template]
+src = "nginx-vhost-yves.tmpl"
+dest = "/etc/nginx/sites-available/yves"
+keys = [
+    "/spryker/"
+]
