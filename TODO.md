@@ -16,10 +16,18 @@
 * Consider using the `ONBUILD` directive of the `Dockerfile` syntax in order to
   use the provided features of this image with a downstream image (see buildl
   time tooling below).
+* Do we need to split up the components shop wise? One database for DE another for US? 
+* How do want to handle different shops based on country codes? Depending nginx
+  vhost, spryker and database might be handles differently? 
 
 
 ## Open action items
 
+* Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
+* Implement mail solution different to local maildrop
+* Find different solution for cronjobs than simply running them in one single
+  container? Either use kubernetes scheduled cron jobs or use dkron.
+  Replace the cronjobs under `./config/Zed/cronjobs`
 * Implement proper health checks for php-fpm channeled through nginx and
   evaluated by monit which in turn must propagate the state of the application
   to the outside world (docker).

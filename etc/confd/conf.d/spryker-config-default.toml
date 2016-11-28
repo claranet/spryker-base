@@ -1,0 +1,7 @@
+
+[template]
+src = "config_default.php.tmpl"
+dest = "/data/shop/config/Shared/config_default.php"
+keys = [
+    "/"
+]

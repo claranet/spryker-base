@@ -1,0 +1,7 @@
+
+[template]
+src = "console_env_local.php.tmpl"
+dest = "/data/shop/config/Shared/console_env_local.php"
+keys = [
+    "/spryker/app/env"
+]
