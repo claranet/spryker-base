@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-sed -e
+set -e
+
+source /data/bin/functions.sh
 
 
 if [ -n "$ETCD_NODE" ]; then
@@ -17,6 +19,9 @@ case $1 in
         ;;
     run)
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
+        ;;
+    build)
+        echo "BUILD BUILD BUILD ... "
         ;;
     *)
         bash -c "$*"

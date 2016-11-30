@@ -21,25 +21,56 @@ to understand where to place the source code.
 
 ## Directory hierarchy
 
-    /data/shop/               -- APPLICATION_ROOT_DIR
-      ./assets/               -- Static assets built by antelope
-      ./config/               -- Configuration files
-      ./cache/                -- Twig cache, the silex/symfony web profiler
-                                 cache and further temporary files will be placed here during runtime
-      ./public/{Yves,Zed}/    -- Entry point to spryker application (document root)
-      ./src/                  -- Actual implementation of this shop instance provided by you!
-        ./Generated/          -- Implementation of all collected transfer objects  of all bundles
-        ./Orm/                -- All the collected Propel schema definitions (XML) of all bundles
-        ./Pyz/                -- The project space of this very own implementation
+    /data/shop/                 -- APPLICATION_ROOT_DIR
+      ./assets/                 -- Static assets built by antelope
+      ./config/                 -- Configuration files
+      ./cache/                  -- Twig cache, the silex/symfony web profiler
+                                   cache and further temporary files will be
+                                   placed here during runtime
+      ./public/{Yves,Zed}/      -- Entry point to spryker application (document root)
+      ./src/                    -- Actual implementation of this shop instance provided by you!
+        ./Generated/            -- Implementation of all collected transfer objects  of all bundles
+        ./Orm/                  -- All the collected Propel schema definitions (XML) of all bundles
+        ./Pyz/                  -- The project space of this very own implementation
 
-      ./vendor/               -- Dependencies resolved by phpcomposer
-        ./spryker/            -- APPLICATION_SPRYKER_ROOT
+      ./vendor/                 -- Dependencies resolved by phpcomposer
+        ./spryker/              -- APPLICATION_SPRYKER_ROOT
 
-    /data/logs/               -- Local log files of different components
+    /data/logs/                 -- Local log files of different components
+    /data/bin/                  -- Helper scripts
+    /data/etc/config_local.php  -- Spryker configuration overriding the project
+                                   wide ones with container local setup resp.
+                                   their external dependencies
 
 ## Using this image 
 
-... 
+In order to use this docker image one must build a docker image itself by
+inheriting this base image and adding custom instructions if necessary. 
+
+Inherited properties are:
+
+* Environment variables (`ENV`)
+* Build trigger adding essential part of your codebase (`ONBUILD`)
+* The entrypoint and cmd parts (`ENTRYPOINT`, `CMD`)
+
+All the environment variables defined here in the base image will be inherited
+by the child image as well. So defaults should be same. During runtime
+configuration you must supply spryker with information regarding the depending
+external resources like the Redis, PostgreSQL or Elasticsearch. To check which
+environment variables are necessary or required have a look at the `Dockerfile`. 
+
+Furthermore are there build trigger (`ONBUILD`) placed at the base level which
+governing part of the build process of the child image. These trigger define
+which part of your shop source code repository (by default) will be included to
+the effective conrete docker image implementing the actual shop.
+
+By default your code base need to supply the following parts which
+automatically get added to the image:
+
+* `./src/`
+* `./package.json`
+* `./composer.json`
+* `./config/`
 
 ## Configuration 
 
