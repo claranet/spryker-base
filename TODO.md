@@ -19,6 +19,13 @@
 * Do we need to split up the components shop wise? One database for DE another for US? 
 * How do want to handle different shops based on country codes? Depending nginx
   vhost, spryker and database might be handles differently? 
+* How do we implement a rolling upgrade? This questions falls apart in two categories:
+    * How do handle the infrastructure part on k8s and via docker-compose as well 
+    * What about the application part? Imagine a running cluster and you wanna
+      push a new shop image. This includes code as well as static assets. The
+      challenge starts if go even further and consider shop upgrade which have
+      some impact on the database schema or the something similiar on the
+      Redis/ES side. How do we cope with this scenario? 
 
 
 ## Open action items
