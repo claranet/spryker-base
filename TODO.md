@@ -3,6 +3,10 @@
 
 ## Open discussion 
 
+* We need to maintain two branches of this docker image, one for PHP5 and one
+  for PHP7 environments. The customer should be able to chose between those two
+  runtime environments. Questions is, how do we keep the required maintenance
+  effort low?
 * Split up Yves/Zed from the very beginning or providing a unified image
   instead and leave this question open to the engineer running this setup? He
   could decide to split both parts in order to be able to scale them
