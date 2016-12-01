@@ -30,6 +30,7 @@
 
 ## Open action items
 
+* Migrate from php5 to php7
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop
 * Find different solution for cronjobs than simply running them in one single
@@ -45,5 +46,9 @@
 * Write tooling for init during runtime: entrypoint script which implements
     * templatable configuration files 
     * initial database/redis/elasticsarch refuelling
+* Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
+  evaluated in k8s deployment contexts. 
+* Make the list of to be installed php extensions configurable. Right now its a
+  static list fixiated in the base image. 
 
 ## Resolved
