@@ -12,10 +12,12 @@ to understand where to place the source code.
 * [x] process supervision via monit
 * [x] nginx
 * [x] php-fpm 
-* [x] php5
-* [x] php5 base modules 
+* [x] php7
+* [x] php7 base modules 
+* [x] php7 custom modules 
 * [x] templating of configuration files according to container environment 
 * [x] base directory hierarchy 
+* [/] building of shop application (npm, php composer, ...)
 * [ ] logging 
 
 
