@@ -13,9 +13,6 @@
 * Split up the dynamic and the static part? 
 * How to implement shops for different countries? Do we need separated VHosts
   for this? Will this be achied by env settings of the nginx vhost? 
-* Consider using the `ONBUILD` directive of the `Dockerfile` syntax in order to
-  use the provided features of this image with a downstream image (see buildl
-  time tooling below).
 * Do we need to split up the components shop wise? One database for DE another for US? 
 * How do want to handle different shops based on country codes? Depending nginx
   vhost, spryker and database might be handles differently? 
@@ -30,7 +27,6 @@
 
 ## Open action items
 
-* Migrate from php5 to php7
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop
 * Find different solution for cronjobs than simply running them in one single
@@ -48,7 +44,12 @@
     * initial database/redis/elasticsarch refuelling
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
-* Make the list of to be installed php extensions configurable. Right now its a
-  static list fixiated in the base image. 
 
 ## Resolved
+
+* Migrate from php5 to php7
+* Make the list of to be installed php extensions configurable. Right now its a
+  static list fixiated in the base image. 
+* Consider using the `ONBUILD` directive of the `Dockerfile` syntax in order to
+  use the provided features of this image with a downstream image (see buildl
+  time tooling below).

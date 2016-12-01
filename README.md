@@ -70,6 +70,8 @@ automatically get added to the image:
 * `./src/`
 * `./package.json`
 * `./composer.json`
+* `./build.conf` - Shell sourcable file including variables governing the
+  behaviour of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
 * `./config/`
 
 ## Configuration 

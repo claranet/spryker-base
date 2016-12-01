@@ -1,5 +1,5 @@
 
-FROM ubuntu:trusty
+FROM ubuntu:xenial
 
 MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
@@ -33,10 +33,10 @@ RUN mkdir -p /data/logs /data/bin /data/etc
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y apt-transport-https curl && \
-		echo "deb https://deb.nodesource.com/node_6.x trusty main" > /etc/apt/sources.list.d/nodesource.list && \
-    curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add - && \
+		echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list && \
+    curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
     apt-get update && \
-    apt-get install -y nginx nginx-extras php5-fpm php5-cli monit nodejs git && \
+    apt-get install -y nginx nginx-extras php-fpm php-cli monit nodejs git && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm /etc/nginx/sites-enabled/default && \
@@ -67,6 +67,7 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 CMD  [ "run" ]
 
 LABEL org.label-schema.name="spryker-base" \
+      org.label-schema.version="1.0" \
       org.label-schema.description="Providing base infrastructure for a containerized spryker e-commerce application" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \
@@ -75,6 +76,6 @@ LABEL org.label-schema.name="spryker-base" \
 
 ONBUILD COPY ./src /data/shop/src
 ONBUILD COPY ./config /data/shop/config
-ONBUILD COPY ./package.json ./composer.json /data/shop/
-ONBUILD RUN ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
-ONBUILD RUN /entrypoint.sh build
+ONBUILD COPY ./package.json ./composer.json build.conf /data/shop/
+ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php && chown -R www-data: /data/shop/
+ONBUILD RUN  /entrypoint.sh build
