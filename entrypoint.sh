@@ -5,8 +5,10 @@ set -e
 export SHOP="/data/shop"
 export SETUP=spryker
 export TERM=xterm 
-source /data/bin/functions.sh
+export VERBOSITY='-v'
+export CONSOLE=vendor/bin/console
 
+source /data/bin/functions.sh
 
 function generate_configurations {
   if [ -n "$ETCD_NODE" ]; then
@@ -19,11 +21,7 @@ function generate_configurations {
 
 # target during build time of child docker image executed by ONBUILD
 # build trigger of base image
-function build_child_image {
-    cd $SHOP
-
-    [ -e "$SHOP/build.conf" ] && source $SHOP/build.conf
-
+function install_dependencies {
 
     if [ -n "$PHP_EXTENSIONS" ]; then
       export DEBIAN_FRONTEND=noninteractive
@@ -45,6 +43,27 @@ function build_child_image {
       php /data/bin/composer.phar install --prefer-dist
     fi
     php /data/bin/composer.phar clear-cache
+
+    antelope install
+}
+
+function build_shared {
+  labelText "Generating Transfer Objects"
+  $CONSOLE transfer:generate
+  writeErrorMessage "Generating Transfer Objects failed"
+
+  labelText "Preparing Propel "
+  $CONSOLE propel:model:build
+  $CONSOLE propel:sql:build
+  $CONSOLE propel:config:convert
+}
+
+function build_yves {
+  antelopeInstallYves
+}
+
+function build_zed {
+  antelopeInstallZed
 }
 
 
@@ -58,7 +77,14 @@ case $1 in
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
         ;;
     build)
-        build_child_image
+        cd $SHOP
+        [ -e "$SHOP/build.conf" ] && source $SHOP/build.conf
+        install_dependencies
+        build_shared
+        build_yves
+        build_zed
+        ;;
+    init)
         ;;
     *)
         generate_configurations
