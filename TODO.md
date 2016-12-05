@@ -31,6 +31,12 @@
 
 ## Open action items
 
+
+* Split up the build and init console commands. We need strictly need to
+  differentiate between build commands like collecting and merging all the
+  propel definitions and init commands like diff'ing and migrating the propel
+  definition in an actual database. The first takes place during image build
+  process and the ladder during cluster runtime.
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop
 * Find different solution for cronjobs than simply running them in one single
@@ -48,13 +54,19 @@
     * initial database/redis/elasticsarch refuelling
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
-* Optimization: Try to find some potential in reducing the size of the docker
+* [Optimization] Try to find some potential in reducing the size of the docker
   images. Right now the base image is of 400MB weight. Plus the demoshop we
   reach 600MB. Thats for now acceptable but tends to grow. Therefore check what
   effectively is included in the image and if its necessary. Antelope alone
   needs 94MB (`/usr/lib/node_modeules/antelope`). Do we need antelope after
   we've built the artifacts during the child image build?
-* Same applies to image layers. Optimize were feasible and reasonable.
+* [Optimization] Same applies to image layers. Optimize were feasible and reasonable.
+* [Optimization] Identify the places within the docker image where data gets
+  written. This might pose a threat to either performance or storage usage -
+  possibly both. Watch and check if these places need housekeeping efforts like
+  cleaning jobs.
+    * `/data/shop/data/`
+    * `/data/logs/`
 
 ## Resolved
 
