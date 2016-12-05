@@ -5,7 +5,7 @@ MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
 
 ENV SPRYKER_SHOP_CC="DE" \
-    SPRYKER_APP_ENV="development" \
+    SPRYKER_APP_ENV="production" \
 		ZED_HOST="" \
 		ZED_HOST_PROTOCOL="" \
 		YVES_HOST="" \
@@ -24,7 +24,9 @@ ENV SPRYKER_SHOP_CC="DE" \
     ZED_DB_DATABASE="spryker" \
     ZED_DB_HOST="db" \
     ZED_DB_PORT="5432" \
-    JENKINS_BASEURL="http://jenkins:10007/jenkins"
+    JENKINS_HOST="jenkins" \
+    JENKINS_PORT="10007" \
+    JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/jenkins"
 
 ENV PATH="/data/bin/:$PATH"
 
@@ -36,7 +38,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 		echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list && \
     curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
     apt-get update && \
-    apt-get install -y nginx nginx-extras php-fpm php-cli monit nodejs git && \
+    apt-get install -y nginx nginx-extras php-fpm php-cli monit nodejs git netcat net-tools && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm /etc/nginx/sites-enabled/default && \
@@ -76,6 +78,7 @@ LABEL org.label-schema.name="spryker-base" \
 
 ONBUILD COPY ./src /data/shop/src
 ONBUILD COPY ./config /data/shop/config
+ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./package.json ./composer.json build.conf /data/shop/
 ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php && chown -R www-data: /data/shop/
 ONBUILD RUN  /entrypoint.sh build
