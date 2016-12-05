@@ -48,6 +48,13 @@
     * initial database/redis/elasticsarch refuelling
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
+* Optimization: Try to find some potential in reducing the size of the docker
+  images. Right now the base image is of 400MB weight. Plus the demoshop we
+  reach 600MB. Thats for now acceptable but tends to grow. Therefore check what
+  effectively is included in the image and if its necessary. Antelope alone
+  needs 94MB (`/usr/lib/node_modeules/antelope`). Do we need antelope after
+  we've built the artifacts during the child image build?
+* Same applies to image layers. Optimize were feasible and reasonable.
 
 ## Resolved
 
