@@ -114,3 +114,14 @@ potentially do not want to run all the payment code, or the mail notification
 code. This differs to production mode. 
 
 Bottom line is, that we keep the semantics of this distinction. 
+
+These environment are defined here: `vendor/spryker/library/src/Spryker/Shared/Library/Environment.php`:
+
+```php
+const DEFAULT_ENVIRONMENT = 'production';
+
+const PRODUCTION = 'production';
+const STAGING = 'staging';
+const DEVELOPMENT = 'development';
+const TESTING = 'testing';
+```
