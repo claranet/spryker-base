@@ -5,7 +5,7 @@ MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
 
 ENV SPRYKER_SHOP_CC="DE" \
-    SPRYKER_APP_ENV="production" \
+    APPLICATION_ENV="production" \
 		ZED_HOST="" \
 		ZED_HOST_PROTOCOL="" \
 		YVES_HOST="" \

@@ -9,7 +9,7 @@ server {
 
     root /data/shop/public/Zed;
 
-    set $application_env {{ getv "/spryker/app/env" }};
+    set $application_env {{ getv "/application/env" }};
     set $application_store {{ getv "/spryker/shop/cc" }};
 
     include "spryker/zed.conf";

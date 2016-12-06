@@ -3,5 +3,6 @@
 src = "nginx-vhost-static.tmpl"
 dest = "/etc/nginx/sites-available/static"
 keys = [
-    "/spryker/"
+    "/spryker/",
+    "/application/",
 ]
