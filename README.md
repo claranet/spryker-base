@@ -86,12 +86,12 @@ the effective conrete docker image implementing the actual shop.
 By default your code base need to supply the following parts which
 automatically get added to the image:
 
-* `./src/`
-* `./package.json`
-* `./composer.json`
+* `./src/` -- custom part of the spryker based shop
+* `./config/` -- configuration of different environments and stores
+* `./package.json` -- npm dependencies 
+* `./composer.json` -- php dependencies 
 * `./build.conf` - Shell sourcable file including variables governing the
   behaviour of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
-* `./config/`
 
 ## Configuration 
 
