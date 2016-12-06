@@ -10,6 +10,9 @@ export CONSOLE=vendor/bin/console
 
 source /data/bin/functions.sh
 
+cd $SHOP
+
+
 function generate_configurations {
   if [ -n "$ETCD_NODE" ]; then
       confd -backend etcd -node ${ETCD_NODE} -prefix ${ETCD_PREFIX} -onetime
@@ -19,9 +22,8 @@ function generate_configurations {
 }
 
 
-# target during build time of child docker image executed by ONBUILD
-# build trigger of base image
 function install_dependencies {
+    labelText "Resolving dependencies ..."
 
     if [ -n "$PHP_EXTENSIONS" ]; then
       export DEBIAN_FRONTEND=noninteractive
@@ -47,37 +49,60 @@ function install_dependencies {
     antelope install
 }
 
-function build_shared {
-  labelText "Generating Transfer Objects"
-  $CONSOLE transfer:generate
-  writeErrorMessage "Generating Transfer Objects failed"
 
-  labelText "Preparing Propel "
-  $CONSOLE propel:model:build
-  $CONSOLE propel:sql:build
-  $CONSOLE propel:config:convert
+function build_shared {
+    labelText "Generating artifacts (transfer objects, propel, etc.) ..."
+
+    infoText "Working on Transfer Objects"
+    $CONSOLE transfer:generate
+    writeErrorMessage "Generating Transfer Objects failed"
+
+    infoText "Preparing Propel Configuration"
+    
+    # This seems to be the equivalent to the commands below
+    $CONSOLE setup:deploy:prepare-propel
+
+    ## copy and merge all the schema files distributed across the bundle
+    #$CONSOLE propel:schema:copy
+    ## generate the SQL code of your schema
+    #$CONSOLE propel:sql:build
+    ## generate model files which are just classes to interact easily with your different tables 
+    #$CONSOLE propel:model:build
+    ## build the PHP version of the propel runtime configuration for performance reasons
+    #$CONSOLE propel:config:convert
 }
+
 
 function build_yves {
-  antelopeInstallYves
+    labelText "Building and optimizing assets of Yves"
+    antelope build yves
 }
+
 
 function build_zed {
-  antelopeInstallZed
+    labelText "Building and optimizing assets of Zed"
+    antelope build zed
 }
 
 
+function init_yves {
+    labelText "Initialize data stores of Yves"
+}
+
+
+function init_zed {
+    labelText "Initialize data stores of Zed"
+}
+
+
+generate_configurations
 case $1 in 
-    init)
-        # wait for depending services and then initialize redis, elasticsearch and postgres
-        generate_configurations
-        ;;
     run)
-        generate_configurations
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
         ;;
     build)
-        cd $SHOP
+        # target during build time of child docker image executed by ONBUILD
+        # build trigger of base image
         [ -e "$SHOP/build.conf" ] && source $SHOP/build.conf
         install_dependencies
         build_shared
@@ -85,9 +110,9 @@ case $1 in
         build_zed
         ;;
     init)
+        # wait for depending services and then initialize redis, elasticsearch and postgres
         ;;
     *)
-        generate_configurations
         bash -c "$*"
         ;;
 esac
