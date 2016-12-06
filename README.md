@@ -17,9 +17,26 @@ to understand where to place the source code.
 * [x] php7 custom modules 
 * [x] templating of configuration files according to container environment 
 * [x] base directory hierarchy 
-* [/] building of shop application (npm, php composer, ...)
+* [x] building of shop application (npm, php composer, ...)
+* [ ] initialize the external resources 
 * [ ] logging 
 
+
+## Stages 
+
+We distinct the following lifecycle stages and their corresponding responsibilities:
+
+* Build - Runs on image level during build process
+  * Resolve dependencies 
+  * Collect, merge and generate code artefacts (transfer objects, orm definitions and classes, ...)
+  * Build all the static components of the Yves and Zed part 
+* Init - Runs on a setup basis during runtime
+  * Initialize the exernal resources
+  * PostgreSQL - Create and init database if not existing; otherwise migrate database schema 
+  * Elasticsearch - Export database into data store
+  * Redis - Export database into data store 
+* Run 
+  * ...
 
 ## Directory hierarchy
 
