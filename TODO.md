@@ -1,4 +1,3 @@
-
 # Todo items
 
 ## Open discussion 
@@ -7,6 +6,9 @@
   for PHP7 environments. The customer should be able to chose between those two
   runtime environments. Questions is, how do we keep the required maintenance
   effort low?
+
+> tw: PHP 5.6 to be specific
+
 * Split up Yves/Zed from the very beginning or providing a unified image
   instead and leave this question open to the engineer running this setup? He
   could decide to split both parts in order to be able to scale them
@@ -20,6 +22,12 @@
 * Do we need to split up the components shop wise? One database for DE another for US? 
 * How do want to handle different shops based on country codes? Depending nginx
   vhost, spryker and database might be handles differently? 
+
+> tw: I would recommend to setup one pool of docker instances per locale. So locale changes would be
+>     handled by a loadbalancer (via source, cookie, url, domain, ...)
+>     This would also include the ability to scale different locales individualy. But will increase
+>     amount of docker instances. Each locale needs a different code configuration.
+
 * How do we implement a rolling upgrade? This questions falls apart in two categories:
     * How do handle the infrastructure part on k8s and via docker-compose as well 
     * What about the application part? Imagine a running cluster and you wanna
