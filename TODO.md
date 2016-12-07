@@ -2,13 +2,10 @@
 
 ## Open discussion 
 
-* We need to maintain two branches of this docker image, one for PHP5 and one
+* We need to maintain two branches of this docker image, one for PHP5.6 and one
   for PHP7 environments. The customer should be able to chose between those two
   runtime environments. Questions is, how do we keep the required maintenance
   effort low?
-
-> tw: PHP 5.6 to be specific
-
 * Split up Yves/Zed from the very beginning or providing a unified image
   instead and leave this question open to the engineer running this setup? He
   could decide to split both parts in order to be able to scale them
@@ -21,13 +18,21 @@
   for this? Will this be achied by env settings of the nginx vhost? 
 * Do we need to split up the components shop wise? One database for DE another for US? 
 * How do want to handle different shops based on country codes? Depending nginx
-  vhost, spryker and database might be handles differently? 
-
-> tw: I would recommend to setup one pool of docker instances per locale. So locale changes would be
->     handled by a loadbalancer (via source, cookie, url, domain, ...)
->     This would also include the ability to scale different locales individualy. But will increase
->     amount of docker instances. Each locale needs a different code configuration.
-
+  vhost, spryker and database might be handled differently? 
+  * [TW] I would recommend to setup one pool of docker instances per locale. So
+    locale changes would be handled by a loadbalancer (via source, cookie, url,
+    domain, ...) This would also include the ability to scale different locales
+    individualy. But will increase amount of docker instances. Each locale
+    needs a different code configuration.
+      * [FD] Especially because this possibly results in a significant higher
+        number of containers, I vote against it. Because the setup will be way
+        more complex to manage. And since there is barely - as we heard today
+        in the webex with Spryker - any code changes but rather configuration
+        changes there might arise different options which are easier to handle.
+        Better would be a mechanism covering this scenario. Like configuring
+        environment variables governing the available country codes for the
+        different shops. We considering these variable during build and init
+        time. 
 * How do we implement a rolling upgrade? This questions falls apart in two categories:
     * How do handle the infrastructure part on k8s and via docker-compose as well 
     * What about the application part? Imagine a running cluster and you wanna
@@ -48,8 +53,11 @@
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop
 * Find different solution for cronjobs than simply running them in one single
-  container? Either use kubernetes scheduled cron jobs or use dkron.
-  Replace the cronjobs under `./config/Zed/cronjobs`
+  container? Either use kubernetes scheduled cron jobs or use dkron.  Replace
+  the cronjobs under `./config/Zed/cronjobs`. In order to stay infrastructure
+  agnostic, it is recommended to implement the cron service as substantial
+  service within the cluster, instead of relying on something from the outside
+  like k8s cron jobs.
 * Implement proper health checks for php-fpm channeled through nginx and
   evaluated by monit which in turn must propagate the state of the application
   to the outside world (docker).
