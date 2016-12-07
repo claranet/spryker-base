@@ -41,3 +41,7 @@ $config[PropelConstants::ZED_DB_HOST]     = '{{ getv "/zed/db/host" }}';
 $config[PropelConstants::ZED_DB_PORT]     = '{{ getv "/zed/db/port" }}';
 
 $config[ApplicationConstants::ELASTICA_PARAMETER__INDEX_NAME] = 'de_search';
+
+# Use commands to remote databases instead of local sudo commands. database
+# specific client tools like psql for postgres are required nevertheless.
+$config[PropelConstants::USE_SUDO_TO_MANAGE_DATABASE] = false;
