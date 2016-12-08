@@ -30,7 +30,7 @@ ENV SPRYKER_SHOP_CC="DE" \
 
 ENV PATH="/data/bin/:$PATH"
 
-RUN mkdir -p /data/logs /data/bin /data/etc 
+RUN mkdir -p /data/logs /data/bin /data/etc
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -38,7 +38,19 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 		echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list && \
     curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
     apt-get update && \
-    apt-get install -y nginx nginx-extras php-fpm php-cli monit nodejs git netcat net-tools && \
+    apt-get install -y \
+      nginx \
+      nginx-extras \
+      php-fpm \
+      php-cli \
+      monit \
+      nodejs \
+      git \
+      netcat \
+      net-tools \
+      redis-tools \
+      postgresql-client \
+      mysql-client && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
     rm /etc/nginx/sites-enabled/default && \
@@ -49,8 +61,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     php /tmp/composer-setup.php --install-dir=/data/bin/ && \
     rm -rf /tmp/composer-setup*
 
-ADD etc/ /etc/
 ADD https://github.com/kelseyhightower/confd/releases/download/v0.11.0/confd-0.11.0-linux-amd64 /usr/bin/confd
+COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
 
@@ -58,9 +70,6 @@ RUN chown www-data: -R /data/ && \
     chmod 755 /usr/bin/confd && \
     ln -fs /data/bin/entrypoint.sh / && \
     ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
-
-COPY entrypoint.sh /
-COPY functions.sh /data/bin/
 
 EXPOSE 80 8080
 
