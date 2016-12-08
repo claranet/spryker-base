@@ -30,7 +30,7 @@ function install_dependencies {
       exts=$(echo "$PHP_EXTENSIONS" | awk  'BEGIN {RS=" "} { if (length($1) != 0) { printf "php-%s ", $1 }}' )
       infoText "Installing required PHP extensions: $exts"
       apt-get -y update
-      apt-get -y install $exts
+      apt-get -y --no-install-recommends install $exts
     fi
 
     if [ "${SPRYKER_APP_ENV}x" != "developmentx" ]; then 

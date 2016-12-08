@@ -29,16 +29,25 @@ ENV SPRYKER_SHOP_CC="DE" \
     JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/jenkins"
 
 ENV PATH="/data/bin/:$PATH"
+ENV GOSU_VERSION 1.10
 
 RUN mkdir -p /data/logs /data/bin /data/etc
 
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
-    apt-get install -y apt-transport-https curl && \
-		echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list && \
-    curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - && \
-    apt-get update && \
-    apt-get install -y \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl \
+		&& echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list \
+    && curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
+    \
+    && arch="$(dpkg --print-architecture)" \
+    && curl -sS -L -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch" \
+    && curl -sS -L -o /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
       nginx \
       nginx-extras \
       php-fpm \
@@ -50,26 +59,29 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
       net-tools \
       redis-tools \
       postgresql-client \
-      mysql-client && \
-    apt-get clean -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /etc/nginx/sites-enabled/default && \
-    npm -g install antelope  && \
-    curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer && \
-    curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig && \
-    php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" && \
-    php /tmp/composer-setup.php --install-dir=/data/bin/ && \
-    rm -rf /tmp/composer-setup*
+      mysql-client \
+    \
+    && npm -g install antelope \
+    \
+    && curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer \
+    && curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
+    && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
+    && php /tmp/composer-setup.php --install-dir=/data/bin/ \
+    \
+    && rm -rf /tmp/composer-setup* \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* 
 
 ADD https://github.com/kelseyhightower/confd/releases/download/v0.11.0/confd-0.11.0-linux-amd64 /usr/bin/confd
 COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
 
-RUN chown www-data: -R /data/ && \
-    chmod 755 /usr/bin/confd && \
-    ln -fs /data/bin/entrypoint.sh / && \
-    ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
+RUN chown www-data: -R /data/ \
+    && chmod 755 /usr/bin/confd \
+    && rm /etc/nginx/sites-enabled/default \
+    && ln -fs /data/bin/entrypoint.sh / \
+    && ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
 
 EXPOSE 80 8080
 
