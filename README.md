@@ -49,17 +49,24 @@ We distinct the following lifecycle stages and their corresponding responsibilit
 This hierarchy represents a typical root directory of a spryker based shop:
 
     /data/shop/                 -- APPLICATION_ROOT_DIR
-      ./assets/                 -- Externally delivered static assets - input source to antelope
+      ./assets/                 -- Externally delivered static assets - one of
+                                   the input sources to antelope. Varies on
+                                   different setups, depending on where the
+                                   product information will be managed and how
+                                   this information will be referenced.
+
       ./config/                 -- Configuration files
       ./cache/                  -- Twig cache, the silex/symfony web profiler
                                    cache and further temporary files will be
                                    placed here during runtime
+
       ./public/{Yves,Zed}/      -- Entry point to spryker application (document root)
         ./assets                -- Output directory for antelope
+
       ./src/                    -- Actual implementation of this shop instance provided by you!
-        ./Generated/            -- Implementation of all collected transfer objects  of all bundles
-        ./Orm/                  -- All the collected Propel schema definitions (XML) of all bundles
-        ./Pyz/                  -- The project space of this very own implementation
+        ./Generated/            -- Generated code: transfer objects, search map classes
+        ./Orm/                  -- Generated code: Propel schema definition and the resulting generated model classes
+        ./Pyz/                  -- The project space of this very own implementation. This is the actual implemented of this shop instance.
 
       ./vendor/                 -- Dependencies resolved by phpcomposer
         ./spryker/              -- APPLICATION_SPRYKER_ROOT
