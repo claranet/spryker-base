@@ -44,14 +44,10 @@
 
 ## Open action items
 
-
-* Split up the build and init console commands. We need strictly need to
-  differentiate between build commands like collecting and merging all the
-  propel definitions and init commands like diff'ing and migrating the propel
-  definition in an actual database. The first takes place during image build
-  process and the ladder during cluster runtime.
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
-* Implement mail solution different to local maildrop
+* Implement mail solution different to local maildrop. Newsletter are commonly
+  sent via a mail provider reachable via API, but locally emitted notifications
+  like user registration expects a running mail setup. 
 * Find different solution for cronjobs than simply running them in one single
   container? Either use kubernetes scheduled cron jobs or use dkron.  Replace
   the cronjobs under `./config/Zed/cronjobs`. In order to stay infrastructure
@@ -61,13 +57,14 @@
 * Implement proper health checks for php-fpm channeled through nginx and
   evaluated by monit which in turn must propagate the state of the application
   to the outside world (docker).
-* Write tooling for init during build time 
-    * collects the schema definitions
-    * collects the transfer objects
-    * run antelope and build all the static assets
 * Write tooling for init during runtime: entrypoint script which implements
     * templatable configuration files 
     * initial database/redis/elasticsarch refuelling
+* Prepare hooks where user provided scripts may be ran at the build and the
+  init level. For instance, the demoshop imports sample data. This would not be
+  covered by the base image, since this is  specific to the demoshop. 
+    * One approach would be to expect - from the view of the base image -
+      folders with scripts to be executed. `./docker/build.d/` and `./docker/init.d/`
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
 * [Optimization] Try to find some potential in reducing the size of the docker
@@ -92,3 +89,12 @@
 * Consider using the `ONBUILD` directive of the `Dockerfile` syntax in order to
   use the provided features of this image with a downstream image (see buildl
   time tooling below).
+* Split up the build and init console commands. We need strictly need to
+  differentiate between build commands like collecting and merging all the
+  propel definitions and init commands like diff'ing and migrating the propel
+  definition in an actual database. The first takes place during image build
+  process and the ladder during cluster runtime.
+* Write tooling for init during build time 
+    * collects the schema definitions
+    * collects the transfer objects
+    * run antelope and build all the static assets
