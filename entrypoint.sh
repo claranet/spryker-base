@@ -61,6 +61,8 @@ function generate_code {
     infoText "Preparing Propel Configuration"
     $CONSOLE setup:deploy:prepare-propel
 
+    ## Cleaning prior runs
+    #$CONSOLE setup:remove-generated-directory
     ## copy and merge all the schema files distributed across the bundle
     #$CONSOLE propel:schema:copy
     ## generate the SQL code of your schema
@@ -105,6 +107,18 @@ function init_zed {
 }
 
 
+function exec_hooks {
+    hook_d=$1
+    if [ -e "$hook_d" -a -n "`ls -1 $hook_d/*`" ]; then
+      labelText "Running custom registered hooks ..."
+      for hook in $hook_d/*; do
+        infoText "Executing hook script: $hook ..."
+        bash $hook
+      done
+    fi
+}
+
+
 generate_configurations
 case $1 in 
     run)
@@ -114,9 +128,11 @@ case $1 in
     build_image)
         # target during build time of child docker image executed by ONBUILD
         # build trigger of base image
-        [ -e "$SHOP/build.conf" ] && source $SHOP/build.conf
+        [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
         generate_code
+
+        exec_hooks "$SHOP/docker/build.d"
         ;;
 
     init_setup)
@@ -132,6 +148,8 @@ case $1 in
         init 
         init_yves
         init_zed
+
+        exec_hooks "$SHOP/docker/init.d"
         ;;
     *)
         bash -c "$*"

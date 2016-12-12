@@ -60,11 +60,6 @@
 * Write tooling for init during runtime: entrypoint script which implements
     * templatable configuration files 
     * initial database/redis/elasticsarch refuelling
-* Prepare hooks where user provided scripts may be ran at the build and the
-  init level. For instance, the demoshop imports sample data. This would not be
-  covered by the base image, since this is  specific to the demoshop. 
-    * One approach would be to expect - from the view of the base image -
-      folders with scripts to be executed. `./docker/build.d/` and `./docker/init.d/`
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
 * [Optimization] Try to find some potential in reducing the size of the docker
@@ -107,3 +102,8 @@
     * collects the schema definitions
     * collects the transfer objects
     * run antelope and build all the static assets
+* Prepare hooks where user provided scripts may be ran at the build and the
+  init level. For instance, the demoshop imports sample data. This would not be
+  covered by the base image, since this is  specific to the demoshop. 
+    * One approach would be to expect - from the view of the base image -
+      folders with scripts to be executed. `./docker/build.d/` and `./docker/init.d/`

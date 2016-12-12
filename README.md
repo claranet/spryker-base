@@ -94,6 +94,14 @@ Inherited properties are:
 * Build trigger adding essential part of your codebase (`ONBUILD`)
 * The entrypoint and cmd parts (`ENTRYPOINT`, `CMD`)
 
+Sample Dockerfile:
+
+```
+FROM spryker-base:latest
+```
+
+This is the sole line required for using this image.
+
 All the environment variables defined here in the base image will be inherited
 by the child image as well. So defaults should be same. During runtime
 configuration you must supply spryker with information regarding the depending
@@ -112,8 +120,10 @@ automatically get added to the image:
 * `./config/` -- configuration of different environments and stores
 * `./package.json` -- npm dependencies 
 * `./composer.json` -- php dependencies 
-* `./build.conf` - Shell sourcable file including variables governing the
+* `./docker/build.conf` - Shell sourcable file including variables governing the
   behaviour of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
+* `./docker/build.d` - User provided scripts which will be executed during image build process (once per image).
+* `./docker/init.d` - User provided scripts which will be executed during runtime as initialization procedure (once per cluster). 
 
 ## Configuration 
 
