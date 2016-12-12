@@ -50,16 +50,15 @@ function install_dependencies {
 }
 
 
-function build_shared {
-    labelText "Generating artifacts (transfer objects, propel, etc.) ..."
+function generate_code {
+    labelText "Generating code artifacts (transfer objects, propel, etc.) ..."
 
-    infoText "Working on Transfer Objects"
+    infoText "Generating Transfer Objects"
     $CONSOLE transfer:generate
-    writeErrorMessage "Generating Transfer Objects failed"
+    writeErrorMessage "Generation of Transfer Objects failed"
 
-    infoText "Preparing Propel Configuration"
-    
     # This seems to be the equivalent to the commands below
+    infoText "Preparing Propel Configuration"
     $CONSOLE setup:deploy:prepare-propel
 
     ## copy and merge all the schema files distributed across the bundle
@@ -73,25 +72,36 @@ function build_shared {
 }
 
 
-function build_yves {
+function build_assets_for_yves {
     labelText "Building and optimizing assets of Yves"
     antelope build yves
 }
 
 
-function build_zed {
+function build_assets_for_zed {
     labelText "Building and optimizing assets of Zed"
     antelope build zed
 }
 
 
+function init {
+    labelText "Initializing setup"
+
+    infoText "Create Search Index and Mapping Types; Generate Mapping Code."
+    $CONSOLE setup:search
+}
+
+
 function init_yves {
-    labelText "Initialize data stores of Yves"
+    labelText "Initializing Yves ..."
 }
 
 
 function init_zed {
-    labelText "Initialize data stores of Zed"
+    labelText "Initializing Zed ..."
+
+    infoText "Setup DB ..."
+    $CONSOLE setup:init-db
 }
 
 
@@ -100,17 +110,28 @@ case $1 in
     run)
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
         ;;
-    build)
+
+    build_image)
         # target during build time of child docker image executed by ONBUILD
         # build trigger of base image
         [ -e "$SHOP/build.conf" ] && source $SHOP/build.conf
         install_dependencies
-        build_shared
-        build_yves
-        build_zed
+        generate_code
         ;;
-    init)
+
+    init_setup)
         # wait for depending services and then initialize redis, elasticsearch and postgres
+        # Run once per setup 
+        mkdir -p /data/shop/assets/{Yves,Zed}
+        build_assets_for_yves
+        build_assets_for_zed
+
+        # FIXME Poor mans waiting-for-depending-services-to-be-online needs to be fixed
+        sleep 5
+
+        init 
+        init_yves
+        init_zed
         ;;
     *)
         bash -c "$*"

@@ -99,9 +99,8 @@ LABEL org.label-schema.name="spryker-base" \
 
 
 ONBUILD COPY ./src /data/shop/src
-ONBUILD COPY ./assets /data/shop/assets
 ONBUILD COPY ./config /data/shop/config
 ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./package.json ./composer.json build.conf /data/shop/
 ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
-ONBUILD RUN  /entrypoint.sh build && chown -R www-data: /data/shop/
+ONBUILD RUN  /entrypoint.sh build_image && chown -R www-data: /data/shop/

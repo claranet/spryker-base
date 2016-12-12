@@ -26,11 +26,17 @@ to understand where to place the source code.
 
 We distinct the following lifecycle stages and their corresponding responsibilities:
 
-* Build - Runs on image level during build process
+* Build - Runs on image level during build process (once per image)
+  * CMD: `build_image`
   * Resolve dependencies 
   * Collect, merge and generate code artefacts (transfer objects, orm definitions and classes, ...)
-  * Build all the static components of the Yves and Zed part 
-* Init - Runs on a setup basis during runtime
+  * Run user supplied hooks (FIXME: yet to be resolved issue)
+* Init - Runs on a setup basis during runtime (once per setup)
+  * CMD: `init_setup`
+  * Build all the static components of the Yves and Zed part. This is an init
+    setup instead a build task because we assume that assets are to be built
+    once per setup because they getting served via external volume which is
+    shared across the setup, both between Yves and Zed.
   * Initialize the exernal resources
   * PostgreSQL - Create and init database if not existing; otherwise migrate database schema 
   * Elasticsearch - Export database into data store
@@ -40,13 +46,16 @@ We distinct the following lifecycle stages and their corresponding responsibilit
 
 ## Directory hierarchy
 
+This hierarchy represents a typical root directory of a spryker based shop:
+
     /data/shop/                 -- APPLICATION_ROOT_DIR
-      ./assets/                 -- Static assets built by antelope
+      ./assets/                 -- Externally delivered static assets - input source to antelope
       ./config/                 -- Configuration files
       ./cache/                  -- Twig cache, the silex/symfony web profiler
                                    cache and further temporary files will be
                                    placed here during runtime
       ./public/{Yves,Zed}/      -- Entry point to spryker application (document root)
+        ./assets                -- Output directory for antelope
       ./src/                    -- Actual implementation of this shop instance provided by you!
         ./Generated/            -- Implementation of all collected transfer objects  of all bundles
         ./Orm/                  -- All the collected Propel schema definitions (XML) of all bundles
@@ -60,6 +69,12 @@ We distinct the following lifecycle stages and their corresponding responsibilit
     /data/etc/config_local.php  -- Spryker configuration overriding the project
                                    wide ones with container local setup resp.
                                    their external dependencies
+
+External docker volumes to be mounted are: 
+
+  * `/data/shop/assets` -- Shared volume where static assets were imported (1)
+  * `/data/shop/public/Yves/assets` -- Shared volume for serving static assets processed by antelope (2)
+  * `/data/shop/public/Zed/assets` -- Shared volume for serving static assets processed by antelope (2)
 
 ## Using this image 
 
