@@ -45,6 +45,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && export GNUPGHOME="$(mktemp -d)" \
     && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
     && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    && chmod 755 /usr/local/bin/gosu \
     \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -98,8 +99,9 @@ LABEL org.label-schema.name="spryker-base" \
 
 
 ONBUILD COPY ./src /data/shop/src
+ONBUILD COPY ./assets /data/shop/assets
 ONBUILD COPY ./config /data/shop/config
 ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./package.json ./composer.json build.conf /data/shop/
-ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php && chown -R www-data: /data/shop/
-ONBUILD RUN  /entrypoint.sh build
+ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
+ONBUILD RUN  /entrypoint.sh build && chown -R www-data: /data/shop/
