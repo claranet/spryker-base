@@ -69,10 +69,19 @@
   evaluated in k8s deployment contexts. 
 * [Optimization] Try to find some potential in reducing the size of the docker
   images. Right now the base image is of 400MB weight. Plus the demoshop we
-  reach 600MB. Thats for now acceptable but tends to grow. Therefore check what
+  reach 700MB. Thats for now acceptable but tends to grow. Therefore check what
   effectively is included in the image and if its necessary. Antelope alone
-  needs 94MB (`/usr/lib/node_modeules/antelope`). Do we need antelope after
-  we've built the artifacts during the child image build?
+  needs 94MB (`/usr/lib/node_modeules/antelope`). 
+    * Do we need antelope after we've built the artifacts during the child image build?
+        * Yes, unfortunately, since search setup involves (a) creating the
+          indizes at elasticsearch, and (b) creating code which represents the
+          mapping as class. 
+        * But since the assets are moved off the container into external
+          volumes which are shared across the cluster, we might create a second
+          image including all the dependencies for initializing the cluster and
+          remove these deps from the shop image which needs to be distributed
+          across the docker cluster. 
+        * Think of something like a tooling docker image. 
 * [Optimization] Same applies to image layers. Optimize were feasible and reasonable.
 * [Optimization] Identify the places within the docker image where data gets
   written. This might pose a threat to either performance or storage usage -
