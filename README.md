@@ -174,3 +174,38 @@ const STAGING = 'staging';
 const DEVELOPMENT = 'development';
 const TESTING = 'testing';
 ```
+
+## Scripting
+
+As the stage above already mentioned we distinguish between different life
+cycle stages. This section deals with the individual task each stage is
+responsible for. 
+
+The console commands of the deployment procedure of the vagrant box must be
+fully understood and translated into appropriate build and init tasks. In some
+circumstances this means that we need to rewrite console commands (alignment
+between ops and spryker).
+
+The complex console command `setup:install` does the following:
+
+1. `cache:delete-all`
+1. `setup:remove-generated-directory`
+1. `propel:install --nodiff`
+1. `transfer:generate`
+1. `setup:init-db`
+1. `setup:generate-ide-auto-completion`
+1. `application:build-navigation-cache`
+1. `setup:search`
+
+
+Please see `Spryker\Zed\Setup\SetupConfig::getSetupInstallCommandNames` for more details
+
+
+### Build Infrastructure
+
+...
+
+
+### Initializing Infrastructure
+
+...
