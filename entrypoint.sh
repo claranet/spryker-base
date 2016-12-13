@@ -53,8 +53,8 @@ function install_dependencies {
 function generate_code {
     labelText "Generating code artifacts (transfer objects, propel, etc.) ..."
 
-    infoText "Removing old data ..."
-    $CONSOLE setup:remove-generated-directory
+    #infoText "Removing old data ..."
+    #$CONSOLE setup:remove-generated-directory
 
     infoText "Generating Transfer Objects"
     $CONSOLE transfer:generate
@@ -111,11 +111,11 @@ function init_zed {
 
 function exec_hooks {
     hook_d=$1
-    if [ -e "$hook_d" -a -n "`ls -1 $hook_d/*`" ]; then
-      max=$(ls -1 $hook_d/*|wc -l)
+    if [ -e "$hook_d" -a -n "`ls -1 $hook_d/`" ]; then
+      max=$(ls -1 $hook_d/|wc -l)
       i=1
       labelText "Running custom registered hooks ..."
-      for hook in $hook_d/*; do
+      for hook in $hook_d/; do
         infoText "Executing $i/$max hook script: $hook ..."
         bash $hook
         let "i += 1"
