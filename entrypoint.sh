@@ -53,16 +53,18 @@ function install_dependencies {
 function generate_code {
     labelText "Generating code artifacts (transfer objects, propel, etc.) ..."
 
+    infoText "Removing old data ..."
+    $CONSOLE setup:remove-generated-directory
+
     infoText "Generating Transfer Objects"
     $CONSOLE transfer:generate
-    writeErrorMessage "Generation of Transfer Objects failed"
+    writeErrorMessage "Generation of Transfer Objects failed!"
 
     # This seems to be the equivalent to the commands below
     infoText "Preparing Propel Configuration"
     $CONSOLE setup:deploy:prepare-propel
+    writeErrorMessage "Generation of Propel configuration failed!"
 
-    ## Cleaning prior runs
-    #$CONSOLE setup:remove-generated-directory
     ## copy and merge all the schema files distributed across the bundle
     #$CONSOLE propel:schema:copy
     ## generate the SQL code of your schema
@@ -133,7 +135,9 @@ case $1 in
         # build trigger of base image
         [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
-        generate_code
+
+        # FIXME Since `setup:search` requires ES to be available, we move this into the init stage
+        #generate_code
 
         exec_hooks "$SHOP/docker/build.d"
         ;;
@@ -142,6 +146,9 @@ case $1 in
         # wait for depending services and then initialize redis, elasticsearch and postgres
         # Run once per setup 
         mkdir -p /data/shop/assets/{Yves,Zed}
+
+        generate_code
+
         build_assets_for_yves
         build_assets_for_zed
 
