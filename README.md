@@ -18,7 +18,7 @@ to understand where to place the source code.
 * [x] templating of configuration files according to container environment 
 * [x] base directory hierarchy 
 * [x] building of shop application (npm, php composer, ...)
-* [ ] initialize the external resources 
+* [ ] initialize the external resources
 * [ ] logging 
 
 
@@ -29,22 +29,30 @@ We distinct the following lifecycle stages and their corresponding responsibilit
 * Build - Runs on image level during build process (once per image)
   * CMD: `build_image`
   * Resolve dependencies 
+  * Generate Transfer objects
+  * Propel: Collect and merge schema files, build model classes. 
   * Run user supplied hooks
 * Init - Runs on a setup basis during runtime (once per setup)
   * CMD: `init_setup`
-  * Collect, merge and generate code artefacts (transfer objects, orm
-    definitions and classes, ...). These are to be shared across the setup via
-    a shared volume.
   * Build all the static components of the Yves and Zed part. This is an init
     setup instead a build task because we assume that assets are to be built
     once per setup because they getting served via external volume which is
     shared across the setup, both between Yves and Zed.
   * Initialize the exernal resources
-  * PostgreSQL - Create and init database if not existing; otherwise migrate database schema 
-  * Elasticsearch - Export database into data store
-  * Redis - Export database into data store 
-* Run 
-  * ...
+      * Propel:
+          * Create and init database if not existing
+          * Diff current models against actual database schema
+          * Execute migration plan to make db schema up-to-date
+      * Elasticsearch
+          * Create indices and mappings
+          * Generate Code
+          * Export database into data store
+      * Redis 
+          * Export database into data store 
+* Run - Image springs to live and becomes a container
+  * Container initialization 
+      * Generate confd template configuration - depending on real infrastruture configurations
+      * Generate Propel Configuration according actually configured resources
 
 ## Directory hierarchy
 
@@ -66,8 +74,8 @@ This hierarchy represents a typical root directory of a spryker based shop:
         ./assets                -- Output directory for antelope
 
       ./src/                    -- Actual implementation of this shop instance provided by you!
-        ./Generated/            -- Generated code: transfer objects, search map classes
-        ./Orm/                  -- Generated code: Propel schema definition and the resulting generated model classes
+        ./Generated/            -- Init generated code: transfer objects, search map classes
+        ./Orm/                  -- Build generated code: Propel schema definition and the resulting generated model classes
         ./Pyz/                  -- The project space of this very own implementation. This is the actual implemented of this shop instance.
 
       ./vendor/                 -- Dependencies resolved by phpcomposer
@@ -81,9 +89,21 @@ This hierarchy represents a typical root directory of a spryker based shop:
 
 External docker volumes to be mounted are: 
 
-  * `/data/shop/assets` -- Shared volume where static assets were imported (1)
-  * `/data/shop/public/Yves/assets` -- Shared volume for serving static assets processed by antelope (2)
-  * `/data/shop/public/Zed/assets` -- Shared volume for serving static assets processed by antelope (2)
+* `/data/shop/assets` -- Shared volume where static assets were imported (persistent volume)
+* `/data/shop/public/Yves/assets` -- Shared volume for serving static assets processed by antelope (volatile volume)
+* `/data/shop/public/Zed/assets` -- Shared volume for serving static assets processed by antelope (volatile volume)
+* `/data/shop/src/Generated` -- Shared volume to share generated code: Mainly
+  because ES init must be done during runtime, therefore we need the
+  resulting generated code shared among all containers (volatile volume)
+
+Type of volumes:
+
+* Persistent:
+    * Unique to setup
+    * Shared across container of all different revisions
+* Volatile:
+    * Unique to revision
+    * Shared among all container of same revisions
 
 ## Using this image 
 

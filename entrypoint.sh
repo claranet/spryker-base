@@ -14,13 +14,19 @@ cd $SHOP
 
 
 function generate_configurations {
-  labelText "Create configuration by templates ..."
+  labelText "Create runtime configuration ..."
 
+  infoText "Applying confd templates ..."
   if [ -n "$ETCD_NODE" ]; then
       confd -backend etcd -node ${ETCD_NODE} -prefix ${ETCD_PREFIX} -onetime
   else
       confd -backend env -onetime
   fi
+
+  if [ -e $CONSOLE ]; then
+    infoText "Propel - Converting configuration ..."
+    $CONSOLE propel:config:convert
+  fi 
 }
 
 
@@ -52,6 +58,28 @@ function install_dependencies {
 }
 
 
+function generate_shared_code {
+    labelText "Generate code for both Yves and Zed ..."
+
+    infoText "Generate transfer objects ..."
+    $CONSOLE transfer:generate
+}
+
+
+function generate_zed_code {
+    labelText "Generate code for Zed ..."
+
+    infoText "Propel - Copy schema files ..."
+    $CONSOLE propel:schema:copy
+
+    infoText "Propel - Build models ..."
+    $CONSOLE propel:model:build
+
+    infoText "Propel - Removing old migration plans ..."
+    rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
+}
+
+
 function build_assets_for_yves {
     labelText "Building and optimizing assets of Yves"
     antelope build yves
@@ -67,11 +95,13 @@ function build_assets_for_zed {
 function init_shared {
     labelText "Initializing setup"
 
-    infoText "Cleaning up ..."
-    $CONSOLE cache:delete-all
+    infoText "Propel - Converting configuration ..."
+    $CONSOLE propel:config:convert
 
-    infoText "Generate transfer objects ..."
-    $CONSOLE transfer:generate
+    # FIXME Does this task makes sense during init stage? Since it works on
+    # ./data which is not a shared volume? 
+    infoText "Cleaning cache ..."
+    $CONSOLE cache:delete-all
 
     infoText "Create Search Index and Mapping Types; Generate Mapping Code."
     $CONSOLE setup:search
@@ -88,31 +118,21 @@ function init_yves {
 
 
 function init_zed {
+    labelText "Initializing Zed ..."
 
-   labelText "Initializing Zed ..."
-
-    infoText "Config convert ..."
-    $CONSOLE propel:config:convert
-
-    infoText "PG Compatibility ..."
-    $CONSOLE propel:pg-sql-compat
-
-    infoText "Create database ..."
+    infoText "Propel - Create database ..."
     $CONSOLE propel:database:create
 
-    infoText "Removing old pending propel migration plans ..."
-    rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
+    infoText "Propel - Insert PG compatibility ..."
+    $CONSOLE propel:pg-sql-compat
 
-    infoText "Create schema diff ..."
+    infoText "Propel - Create schema diff ..."
     $CONSOLE propel:diff
 
-    infoText "Model Build ..."
-    $CONSOLE propel:model:build
-
-    infoText "Migrate Schema ..."
+    infoText "Propel - Migrate Schema ..."
     $CONSOLE propel:migrate
 
-    infoText "Initialize database ..."
+    infoText "Propel - Initialize database ..."
     $CONSOLE setup:init-db
 
     exec_hooks "$SHOP/docker/init.d/Zed"
@@ -135,9 +155,9 @@ function exec_hooks {
 }
 
 
-generate_configurations
 case $1 in 
     run)
+        generate_configurations
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
         ;;
 
@@ -146,6 +166,9 @@ case $1 in
         # build trigger of base image
         [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
+        generate_configurations
+        generate_shared_code
+        generate_zed_code
 
         exec_hooks "$SHOP/docker/build.d"
 
@@ -153,12 +176,22 @@ case $1 in
         ;;
 
     init_setup)
+        generate_configurations
         # wait for depending services and then initialize redis, elasticsearch and postgres
         # Run once per setup 
         mkdir -p /data/shop/assets/{Yves,Zed}
 
         build_assets_for_yves
         build_assets_for_zed
+
+        # FIXME the following line is workaround:
+        #   (1) setup:search must be run at runtime 
+        #   (2) therefore ./src/Generated needs to be a shared volume
+        #   (3) thats why the transfer objects generated during build time are not available anymore
+        #   (4) but we need them there, because propel generation relies on these transfer objects
+        #   (5) and thats why we need to regenerate them here 
+        # If search:setup task has been split up into a build and init time part, we are able to clean this up
+        generate_shared_code
 
         # FIXME Poor mans waiting-for-depending-services-to-be-online needs to be fixed
         sleep 5
@@ -171,6 +204,7 @@ case $1 in
         successText "Setup Initialization has been successfully FINISHED"
         ;;
     *)
+        generate_configurations
         bash -c "$*"
         ;;
 esac
