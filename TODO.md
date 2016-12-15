@@ -44,6 +44,8 @@
 
 ## Open action items
 
+* Add possibility to differentiate user supplied hooks for not only the
+  component like Yves and Zed, but for the environment as well.
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop. Newsletter are commonly
   sent via a mail provider reachable via API, but locally emitted notifications
@@ -57,9 +59,6 @@
 * Implement proper health checks for php-fpm channeled through nginx and
   evaluated by monit which in turn must propagate the state of the application
   to the outside world (docker).
-* Write tooling for init during runtime: entrypoint script which implements
-    * templatable configuration files 
-    * initial database/redis/elasticsarch refuelling
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
 * [Optimization] Try to find some potential in reducing the size of the docker
@@ -107,3 +106,6 @@
   covered by the base image, since this is  specific to the demoshop. 
     * One approach would be to expect - from the view of the base image -
       folders with scripts to be executed. `./docker/build.d/` and `./docker/init.d/`
+* Write tooling for init during runtime: entrypoint script which implements
+    * templatable configuration files 
+    * initial database/redis/elasticsarch refuelling
