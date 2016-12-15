@@ -29,10 +29,12 @@ We distinct the following lifecycle stages and their corresponding responsibilit
 * Build - Runs on image level during build process (once per image)
   * CMD: `build_image`
   * Resolve dependencies 
-  * Collect, merge and generate code artefacts (transfer objects, orm definitions and classes, ...)
-  * Run user supplied hooks (FIXME: yet to be resolved issue)
+  * Run user supplied hooks
 * Init - Runs on a setup basis during runtime (once per setup)
   * CMD: `init_setup`
+  * Collect, merge and generate code artefacts (transfer objects, orm
+    definitions and classes, ...). These are to be shared across the setup via
+    a shared volume.
   * Build all the static components of the Yves and Zed part. This is an init
     setup instead a build task because we assume that assets are to be built
     once per setup because they getting served via external volume which is
@@ -122,8 +124,8 @@ automatically get added to the image:
 * `./composer.json` -- php dependencies 
 * `./docker/build.conf` - Shell sourcable file including variables governing the
   behaviour of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
-* `./docker/build.d` - User provided scripts which will be executed during image build process (once per image).
-* `./docker/init.d` - User provided scripts which will be executed during runtime as initialization procedure (once per cluster). 
+* `./docker/build.d/{Shared,Yves,Zed}` - User provided scripts which will be executed during image build process (once per image).
+* `./docker/init.d/{Shared,Yves,Zed}` - User provided scripts which will be executed during runtime as initialization procedure (once per cluster). 
 
 ## Configuration 
 
@@ -186,7 +188,7 @@ fully understood and translated into appropriate build and init tasks. In some
 circumstances this means that we need to rewrite console commands (alignment
 between ops and spryker).
 
-The complex console command `setup:install` does the following:
+The complex console command `setup:install` resolves to the following subtasks:
 
 1. `cache:delete-all`
 1. `setup:remove-generated-directory`
@@ -196,7 +198,6 @@ The complex console command `setup:install` does the following:
 1. `setup:generate-ide-auto-completion`
 1. `application:build-navigation-cache`
 1. `setup:search`
-
 
 Please see `Spryker\Zed\Setup\SetupConfig::getSetupInstallCommandNames` for more details
 

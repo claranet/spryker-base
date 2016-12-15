@@ -14,6 +14,8 @@ cd $SHOP
 
 
 function generate_configurations {
+  labelText "Create configuration by templates ..."
+
   if [ -n "$ETCD_NODE" ]; then
       confd -backend etcd -node ${ETCD_NODE} -prefix ${ETCD_PREFIX} -onetime
   else
@@ -33,7 +35,7 @@ function install_dependencies {
       apt-get -y --no-install-recommends install $exts
     fi
 
-    if [ "${SPRYKER_APP_ENV}x" != "developmentx" ]; then 
+    if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
       infoText "Installing required NPM dependencies..."
       npm install --only=production
       infoText "Installing required PHP dependencies..."
@@ -50,32 +52,6 @@ function install_dependencies {
 }
 
 
-function generate_code {
-    labelText "Generating code artifacts (transfer objects, propel, etc.) ..."
-
-    #infoText "Removing old data ..."
-    #$CONSOLE setup:remove-generated-directory
-
-    infoText "Generating Transfer Objects"
-    $CONSOLE transfer:generate
-    writeErrorMessage "Generation of Transfer Objects failed!"
-
-    # This seems to be the equivalent to the commands below
-    infoText "Preparing Propel Configuration"
-    $CONSOLE setup:deploy:prepare-propel
-    writeErrorMessage "Generation of Propel configuration failed!"
-
-    ## copy and merge all the schema files distributed across the bundle
-    #$CONSOLE propel:schema:copy
-    ## generate the SQL code of your schema
-    #$CONSOLE propel:sql:build
-    ## generate model files which are just classes to interact easily with your different tables 
-    #$CONSOLE propel:model:build
-    ## build the PHP version of the propel runtime configuration for performance reasons
-    #$CONSOLE propel:config:convert
-}
-
-
 function build_assets_for_yves {
     labelText "Building and optimizing assets of Yves"
     antelope build yves
@@ -88,24 +64,58 @@ function build_assets_for_zed {
 }
 
 
-function init {
+function init_shared {
     labelText "Initializing setup"
+
+    infoText "Cleaning up ..."
+    $CONSOLE cache:delete-all
+
+    infoText "Generate transfer objects ..."
+    $CONSOLE transfer:generate
 
     infoText "Create Search Index and Mapping Types; Generate Mapping Code."
     $CONSOLE setup:search
+
+    exec_hooks "$SHOP/docker/init.d/Shared"
 }
 
 
 function init_yves {
     labelText "Initializing Yves ..."
+
+    exec_hooks "$SHOP/docker/init.d/Yves"
 }
 
 
 function init_zed {
-    labelText "Initializing Zed ..."
 
-    infoText "Setup DB ..."
+   labelText "Initializing Zed ..."
+
+    infoText "Config convert ..."
+    $CONSOLE propel:config:convert
+
+    infoText "PG Compatibility ..."
+    $CONSOLE propel:pg-sql-compat
+
+    infoText "Create database ..."
+    $CONSOLE propel:database:create
+
+    infoText "Removing old pending propel migration plans ..."
+    rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
+
+    infoText "Create schema diff ..."
+    $CONSOLE propel:diff
+
+    infoText "Model Build ..."
+    $CONSOLE propel:model:build
+
+    infoText "Migrate Schema ..."
+    $CONSOLE propel:migrate
+
+    infoText "Initialize database ..."
     $CONSOLE setup:init-db
+
+    exec_hooks "$SHOP/docker/init.d/Zed"
 }
 
 
@@ -115,7 +125,8 @@ function exec_hooks {
       max=$(ls -1 $hook_d/|wc -l)
       i=1
       labelText "Running custom registered hooks ..."
-      for hook in $hook_d/; do
+      for hook in `find $hook_d -type f ! -name '\.*' -a -name '*.sh'`; do
+        hook="${hook%\\n}"
         infoText "Executing $i/$max hook script: $hook ..."
         bash $hook
         let "i += 1"
@@ -136,10 +147,9 @@ case $1 in
         [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
 
-        # FIXME Since `setup:search` requires ES to be available, we move this into the init stage
-        #generate_code
-
         exec_hooks "$SHOP/docker/build.d"
+
+        successText "Image Build has been successfully FINISHED"
         ;;
 
     init_setup)
@@ -147,19 +157,18 @@ case $1 in
         # Run once per setup 
         mkdir -p /data/shop/assets/{Yves,Zed}
 
-        generate_code
-
         build_assets_for_yves
         build_assets_for_zed
 
         # FIXME Poor mans waiting-for-depending-services-to-be-online needs to be fixed
         sleep 5
 
-        init 
+        # The different init stages has been already prepared to be split up in future
+        init_shared
         init_yves
         init_zed
 
-        exec_hooks "$SHOP/docker/init.d"
+        successText "Setup Initialization has been successfully FINISHED"
         ;;
     *)
         bash -c "$*"
