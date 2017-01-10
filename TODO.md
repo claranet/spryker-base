@@ -17,7 +17,7 @@
 * How to implement shops for different countries? Do we need separated VHosts
   for this? Will this be achied by env settings of the nginx vhost? 
 * Do we need to split up the components shop wise? One database for DE another for US? 
-* How do want to handle different shops based on country codes? Depending nginx
+* How do we want to handle different shops based on country codes? Depending nginx
   vhost, spryker and database might be handled differently? 
   * [TW] I would recommend to setup one pool of docker instances per locale. So
     locale changes would be handled by a loadbalancer (via source, cookie, url,
@@ -33,6 +33,13 @@
         environment variables governing the available country codes for the
         different shops. We considering these variable during build and init
         time. 
+      * [FD] Furthermore, i suppose that each of CC shops rely on shared
+        stateful (db, redis) information.
+      * [FD] We should prepare the images of a single shop instance with the
+        possibility of different localized versions of the very same shop. If
+        the customer wants to run independent shops for each country instance,
+        they just need to bootstrap different container pools for this and
+        therefore running completely different setups. 
 * How do we implement a rolling upgrade? This questions falls apart in two categories:
     * How do handle the infrastructure part on k8s and via docker-compose as well 
     * What about the application part? Imagine a running cluster and you wanna
@@ -40,12 +47,18 @@
       challenge starts if go even further and consider shop upgrade which have
       some impact on the database schema or the something similiar on the
       Redis/ES side. How do we cope with this scenario? 
+* Split off generic and demoshop specific build/init jobs and move them to user
+  supplied hooks. This heavily depends on the bundles being used by the common
+  shops. Which console jobs are reasonbly placed at the generic base image? For
+  example, is the navigation cache for zed to be expected to be used for all or
+  most of the shops out there? 
 
 
 ## Open action items
 
-* Add possibility to differentiate user supplied hooks for not only the
-  component like Yves and Zed, but for the environment as well.
+* Make some of the nginx configuration configurable from the outside of the
+  container. Think of something comparable like the build trigger, but rather
+  for the nginx to be included.
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
 * Implement mail solution different to local maildrop. Newsletter are commonly
   sent via a mail provider reachable via API, but locally emitted notifications
@@ -86,6 +99,11 @@
 
 ## Resolved
 
+* Add possibility to differentiate user supplied hooks for not only the
+  component like Yves and Zed, but for the environment as well. 
+    -> Not implemented, since this information is available to the hook scripts
+       via environment variables so that they are able to differentiate by
+       theirselves. 
 * Migrate from php5 to php7
 * Make the list of to be installed php extensions configurable. Right now its a
   static list fixiated in the base image. 
