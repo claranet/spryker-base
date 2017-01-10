@@ -70,6 +70,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && php /tmp/composer-setup.php --install-dir=/data/bin/ \
     \
     && rm -rf /tmp/composer-setup* \
+    && rm -f /etc/php/*/fpm/pool.d/www.conf
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* 
 
