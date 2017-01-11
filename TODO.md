@@ -56,6 +56,10 @@
 
 ## Open action items
 
+* Scan all config files for external resource definitions and consider moving
+  them into the config_local.php. Rationale behind these decisions must be the
+  weighing up whether the configuration option in question better fits into the
+  generic layer or into the shop layer.
 * Make some of the nginx configuration configurable from the outside of the
   container. Think of something comparable like the build trigger, but rather
   for the nginx to be included.
