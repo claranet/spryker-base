@@ -77,9 +77,6 @@ function generate_zed_code {
 
     infoText "Propel - Removing old migration plans ..."
     rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
-
-    infoText "Build Zeds Navigation Cache ..."
-    $CONSOLE application:build-navigation-cache
 }
 
 
@@ -108,6 +105,9 @@ function init_shared {
 
     infoText "Create Search Index and Mapping Types; Generate Mapping Code."
     $CONSOLE setup:search
+
+    infoText "Build Zeds Navigation Cache ..."
+    $CONSOLE application:build-navigation-cache
 
     exec_hooks "$SHOP/docker/init.d/Shared"
 }
