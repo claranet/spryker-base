@@ -139,6 +139,13 @@ function init_zed {
     $CONSOLE setup:init-db
 
     exec_hooks "$SHOP/docker/init.d/Zed"
+
+    infoText "Jenkins - Register setup wide cronjobs ..."
+    # FIXME [bug01] until the code of the following cronsole command completely
+    # relies on API calls, we need to workaround the issue with missing local
+    # jenkins job definitions.
+    mkdir -p /tmp/jenkins/jobs
+    $CONSOLE setup:jenkins:generate
 }
 
 

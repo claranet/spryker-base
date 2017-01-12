@@ -32,6 +32,9 @@ $config[SessionConstants::ZED_SESSION_REDIS_PASSWORD] = '{{ getv "/redis/session
 $config[SessionConstants::ZED_SESSION_REDIS_DATABASE] = 2;
 
 $config[ApplicationConstants::JENKINS_BASE_URL] = '{{ getv "/jenkins/baseurl" }}';
+# FIXME [bug01] jenkins console commands of spryker/setup do not relies
+# completely of calls to a remote jenkins call
+$config[ApplicationConstants::JENKINS_DIRECTORY] = '/tmp/jenkins/jobs';
 
 $config[PropelConstants::ZED_DB_ENGINE]   = $config[PropelConstants::ZED_DB_ENGINE_PGSQL];
 $config[PropelConstants::ZED_DB_USERNAME] = '{{ getv "/zed/db/username" }}';
