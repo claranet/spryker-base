@@ -56,6 +56,9 @@
 
 ## Open action items
 
+* Prepare Jenkins to be incorporated
+* Update images to rely on recently version 2.4 of the demoshop which runs on
+  PHP 7.1.
 * Scan all config files for external resource definitions and consider moving
   them into the config_local.php. Rationale behind these decisions must be the
   weighing up whether the configuration option in question better fits into the
