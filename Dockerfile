@@ -79,6 +79,9 @@ COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
 
+# fix wrong permissions of monitrc, else monit will refuse to run
+RUN chmod 0700 /etc/monit/monitrc
+
 RUN chown www-data: -R /data/ \
     && chmod 755 /usr/bin/confd \
     && rm /etc/nginx/sites-enabled/default \
