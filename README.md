@@ -36,7 +36,7 @@ We distinct the following lifecycle stages and their corresponding responsibilit
   * CMD: `init_setup`
   * Build all the static components of the Yves and Zed part. This is an init
     setup instead a build task because we assume that assets are to be built
-    once per setup because they getting served via external volume which is
+    once per setup because they're getting served via external volume which is
     shared across the setup, both between Yves and Zed.
   * Initialize the exernal resources
       * Propel:
@@ -118,7 +118,7 @@ Inherited properties are:
 
 Sample Dockerfile:
 
-```
+```docker
 FROM spryker-base:latest
 ```
 
@@ -133,7 +133,7 @@ environment variables are necessary or required have a look at the `Dockerfile`.
 Furthermore are there build trigger (`ONBUILD`) placed at the base level which
 governing part of the build process of the child image. These trigger define
 which part of your shop source code repository (by default) will be included to
-the effective conrete docker image implementing the actual shop.
+the effective concrete docker image implementing the actual shop.
 
 By default your code base need to supply the following parts which
 automatically get added to the image:
@@ -143,7 +143,7 @@ automatically get added to the image:
 * `./package.json` -- npm dependencies 
 * `./composer.json` -- php dependencies 
 * `./docker/build.conf` - Shell sourcable file including variables governing the
-  behaviour of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
+  behavior of the build process of the child image (e.g.: `$PHP_EXTENSIONS`).
 * `./docker/build.d/{Shared,Yves,Zed}` - User provided scripts which will be executed during image build process (once per image).
 * `./docker/init.d/{Shared,Yves,Zed}` - User provided scripts which will be executed during runtime as initialization procedure (once per cluster). 
 
@@ -151,7 +151,7 @@ automatically get added to the image:
 
 The abstract base infrastructure provides the derived more concrete shop docker
 image with the templating features we need to feed this shop with the proper
-configuration for dynamica environments. 
+configuration for dynamic environments. 
 
 ### Order of precedence
 
@@ -174,12 +174,12 @@ Where are these configuration and how are we able to override them?
 
 The environment definition (production, staging, development) fulfills two functions:
 
-1. First it **configures** external resources approriate for this environment to run in
-2. ... and secondly it defines a particular behaviour specific for this **mode** to be ran 
+1. First it **configures** external resources appropriate for this environment to run in
+2. ... and secondly it defines a particular behavior specific for this **mode** to be ran 
 
 Since containerized application were always dynamically configured we do not
 need this distinction for parallel configurations of different environments or
-sites. But this distinction is nevertheless useful for governing the behaviour
+sites. But this distinction is nevertheless useful for governing the behavior
 of the application. If we want to run this app in development mode we
 potentially do not want to run all the payment code, or the mail notification
 code. This differs to production mode. 
