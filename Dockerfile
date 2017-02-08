@@ -30,12 +30,23 @@ ENV SPRYKER_SHOP_CC="DE" \
 
 ENV PATH="/data/bin/:$PATH"
 ENV GOSU_VERSION 1.10
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /data/logs /data/bin /data/etc
 
-RUN export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends apt-transport-https ca-certificates curl \
+# make this step cacheable
+RUN apt-get update
+
+# add add-apt-repository tool
+RUN apt-get install -y software-properties-common
+
+# this process seems to failsometimes while importing the keyring
+RUN add-apt-repository ppa:ondrej/php || true
+
+# now update the apt sources caches to make use of the new php
+RUN apt-get update
+
+RUN apt-get install -y  --no-install-recommends apt-transport-https ca-certificates curl \
 		&& echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list \
     && curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
     \
@@ -48,11 +59,11 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && chmod 755 /usr/local/bin/gosu \
     \
     && apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && apt-get install -y --allow-unauthenticated --no-install-recommends \
       nginx \
       nginx-extras \
-      php-fpm \
-      php-cli \
+      php7.0-fpm \
+      php7.0-cli \
       monit \
       nodejs \
       git \
