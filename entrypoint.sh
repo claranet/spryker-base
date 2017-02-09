@@ -35,10 +35,10 @@ function install_dependencies {
 
     if [ -n "$PHP_EXTENSIONS" ]; then
       export DEBIAN_FRONTEND=noninteractive
-      exts=$(echo "$PHP_EXTENSIONS" | awk  'BEGIN {RS=" "} { if (length($1) != 0) { printf "php-%s ", $1 }}' )
+      exts=$(echo "$PHP_EXTENSIONS" | awk  'BEGIN {RS=" "} { if (length($1) != 0) { printf "php7.0-%s ", $1 }}' )
       infoText "Installing required PHP extensions: $exts"
       apt-get -y update
-      apt-get -y --no-install-recommends install $exts
+      apt-get -y --allow-unauthenticated --no-install-recommends install $exts
     fi
 
     if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
