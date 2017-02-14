@@ -6,10 +6,8 @@ MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
 ENV SPRYKER_SHOP_CC="DE" \
     APPLICATION_ENV="production" \
-		ZED_HOST="" \
-		ZED_HOST_PROTOCOL="" \
-		YVES_HOST="" \
-		YVES_HOST_PROTOCOL="" \
+    ZED_HOST="localhost:8080" \
+    YVES_HOST="" \
     ES_HOST="elasticsearch" \
     ES_PROTOCOL="http" \
     ES_PORT="9200" \
@@ -25,8 +23,8 @@ ENV SPRYKER_SHOP_CC="DE" \
     ZED_DB_HOST="database" \
     ZED_DB_PORT="5432" \
     JENKINS_HOST="jenkins" \
-    JENKINS_PORT="8080" \
-    JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/"
+    JENKINS_PORT="8080"
+ENV JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/"
 
 ENV PATH="/data/bin/:$PATH"
 ENV GOSU_VERSION 1.10

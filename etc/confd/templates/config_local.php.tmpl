@@ -19,6 +19,26 @@ $config[StorageConstants::STORAGE_REDIS_PORT]     = '{{ getv "/redis/storage/por
 $config[StorageConstants::STORAGE_REDIS_PASSWORD] = '{{ getv "/redis/storage/password" }}';
 $config[StorageConstants::STORAGE_REDIS_DATABASE] = 0;
 
+/**
+ * Hostname(s) for Yves - Shop frontend
+ * In production you probably use a CDN for static content
+ * But BE AWARE: session domain has to match the sites domain!
+ */
+$config[ApplicationConstants::HOST_YVES]
+    = $config[ApplicationConstants::HOST_STATIC_ASSETS]
+    = $config[ApplicationConstants::HOST_STATIC_MEDIA]
+    = $config[ApplicationConstants::HOST_SSL_YVES]
+    = $config[ApplicationConstants::HOST_SSL_STATIC_ASSETS]
+    = $config[ApplicationConstants::HOST_SSL_STATIC_MEDIA]
+    = $config[SessionConstants::YVES_SESSION_COOKIE_NAME]
+    = $config[SessionConstants::YVES_SESSION_COOKIE_DOMAIN]
+    = '{{ getv "/yves/host" }}';
+
+$config[SessionConstants::YVES_SESSION_SAVE_HANDLER]          = SessionConstants::SESSION_HANDLER_REDIS;
+$config[SessionConstants::YVES_SESSION_TIME_TO_LIVE]          = SessionConstants::SESSION_LIFETIME_1_HOUR;
+$config[SessionConstants::YVES_SESSION_FILE_PATH]             = session_save_path();
+$config[SessionConstants::YVES_SESSION_PERSISTENT_CONNECTION] = $config[StorageConstants::STORAGE_PERSISTENT_CONNECTION];
+
 $config[SessionConstants::YVES_SESSION_REDIS_PROTOCOL] = 'tcp';
 $config[SessionConstants::YVES_SESSION_REDIS_HOST]     = '{{ getv "/redis/session/host" }}';
 $config[SessionConstants::YVES_SESSION_REDIS_PORT]     = '{{ getv "/redis/session/port" }}';

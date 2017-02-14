@@ -169,6 +169,9 @@ case $1 in
     run)
         generate_configurations
         /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
+        # create events log dir and fix rights of /data/shop/data/ so spryker app can create it's event log file
+        mkdir -pv /data/shop/data/logs
+        chown -R www-data: /data/shop/data
         ;;
 
     build_image)
