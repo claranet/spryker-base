@@ -12,7 +12,7 @@ stages:
 variables:
   # checkout: http://docs.gitlab.com/ce/ci/variables/README.html
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:latest
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF_NAME
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF
 
 # login to private gitlab registry
 before_script:
