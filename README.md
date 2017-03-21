@@ -26,7 +26,7 @@ to understand where to place the source code.
 
 > Please double the estimated times to get an appropriate time buffer. To be save - tripple them (normal thumb rule ;))
 
-* 41h (5d) | 02.05.2017: Beta release of local dev env (I've 15 workdays from now 2017-03-21 until the beta release)
+* 43h (5,5d) | 02.05.2017: Beta release of local dev env (I've 15 workdays from now 2017-03-21 until the beta release)
   * 4-8h | why are there diffs between devvm and docker images (e.g. vendor/spryker/library is missing in devvm, and therefore Environment.php)?
   * 2h | why not using php:70 directly, instead of building on ubuntu:xenial and managing our own PHP infrastructure? (could only find one argument against it - see "how to provide a different PHP version")
     * would require a clean up of spryker base and a simple adaption in spryker-demoshop
@@ -39,6 +39,7 @@ to understand where to place the source code.
   * test local dev env
     * build instructions (init_setup) depend on module versions installed by php composer - how to deal with that? Currently spryker-base provides the build instructions...
       * each customer will probably have its own set of dependencies and modules, even custom build steps
+    * 2h | clean up spryker-demoshop repo (branches, tags)
     * 2h | bind-mounts
     * rebuild composer/npm dependencies?
       * via command within docker image?
