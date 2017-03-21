@@ -1,6 +1,7 @@
 <?php
 
 use Spryker\Shared\Application\ApplicationConstants;
+use Spryker\Shared\Setup\SetupConstants;
 use Spryker\Shared\Storage\StorageConstants;
 use Spryker\Shared\Session\SessionConstants;
 use Spryker\Shared\Propel\PropelConstants;
@@ -51,10 +52,10 @@ $config[SessionConstants::ZED_SESSION_REDIS_PORT]     = '{{ getv "/redis/session
 $config[SessionConstants::ZED_SESSION_REDIS_PASSWORD] = '{{ getv "/redis/session/password" }}';
 $config[SessionConstants::ZED_SESSION_REDIS_DATABASE] = 2;
 
-$config[ApplicationConstants::JENKINS_BASE_URL] = '{{ getv "/jenkins/baseurl" }}';
+$config[SetupConstants::JENKINS_BASE_URL] = '{{ getv "/jenkins/baseurl" }}';
 # FIXME [bug01] jenkins console commands of spryker/setup do not relies
 # completely of calls to a remote jenkins call
-$config[ApplicationConstants::JENKINS_DIRECTORY] = '/tmp/jenkins/jobs';
+$config[SetupConstants::JENKINS_DIRECTORY] = '/tmp/jenkins/jobs';
 
 $config[PropelConstants::ZED_DB_ENGINE]   = $config[PropelConstants::ZED_DB_ENGINE_PGSQL];
 $config[PropelConstants::ZED_DB_USERNAME] = '{{ getv "/zed/db/username" }}';
