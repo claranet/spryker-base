@@ -37,6 +37,8 @@ to understand where to place the source code.
   * 8h | clean up entrypoint.sh
     * a lot of testing is involved here, this takes time
   * test local dev env
+    * build instructions (init_setup) depend on module versions installed by php composer - how to deal with that? Currently spryker-base provides the build instructions...
+      * each customer will probably have its own set of dependencies and modules, even custom build steps
     * 2h | bind-mounts
     * rebuild composer/npm dependencies?
       * via command within docker image?
