@@ -22,6 +22,41 @@ to understand where to place the source code.
 * [ ] logging 
 
 
+## Roadmap
+
+> Please double the estimated times to get an appropriate time buffer. To be save - tripple them (normal thumb rule ;))
+
+* 41h (5d) | 02.05.2017: Beta release of local dev env (I've 15 workdays from now 2017-03-21 until the beta release)
+  * 4-8h | why are there diffs between devvm and docker images (e.g. vendor/spryker/library is missing in devvm, and therefore Environment.php)?
+  * 2h | why not using php:70 directly, instead of building on ubuntu:xenial and managing our own PHP infrastructure? (could only find one argument against it - see "how to provide a different PHP version")
+    * would require a clean up of spryker base and a simple adaption in spryker-demoshop
+  * 1h | spryker switches to `yarn` in demoshop
+  * 4h | sync / check new developments in functions.sh and setup process
+  * 4h | write docs for users (developers) - at least a base documentation
+    * write notes about when all data in containers gets erased and what docker(-compose) commands are data save...
+  * 8h | clean up entrypoint.sh
+    * a lot of testing is involved here, this takes time
+  * test local dev env
+    * 2h | bind-mounts
+    * rebuild composer/npm dependencies?
+      * via command within docker image?
+      * via bind-mount, even resolved dependencies are linked in?
+      * if bind-mount => how to run the setup init?
+      * if bind-mount we might need to have an externally available trigger which does the init?
+        * if so, how? and what about a separate Yves/Zed image while in local dev?
+    * is getting Yves/Zed separated in local dev a wanted feature?
+      * if so, it might make it more fragil to transfer / migrate a local dev into PROD/STAGE as envs aren't equal
+    * 4h | rebuild docker images
+      * check what env is required for this to work sufficient?
+  * 4h | write script to make installation / setup easier - no aim for a one-shot-run as this might get complicated and risky (requires changes within the unknown dev env of the user)
+  * 4h | provide S3 object store service and how to provide both - S3 and normal FTP?
+    * look for appropriate solutions where API is fine for local dev and PROD
+  * how to upgrade to latest nodejs version? => Dockerfile sufficient? If so, why are we providing nodejs / npm via spryker-base? Some would want to use npm, some yarn and required nodejs versions might differ a lot
+  * how to provide a different PHP version to customers? => rebuild with different versions?
+    * or local switch? if local switch ( via env setting ) => php:70 base image is obsolete and ubuntu:xenial (or similar) is a good idea
+    * if we provide different versions, automated testing is a must => this is official software development, so if represents our brand!
+    * even without multiple versions - testing should be automated
+
 ## Stages 
 
 We distinct the following lifecycle stages and their corresponding responsibilities:
