@@ -100,8 +100,8 @@ RUN chown www-data: -R /data/ \
 EXPOSE 80 8080
 
 WORKDIR /data/shop/
-ENTRYPOINT [ "/entrypoint.sh" ]
-CMD  [ "run" ]
+ENTRYPOINT [ "/bin/bash" ]
+CMD  [ "/entrypoint.sh run" ]
 
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="1.0" \
