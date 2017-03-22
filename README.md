@@ -7,19 +7,11 @@ implemented here, build your own image including the actual implementation of a
 shop derived from this image. See directory hierarchy explained below in order
 to understand where to place the source code. 
 
-## Features
 
-* [x] process supervision via monit
-* [x] nginx
-* [x] php-fpm 
-* [x] php7
-* [x] php7 base modules 
-* [x] php7 custom modules 
-* [x] templating of configuration files according to container environment 
-* [x] base directory hierarchy 
-* [x] building of shop application (npm, php composer, ...)
-* [ ] initialize the external resources
-* [ ] logging 
+[[_TOC_]]
+
+
+# Project specifics
 
 
 ## Roadmap
@@ -60,6 +52,34 @@ to understand where to place the source code.
     * or local switch? if local switch ( via env setting ) => php:70 base image is obsolete and ubuntu:xenial (or similar) is a good idea
     * if we provide different versions, automated testing is a must => this is official software development, so if represents our brand!
     * even without multiple versions - testing should be automated
+
+
+## Default image services architecture
+
+> drawing follows... this is a first draft for an overview
+
+* nginx (gets exposed with yves via port 80 AND zed via port 8080)
+* php-fpm (2 instances - ZED and Yves, both localhost only via socket file)
+* monit starts both services (nginx and php-fpm)
+
+
+
+# Image (Container) specifics
+
+## Features
+
+* [x] process supervision via monit
+* [x] nginx
+* [x] php-fpm 
+* [x] php7
+* [x] php7 base modules 
+* [x] php7 custom modules 
+* [x] templating of configuration files according to container environment 
+* [x] base directory hierarchy 
+* [x] building of shop application (npm, php composer, ...)
+* [ ] initialize the external resources
+* [ ] logging 
+
 
 ## Stages 
 
