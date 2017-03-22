@@ -5,10 +5,29 @@ Zed. Infrastructure in terms of scripts and tooling around the shop itself.
 This image does not provide a ready to use shop! In order to use the features
 implemented here, build your own image including the actual implementation of a
 shop derived from this image. See directory hierarchy explained below in order
-to understand where to place the source code. 
+to understand where to place the source code.
 
 
-[[_TOC_]]
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Spryker base docker image](#spryker-base-docker-image)
+- [Project specifics](#project-specifics)
+	- [Roadmap](#roadmap)
+	- [Default image services architecture](#default-image-services-architecture)
+- [Image (Container) specifics](#image-container-specifics)
+	- [Features](#features)
+	- [Stages](#stages)
+	- [Directory hierarchy](#directory-hierarchy)
+	- [Using this image](#using-this-image)
+	- [Configuration](#configuration)
+		- [Order of precedence](#order-of-precedence)
+		- [Override base configuration](#override-base-configuration)
+	- [On Environments](#on-environments)
+	- [Scripting](#scripting)
+		- [Build Infrastructure](#build-infrastructure)
+		- [Initializing Infrastructure](#initializing-infrastructure)
+
+<!-- /TOC -->
 
 
 # Project specifics
@@ -16,17 +35,42 @@ to understand where to place the source code.
 
 ## Roadmap
 
+
+
+* default_local.conf from base image in spryker-shop implementation => customer gets configs via ENV ( getenv() ). we provide predefined default_local.conf with getenv() already in use to provide an example
+
+* spryker-base flavors:
+  * via docker tag, e.g. `php-7_1`
+  * it would result in something like: `php-7.1_spryker-2.9_prod` (7.1 PHP version, 2.9 is spryker core, prod instance env flavor)
+  * add dev/prod image flavors (for different versions)
+* we pre-build local development images (with prod/dev flavor), per customer
+  * customer has to do "git clone && cd docker/ && docker-compose -t spryker up"
+  * so there is no need for a custom install script!
+  * if the customer want to start with the demoshop as a base, it is already prepared
+  * if not => he can ask us to docker enable its repository
+* package manager (npm/yarn) customizing + init_setup disable via vars in hook vars to support customer customizing
+  * customer can disable init_setup (or parts of it) to set up it's own setups/init process
+  * customer can install npm/yarn with specific versions via ENV settings (to be specified in shop-implementation)
+* git repo: instead of upstream pull => fetch directly the tag ref for a merge!
+* clean up demoshop repo:
+  * merge history of Dockerfile and docker/ folder
+  * build up demoshop repo from skretch (fetch upstream tag 2.8 (for spryker core 2.x support) and in addition, tag 2.9 for spryker core 3.x support)
+* for local dev: bind-mount read only => to prevent changes in docker image and enforce the user to change files on his system
+
+
+
+
 > Please double the estimated times to get an appropriate time buffer. To be save - tripple them (normal thumb rule ;))
 
 * 43h (5,5d) | 02.05.2017: Beta release of local dev env (I've 15 workdays from now 2017-03-21 until the beta release)
-  * 4-8h | why are there diffs between devvm and docker images (e.g. vendor/spryker/library is missing in devvm, and therefore Environment.php)?
-  * 2h | why not using php:70 directly, instead of building on ubuntu:xenial and managing our own PHP infrastructure? (could only find one argument against it - see "how to provide a different PHP version")
+  * 4-8h | why are there diffs between devvm and docker images (e.g. vendor/spryker/library is missing in devvm, and therefore Environment.php)? (**low prio**, optimizing)
+  * ?h | why not using php:70 directly, instead of building on ubuntu:xenial and managing our own PHP infrastructure? (could only find one argument against it - see "how to provide a different PHP version") (**low prio**, optimizing)
     * would require a clean up of spryker base and a simple adaption in spryker-demoshop
   * 1h | spryker switches to `yarn` in demoshop
   * 4h | sync / check new developments in functions.sh and setup process
   * 4h | write docs for users (developers) - at least a base documentation
     * write notes about when all data in containers gets erased and what docker(-compose) commands are data save...
-  * 8h | clean up entrypoint.sh
+  * 8h | clean up entrypoint.sh (**low prio**, optimizing)
     * a lot of testing is involved here, this takes time
   * test local dev env
     * build instructions (init_setup) depend on module versions installed by php composer - how to deal with that? Currently spryker-base provides the build instructions...
@@ -35,6 +79,7 @@ to understand where to place the source code.
     * 2h | clean up spryker-demoshop repo (branches, tags)
     * 2h | bind-mounts
     * rebuild composer/npm dependencies?
+      * add variants in documentation for developers
       * via command within docker image?
       * via bind-mount, even resolved dependencies are linked in?
       * if bind-mount => how to run the setup init?
@@ -47,6 +92,7 @@ to understand where to place the source code.
   * 4h | write script to make installation / setup easier - no aim for a one-shot-run as this might get complicated and risky (requires changes within the unknown dev env of the user)
   * 4h | provide S3 object store service and how to provide both - S3 and normal FTP?
     * look for appropriate solutions where API is fine for local dev and PROD
+    * NOT YET!
   * how to upgrade to latest nodejs version? => Dockerfile sufficient? If so, why are we providing nodejs / npm via spryker-base? Some would want to use npm, some yarn and required nodejs versions might differ a lot
   * how to provide a different PHP version to customers? => rebuild with different versions?
     * or local switch? if local switch ( via env setting ) => php:70 base image is obsolete and ubuntu:xenial (or similar) is a good idea
@@ -60,6 +106,8 @@ to understand where to place the source code.
 
 * nginx (gets exposed with yves via port 80 AND zed via port 8080)
 * php-fpm (2 instances - ZED and Yves, both localhost only via socket file)
+  * the ZED instance provides the admin interface (admin-frontend in dev speak)
+  * the YVES instance provides the "normal shop customer" frontend
 * monit starts both services (nginx and php-fpm)
 
 
