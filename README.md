@@ -38,7 +38,8 @@ to understand where to place the source code.
     * a lot of testing is involved here, this takes time
   * test local dev env
     * build instructions (init_setup) depend on module versions installed by php composer - how to deal with that? Currently spryker-base provides the build instructions...
-      * each customer will probably have its own set of dependencies and modules, even custom build steps
+      * each customer will probably have its own set of dependencies and modules, even custom build steps (affects init_setup)
+      * even config structure will differ per customer (e.g. custom settings, different key/value requirements per module version)
     * 2h | clean up spryker-demoshop repo (branches, tags)
     * 2h | bind-mounts
     * rebuild composer/npm dependencies?
