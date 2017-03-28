@@ -31,3 +31,5 @@ release-image:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
     - docker push $CONTAINER_RELEASE_IMAGE
+    # trigger rebuild of spryker-demoshop image build
+    - curl -X POST -F token=$TRIGGER_TOKEN_DEMOSHOP -F ref=feature/clara-enable_gitlabci_tests https://git.eu.clara.net/api/v3/projects/2233/trigger/builds
