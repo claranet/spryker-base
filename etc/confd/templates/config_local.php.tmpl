@@ -35,6 +35,16 @@ $config[ApplicationConstants::HOST_YVES]
     = $config[SessionConstants::YVES_SESSION_COOKIE_DOMAIN]
     = '{{ getv "/yves/host" }}';
 
+/**
+ * Hostname(s) for Zed - Shop frontend
+ * In production you probably use HTTPS for Zed
+ */
+$config[ApplicationConstants::HOST_ZED_GUI]
+    = $config[ApplicationConstants::HOST_ZED_API]
+    = $config[ApplicationConstants::HOST_SSL_ZED_GUI]
+    = $config[ApplicationConstants::HOST_SSL_ZED_API]
+    = '{{ getv "/zed/host" }}';
+
 $config[SessionConstants::YVES_SESSION_SAVE_HANDLER]          = SessionConstants::SESSION_HANDLER_REDIS;
 $config[SessionConstants::YVES_SESSION_TIME_TO_LIVE]          = SessionConstants::SESSION_LIFETIME_1_HOUR;
 $config[SessionConstants::YVES_SESSION_FILE_PATH]             = session_save_path();
