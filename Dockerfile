@@ -88,6 +88,9 @@ COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
 
+# make bash as default shell
+RUN ln -fs /bin/bash /bin/sh
+
 # fix wrong permissions of monitrc, else monit will refuse to run
 RUN chmod 0700 /etc/monit/monitrc
 
