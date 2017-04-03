@@ -117,4 +117,6 @@ ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
 ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
+# create events log dir
+ONBUILD RUN  mkdir -pv /data/shop/data/DE/logs
 ONBUILD RUN  /entrypoint.sh build_image && chown -R www-data: /data/shop/
