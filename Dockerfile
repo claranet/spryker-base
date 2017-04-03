@@ -99,7 +99,7 @@ RUN chown www-data: -R /data/ \
     && ln -fs /data/bin/entrypoint.sh / \
     && ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
 
-EXPOSE 80 8080
+EXPOSE 80
 
 WORKDIR /data/shop/
 ENTRYPOINT [ "/entrypoint.sh" ]
