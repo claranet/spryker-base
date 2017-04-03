@@ -8,6 +8,9 @@ export TERM=xterm
 export VERBOSITY='-v'
 export CONSOLE=vendor/bin/console
 
+# NOTE: requires $PHP_VERSION to be set from outside!
+ENABLED_SERVICES=""
+
 source /data/bin/functions.sh
 
 cd $SHOP
@@ -149,6 +152,69 @@ function init_zed {
 }
 
 
+# force setting a symlink from sites-available to sites-enabled if vhost file exists
+function enable_nginx_vhost {
+  NGINX_SITES_AVAILABLE='/etc/nginx/sites-enabled'
+  NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
+  VHOST=$1
+  if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
+    errorText "\t nginx vhost '$APP' not found! Can't enable vhost!"
+    return
+  fi
+  
+  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/$VHOST
+}
+
+
+# force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
+function enable_phpfpm_app {
+  FPM_APPS_AVAILABLE="/etc/php/$PHP_VERSION/fpm/apps-available"
+  FPM_APPS_ENABLED="/etc/php/$PHP_VERSION/fpm/pool.d"
+  APP="${1}.conf"
+  if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
+    errorText "\t php-fpm app '$APP' not found! Can't enable app!"
+    return
+  fi
+  
+  ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
+}
+
+
+function enable_yves {
+  labelText "Enable Yves vHost and PHP-FPM app..."
+  
+  infoText "Enbable Yves - Link nginx vHost to sites-enabled/..."
+  enable_nginx_vhost yves
+  
+  infoText "Enable Yves - Link php-fpm pool app config to pool.d/..."
+  enable_phpfpm_app yves
+  
+  ENABLED_SERVICES="$ENABLED_SERVICES yves"
+}
+
+
+function enable_zed {
+  labelText "Enable Zed vHost and PHP-FPM app..."
+  
+  infoText "Enbable Zed - Link nginx vHost to sites-enabled/..."
+  enable_nginx_vhost zed
+  
+  infoText "Enable Zed - Link php-fpm pool app config to pool.d/..."
+  enable_phpfpm_app zed
+  
+  ENABLED_SERVICES="$ENABLED_SERVICES zed"
+}
+
+
+function start_services {
+  labelText "Starting enabled services $ENABLED_SERVICES"
+  
+  generate_configurations
+  /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
+  chown -R www-data: /data/shop/data
+}
+
+
 function exec_hooks {
     hook_d=$1
     if [ -e "$hook_d" -a -n "`ls -1 $hook_d/`" ]; then
@@ -166,11 +232,21 @@ function exec_hooks {
 
 
 case $1 in 
-    run)
-        generate_configurations
-        /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
-        chown -R www-data: /data/shop/data
-        ;;
+    run_yves)
+      enable_yves
+      start_services
+      ;;
+
+    run_zed)
+      enable_zed
+      start_services
+      ;;
+
+    run_both)
+      enable_zed
+      enable_yves
+      start_services
+      ;;
 
     build_image)
         # target during build time of child docker image executed by ONBUILD

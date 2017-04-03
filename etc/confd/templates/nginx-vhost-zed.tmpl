@@ -1,8 +1,12 @@
 
 server {
-    listen 8080;
+    listen 80;
 
-    server_name zed.de.spryker.dev;
+    # 
+    # This vhost will be enabled by /entrypoint.sh with the 'run_zed' or 'run_both' argument
+    # 
+
+    server_name {{ getv "public/zed/domain" }};
 
     keepalive_timeout 0;
     access_log  /data/logs/zed-access.log extended;
