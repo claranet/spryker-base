@@ -6,7 +6,7 @@ MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
 ENV SPRYKER_SHOP_CC="DE" \
     APPLICATION_ENV="production" \
-    ZED_HOST="localhost:8080" \
+    ZED_HOST="zed" \
     PUBLIC_ZED_DOMAIN="zed.spryker.dev"\
     YVES_HOST="yves" \
     PUBLIC_YVES_DOMAIN="yves.spryker.dev"\
