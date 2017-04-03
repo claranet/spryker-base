@@ -6,7 +6,7 @@ server {
     # This vhost will be enabled by /entrypoint.sh with the 'run_yves' or 'run_both' argument
     # 
 
-    server_name {{ getv "public/zed/domain" }};
+    server_name {{ getv "/public/zed/domain" }};
 
     access_log  /data/logs/yves-access.log extended;
 

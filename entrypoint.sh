@@ -80,6 +80,9 @@ function generate_zed_code {
 
     infoText "Propel - Removing old migration plans ..."
     rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
+    
+    infoText "Zed - generate navigation cache files"
+    $CONSOLE navigation:build-cache
 }
 
 
@@ -154,11 +157,11 @@ function init_zed {
 
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
 function enable_nginx_vhost {
-  NGINX_SITES_AVAILABLE='/etc/nginx/sites-enabled'
+  NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
   NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
   VHOST=$1
   if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
-    errorText "\t nginx vhost '$APP' not found! Can't enable vhost!"
+    errorText "\t nginx vhost '$VHOST' not found! Can't enable vhost!"
     return
   fi
   
