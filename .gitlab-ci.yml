@@ -31,7 +31,6 @@ build_php_7.0:
     - docker:dind
   only:
     - master
-    - feature/addGitlabCIIntegration
 
 build_php_5.6:
   stage: build
@@ -43,8 +42,6 @@ build_php_5.6:
     - docker:dind
   only:
     - master
-    - feature/addGitlabCIIntegration
-
 
 # ===================
 #   STAGE | RELEASE
@@ -63,7 +60,6 @@ release_php_7.0:
     - docker:dind
   only:
     - master
-    - feature/addGitlabCIIntegration
 
 release_php_5.6:
   stage: release
@@ -78,4 +74,4 @@ release_php_5.6:
     - docker:dind
   only:
     - master
-    - feature/addGitlabCIIntegration
+
