@@ -110,7 +110,7 @@ EXPOSE 80
 
 WORKDIR /data/shop/
 ENTRYPOINT [ "/bin/bash" ]
-CMD  [ "/entrypoint.sh run" ]
+CMD  [ "/entrypoint.sh run_both" ]
 
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="1.0" \
