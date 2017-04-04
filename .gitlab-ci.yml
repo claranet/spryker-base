@@ -31,6 +31,7 @@ build_php_7.0:
     - docker:dind
   only:
     - master
+    - feature/prepareForLocalDev
 
 build_php_5.6:
   stage: build
@@ -42,6 +43,7 @@ build_php_5.6:
     - docker:dind
   only:
     - master
+    - feature/prepareForLocalDev
 
 # ===================
 #   STAGE | RELEASE
@@ -60,6 +62,7 @@ release_php_7.0:
     - docker:dind
   only:
     - master
+    - feature/prepareForLocalDev
 
 release_php_5.6:
   stage: release
@@ -74,4 +77,5 @@ release_php_5.6:
     - docker:dind
   only:
     - master
+    - feature/prepareForLocalDev
 

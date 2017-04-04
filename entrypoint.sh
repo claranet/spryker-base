@@ -11,6 +11,7 @@ export CONSOLE=vendor/bin/console
 # NOTE: requires $PHP_VERSION to be set from outside!
 ENABLED_SERVICES=""
 
+
 source /data/bin/functions.sh
 
 cd $SHOP
@@ -38,7 +39,11 @@ function install_dependencies {
 
     if [ -n "$PHP_EXTENSIONS" ]; then
       export DEBIAN_FRONTEND=noninteractive
-      exts=$(echo "$PHP_EXTENSIONS" | awk  'BEGIN {RS=" "} { if (length($1) != 0) { printf "php${PHP_VERSION}-%s ", $1 }}' )
+      
+      for i in $PHP_EXTENSIONS; do
+        exts="php${PHP_VERSION}-${i} $exts"
+      done
+      
       infoText "Installing required PHP extensions: $exts"
       apt-get -y update
       apt-get -y --allow-unauthenticated --no-install-recommends install $exts
@@ -183,29 +188,16 @@ function enable_phpfpm_app {
 }
 
 
-function enable_yves {
-  labelText "Enable Yves vHost and PHP-FPM app..."
-  
-  infoText "Enbable Yves - Link nginx vHost to sites-enabled/..."
-  enable_nginx_vhost yves
-  
-  infoText "Enable Yves - Link php-fpm pool app config to pool.d/..."
-  enable_phpfpm_app yves
-  
-  ENABLED_SERVICES="$ENABLED_SERVICES yves"
-}
-
-
-function enable_zed {
-  labelText "Enable Zed vHost and PHP-FPM app..."
-  
-  infoText "Enbable Zed - Link nginx vHost to sites-enabled/..."
-  enable_nginx_vhost zed
-  
-  infoText "Enable Zed - Link php-fpm pool app config to pool.d/..."
-  enable_phpfpm_app zed
-  
-  ENABLED_SERVICES="$ENABLED_SERVICES zed"
+function enable_services {
+  for SERVICE in $ENABLED_SERVICES; do
+    labelText "Enable ${SERVICE} vHost and PHP-FPM app..."
+    
+    infoText "Enbable ${SERVICE} - Link nginx vHost to sites-enabled/..."
+    enable_nginx_vhost ${SERVICE}
+    
+    infoText "Enable ${SERVICE} - Link php-fpm pool app config to pool.d/..."
+    enable_phpfpm_app ${SERVICE}
+  done
 }
 
 
@@ -236,18 +228,20 @@ function exec_hooks {
 
 case $1 in 
     run_yves)
-      enable_yves
+      ENABLED_SERVICES="yves"
+      enable_services
       start_services
       ;;
 
     run_zed)
-      enable_zed
+      ENABLED_SERVICES="zed"
+      enable_services
       start_services
       ;;
 
     run_both)
-      enable_zed
-      enable_yves
+      ENABLED_SERVICES="yves zed"
+      enable_services
       start_services
       ;;
 
