@@ -3,6 +3,8 @@ FROM ubuntu:xenial
 
 MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
+# specify possible build args
+ARG PHP_VERSION
 
 ENV SPRYKER_SHOP_CC="DE" \
     APPLICATION_ENV="production" \
@@ -30,7 +32,7 @@ ENV JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/"
 
 ENV PATH="/data/bin/:$PATH"
 ENV GOSU_VERSION="1.10" \
-    PHP_VERSION="7.0" \
+    PHP_VERSION=${PHP_VERSION:-7.0} \
     CONFD_VERSION="0.11.0"
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -92,6 +94,9 @@ COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
 
+# make bash as default shell
+RUN ln -fs /bin/bash /bin/sh
+
 # fix wrong permissions of monitrc, else monit will refuse to run
 RUN chmod 0700 /etc/monit/monitrc
 
@@ -104,8 +109,8 @@ RUN chown www-data: -R /data/ \
 EXPOSE 80
 
 WORKDIR /data/shop/
-ENTRYPOINT [ "/entrypoint.sh" ]
-CMD  [ "run" ]
+ENTRYPOINT [ "/bin/bash" ]
+CMD  [ "/entrypoint.sh run_both" ]
 
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="1.0" \
