@@ -6,8 +6,10 @@ MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
 ENV SPRYKER_SHOP_CC="DE" \
     APPLICATION_ENV="production" \
-    ZED_HOST="localhost:8080" \
-    YVES_HOST="" \
+    ZED_HOST="zed" \
+    PUBLIC_ZED_DOMAIN="zed.spryker.dev" \
+    YVES_HOST="yves" \
+    PUBLIC_YVES_DOMAIN="yves.spryker.dev" \
     ES_HOST="elasticsearch" \
     ES_PROTOCOL="http" \
     ES_PORT="9200" \
@@ -27,7 +29,9 @@ ENV SPRYKER_SHOP_CC="DE" \
 ENV JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/"
 
 ENV PATH="/data/bin/:$PATH"
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION="1.10" \
+    PHP_VERSION="7.0" \
+    CONFD_VERSION="0.11.0"
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir -p /data/logs /data/bin /data/etc
@@ -60,8 +64,8 @@ RUN apt-get install -y  --no-install-recommends apt-transport-https ca-certifica
     && apt-get install -y --allow-unauthenticated --no-install-recommends \
       nginx \
       nginx-extras \
-      php7.0-fpm \
-      php7.0-cli \
+      php${PHP_VERSION}-fpm \
+      php${PHP_VERSION}-cli \
       monit \
       nodejs \
       git \
@@ -83,7 +87,7 @@ RUN apt-get install -y  --no-install-recommends apt-transport-https ca-certifica
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* 
 
-ADD https://github.com/kelseyhightower/confd/releases/download/v0.11.0/confd-0.11.0-linux-amd64 /usr/bin/confd
+ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/bin/confd
 COPY etc/ /etc/
 COPY shop/ /data/shop/
 COPY entrypoint.sh functions.sh /data/bin/
@@ -100,7 +104,7 @@ RUN chown www-data: -R /data/ \
     && ln -fs /data/bin/entrypoint.sh / \
     && ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
 
-EXPOSE 80 8080
+EXPOSE 80
 
 WORKDIR /data/shop/
 ENTRYPOINT [ "/bin/bash" ]
@@ -122,4 +126,5 @@ ONBUILD COPY ./package.json ./composer.json /data/shop/
 ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
 # create events log dir
 ONBUILD RUN  mkdir -pv /data/shop/data/DE/logs
-ONBUILD RUN  /entrypoint.sh build_image && chown -R www-data: /data/shop/
+ONBUILD RUN  /entrypoint.sh build_image
+ONBUILD RUN  chown -R www-data: /data/shop/
