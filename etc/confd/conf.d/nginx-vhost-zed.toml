@@ -4,5 +4,6 @@ src = "nginx-vhost-zed.tmpl"
 dest = "/etc/nginx/sites-available/zed"
 keys = [
     "/spryker/",
+    "/public/",
     "/application/"
 ]
