@@ -1,9 +1,6 @@
 ---
 
 # gitlab-runner must started with DOCKER_PRIVILEGED=yes
-image: docker:git
-services:
-  - docker:dind
 
 stages:
   - build
@@ -11,25 +8,74 @@ stages:
 
 variables:
   # checkout: http://docs.gitlab.com/ce/ci/variables/README.html
-  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:latest
-  CONTAINER_TEST_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH:$CI_BUILD_REF
+  CONTAINER_RELEASE_IMAGE_PHP56: $CI_REGISTRY/$CI_PROJECT_PATH:latest_php56
+  CONTAINER_RELEASE_IMAGE_PHP70: $CI_REGISTRY/$CI_PROJECT_PATH:latest_php70
+  CONTAINER_TEST_IMAGE_PHP56: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}_php56
+  CONTAINER_TEST_IMAGE_PHP70: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}_php70
 
 # login to private gitlab registry
 before_script:
   - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
 
-build:
+# ===================
+#    STAGE | BUILD
+# ===================
+
+build_php_7.0:
   stage: build
+  image: docker:git
   script:
-    - docker build -t $CONTAINER_TEST_IMAGE .
-    - docker push $CONTAINER_TEST_IMAGE
+    - docker build --build-arg PHP_VERSION=7.0 -t $CONTAINER_TEST_IMAGE_PHP70 .
+    - docker push $CONTAINER_TEST_IMAGE_PHP70
+  services:
+    - docker:dind
+  only:
+    - master
+    - feature/addGitlabCIIntegration
+
+build_php_5.6:
+  stage: build
+  image: docker:git
+  script:
+    - docker build --build-arg PHP_VERSION=5.6 -t $CONTAINER_TEST_IMAGE_PHP56 .
+    - docker push $CONTAINER_TEST_IMAGE_PHP56
+  services:
+    - docker:dind
+  only:
+    - master
+    - feature/addGitlabCIIntegration
 
 
-release-image:
+# ===================
+#   STAGE | RELEASE
+# ===================
+
+release_php_7.0:
   stage: release
+  image: docker:git
   script:
-    - docker pull $CONTAINER_TEST_IMAGE
-    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
-    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker pull $CONTAINER_TEST_IMAGE_PHP70
+    - docker tag $CONTAINER_TEST_IMAGE_PHP70 $CONTAINER_RELEASE_IMAGE_PHP70
+    - docker push $CONTAINER_RELEASE_IMAGE_PHP70
     # trigger rebuild of spryker-demoshop image build
     - curl -X POST -F token=$TRIGGER_TOKEN_DEMOSHOP -F ref=feature/clara-enable_gitlabci_tests https://git.eu.clara.net/api/v3/projects/2233/trigger/builds
+  services:
+    - docker:dind
+  only:
+    - master
+    - feature/addGitlabCIIntegration
+
+release_php_5.6:
+  stage: release
+  image: docker:git
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE_PHP56
+    - docker tag $CONTAINER_TEST_IMAGE_PHP56 $CONTAINER_RELEASE_IMAGE_PHP56
+    - docker push $CONTAINER_RELEASE_IMAGE_PHP56
+    # trigger rebuild of spryker-demoshop image build
+    - curl -X POST -F token=$TRIGGER_TOKEN_DEMOSHOP -F ref=feature/clara-enable_gitlabci_tests https://git.eu.clara.net/api/v3/projects/2233/trigger/builds
+  services:
+    - docker:dind
+  only:
+    - master
+    - feature/addGitlabCIIntegration
