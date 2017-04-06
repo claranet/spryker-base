@@ -1,13 +1,24 @@
 
 FROM ubuntu:xenial
 
-MAINTAINER Fabian Dörk <fabian.doerk@de.clara.net>
 
-# specify possible build args
-ARG PHP_VERSION
+# NOTE: to get a list of possible build args,
+#       run `egrep 'ARG ' Dockerfile`
 
+
+# see http://label-schema.org/rc1/
+LABEL org.label-schema.name="spryker-base" \
+      org.label-schema.version="1.0" \
+      org.label-schema.description="Providing base infrastructure for a containerized spryker e-commerce application" \
+      org.label-schema.vendor="Claranet GmbH" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.vcs-url="https://git.eu.clara.net/de-docker-images/spryker.git" \
+      maintainer="Fabian Dörk <fabian.doerk@de.clara.net>" \
+      co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
+
+
+# Spryker config related ENV vars
 ENV SPRYKER_SHOP_CC="DE" \
-    APPLICATION_ENV="production" \
     ZED_HOST="zed" \
     PUBLIC_ZED_DOMAIN="zed.spryker.dev" \
     YVES_HOST="yves" \
@@ -26,98 +37,106 @@ ENV SPRYKER_SHOP_CC="DE" \
     ZED_DB_DATABASE="spryker" \
     ZED_DB_HOST="database" \
     ZED_DB_PORT="5432" \
-    JENKINS_HOST="jenkins" \
-    JENKINS_PORT="8080"
-ENV JENKINS_BASEURL="http://$JENKINS_HOST:$JENKINS_PORT/"
+    JENKINS_BASEURL="http://jenkins:8080/"
 
-ENV PATH="/data/bin/:$PATH"
-ENV GOSU_VERSION="1.10" \
-    PHP_VERSION=${PHP_VERSION:-7.0} \
-    CONFD_VERSION="0.11.0"
-ENV DEBIAN_FRONTEND=noninteractive
 
-RUN mkdir -p /data/logs /data/bin /data/etc
+# debian related vars
+ENV DEBIAN_FRONTEND=noninteractive \
+    APT_GET_BASIC_ARGS="-y  --no-install-recommends"
 
-# make this step cacheable
+
+# make apt-get packages cache available
+# and install basic packages
 RUN apt-get update
+RUN apt-get install $APT_GET_BASIC_ARGS \
+      software-properties-common \
+      apt-transport-https \
+      ca-certificates \
+      curl
 
-# add add-apt-repository tool
-RUN apt-get install -y software-properties-common
 
-# this process seems to failsometimes while importing the keyring
-RUN add-apt-repository ppa:ondrej/php || true
-
-# now update the apt sources caches to make use of the new php
-RUN apt-get update
-
-RUN apt-get install -y  --no-install-recommends apt-transport-https ca-certificates curl \
-		&& echo "deb https://deb.nodesource.com/node_6.x xenial main" > /etc/apt/sources.list.d/nodesource.list \
-    && curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
-    \
-    && arch="$(dpkg --print-architecture)" \
-    && curl -sS -L -o /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch" \
-    && curl -sS -L -o /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$arch.asc" \
-    && export GNUPGHOME="$(mktemp -d)" \
-    && gpg --keyserver pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
-    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
-    && chmod 755 /usr/local/bin/gosu \
-    \
-    && apt-get update \
-    && apt-get install -y --allow-unauthenticated --no-install-recommends \
+# TODO: make postgres / mysql configureable!
+RUN apt-get install $APT_GET_BASIC_ARGS \
       nginx \
       nginx-extras \
-      php${PHP_VERSION}-fpm \
-      php${PHP_VERSION}-cli \
       monit \
-      nodejs \
       git \
       netcat \
       net-tools \
       redis-tools \
       postgresql-client \
-      mysql-client \
-    \
-    && npm -g install antelope \
-    \
-    && curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer \
-    && curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
-    && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
-    && php /tmp/composer-setup.php --install-dir=/data/bin/ \
-    \
-    && rm -rf /tmp/composer-setup* \
-    && rm -f /etc/php/*/fpm/pool.d/www.conf \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/* 
+      mysql-client
 
-ADD https://github.com/kelseyhightower/confd/releases/download/v${CONFD_VERSION}/confd-${CONFD_VERSION}-linux-amd64 /usr/bin/confd
+
+# copy image data and prepare image filesystem structure
+
+# copy prepared config files
 COPY etc/ /etc/
-COPY shop/ /data/shop/
-COPY entrypoint.sh functions.sh /data/bin/
+RUN mkdir -pv /data/logs /data/bin /data/etc /data/shop
+ENV PATH="/data/bin/:$PATH"
 
-# make bash as default shell
+# make bash default shell for better syntax support
 RUN ln -fs /bin/bash /bin/sh
 
-# fix wrong permissions of monitrc, else monit will refuse to run
-RUN chmod 0700 /etc/monit/monitrc
+# copy our command and container entrypoint script
+# also add docker build helper scripts
+COPY entrypoint.sh functions.sh build_scripts/* /data/bin/
+RUN chmod +x /data/bin/*
 
-RUN chown www-data: -R /data/ \
-    && chmod 755 /usr/bin/confd \
-    && rm /etc/nginx/sites-enabled/default \
-    && ln -fs /data/bin/entrypoint.sh / \
-    && ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
+
+# fix wrong permissions of monitrc, else monit will refuse to run
+# and remove nginx default vhost
+RUN chmod 0700 /etc/monit/monitrc \
+    && rm /etc/nginx/sites-enabled/default
+
 
 EXPOSE 80
 
 WORKDIR /data/shop/
-ENTRYPOINT [ "/bin/bash" ]
-CMD  [ "/entrypoint.sh run_both" ]
+ENTRYPOINT [ "/data/bin/entrypoint.sh" ]
 
-LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="1.0" \
-      org.label-schema.description="Providing base infrastructure for a containerized spryker e-commerce application" \
-      org.label-schema.vendor="Claranet GmbH" \
-      org.label-schema.schema-version="1.0" \
-      org.label-schema.vcs-url="https://git.eu.clara.net/de-docker-images/spryker.git"
+# on default, start yves and zed in one container
+CMD  [ "run_both" ]
+
+
+#
+# all onbuild commands will be executed before a child image gets build.
+# 
+# 
+
+
+# ops mode defines the mode while building docker images... it does NOT control
+# in which ENV the application is installed.
+# supported vaules are (dev/prod), defaults to "dev"
+ONBUILD ARG OPS_MODE
+ONBUILD ENV OPS_MODE=${OPS_MODE:-dev}
+
+# application env decides in which mode the application is installed/runned.
+# so if you choose development here, e.g. composer and npm/yarn will also install
+# dev dependencies! There are more modifications, which depend on this switch.
+# defaults to "production"
+ONBUILD ARG APPLICATION_ENV
+ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production}
+
+# support PHP_VERSION as ARG to support an easy way to build multiple flavors
+# of your image (one for e.g. 5.6 and one for 7.0)
+# This is especially useful while in OPS_MODE=dev! Or for OPS tests.
+ONBUILD ARG PHP_VERSION
+ONBUILD ENV PHP_VERSION=${PHP_VERSION:-7.0}
+
+# support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
+ONBUILD ARG NODEJS_VERSION
+ONBUILD ENV NODEJS_VERSION=${NODEJS_VERSION:-6}
+
+# support different nodejs package managers, as spryker supports npm and yarn!
+ONBUILD ARG NODEJS_PACKAGE_MANAGER
+ONBUILD ENV NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
+
+
+# via PHP_VERSION you can control which PHP version you need. Version 7.0 is default
+# via NODEJS_VERSION you can control which nodejs version you need. Version 6 (LTS) is default
+ONBUILD RUN cd /data/bin/ && ./install_php.sh
+ONBUILD RUN cd /data/bin/ && ./install_nodejs.sh
 
 
 ONBUILD COPY ./src /data/shop/src
@@ -125,8 +144,19 @@ ONBUILD COPY ./config /data/shop/config
 ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
-ONBUILD RUN  ln -fs /data/etc/config_local.php /data/shop/config/Shared/config_local.php
-# create events log dir
-ONBUILD RUN  mkdir -pv /data/shop/data/DE/logs
-ONBUILD RUN  /entrypoint.sh build_image
-ONBUILD RUN  chown -R www-data: /data/shop/
+
+# 
+ONBUILD RUN  /data/bin/entrypoint.sh build_image
+
+# install ops tools while in debugging and testing stage
+ONBUILD RUN if [ "$OPS_MODE" == "dev" ]; then apt-get install $APT_GET_BASIC_ARGS \
+      vim \
+      less \
+      tree; \
+      fi
+
+# clean up docker image if we are in OPS_MODE "dev"
+ONBUILD RUN if [ "$OPS_MODE" == "prod" ]; then \
+              apt-get clean -y; \
+              rm -rf /var/lib/apt/lists/*; \
+              fi

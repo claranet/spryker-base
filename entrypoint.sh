@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 export SHOP="/data/shop"
 export SETUP=spryker
 export TERM=xterm 
@@ -14,18 +12,14 @@ ENABLED_SERVICES=""
 
 source /data/bin/functions.sh
 
+# abort on first error
+set -e
+
 cd $SHOP
 
 
 function generate_configurations {
   labelText "Create runtime configuration ..."
-
-  infoText "Applying confd templates ..."
-  if [ -n "$ETCD_NODE" ]; then
-      confd -backend etcd -node ${ETCD_NODE} -prefix ${ETCD_PREFIX} -onetime
-  else
-      confd -backend env -onetime
-  fi
 
   if [ -e $CONSOLE ]; then
     infoText "Propel - Converting configuration ..."
@@ -176,15 +170,21 @@ function enable_nginx_vhost {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 function enable_phpfpm_app {
-  FPM_APPS_AVAILABLE="/etc/php/$PHP_VERSION/fpm/apps-available"
+  FPM_APPS_AVAILABLE="/etc/php/apps"
   FPM_APPS_ENABLED="/etc/php/$PHP_VERSION/fpm/pool.d"
+  
   APP="${1}.conf"
+  MONIT_APP="${1}"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
   fi
   
+  # enable php-fpm pool config
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
+  
+  # enable monit php-fpm app check
+  ln -fs /etc/monit/apps-available/$MONIT_APP /etc/monit/conf.d/$MONIT_APP
 }
 
 
@@ -204,9 +204,13 @@ function enable_services {
 function start_services {
   labelText "Starting enabled services $ENABLED_SERVICES"
   
+  # fix error with missing event log dir
+  mkdir -p /data/shop/data/$SPRYKER_SHOP_CC/logs/
+  
   generate_configurations
   /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
-  chown -R www-data: /data/shop/data
+  # TODO: increase security by making this more granular
+  chown -R www-data: /data/{logs,shop}
 }
 
 

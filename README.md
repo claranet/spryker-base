@@ -106,7 +106,7 @@ to understand where to place the source code.
 
 > drawing follows... this is a first draft for an overview
 
-* nginx (gets exposed with yves via port 80 AND zed via port 8080)
+* nginx (gets exposed with yves and zed via port 80)
 * php-fpm (2 instances - ZED and Yves, both localhost only via socket file)
   * the ZED instance provides the admin interface (admin-frontend in dev speak)
   * the YVES instance provides the "normal shop customer" frontend
