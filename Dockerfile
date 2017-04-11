@@ -107,9 +107,9 @@ CMD  [ "run_yves_and_zed" ]
 
 # ops mode defines the mode while building docker images... it does NOT control
 # in which ENV the application is installed.
-# supported vaules are (dev/prod), defaults to "dev"
+# supported vaules are (dev/prod), defaults to "prod"
 ONBUILD ARG OPS_MODE
-ONBUILD ENV OPS_MODE=${OPS_MODE:-dev}
+ONBUILD ENV OPS_MODE=${OPS_MODE:-prod}
 
 # application env decides in which mode the application is installed/runned.
 # so if you choose development here, e.g. composer and npm/yarn will also install
@@ -154,6 +154,6 @@ ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apt-get install $APT_GET_BASIC_ARGS \
       less \
       tree
 
-# clean up docker image if we are in OPS_MODE "dev"
+# clean up docker image if we are in OPS_MODE "prod"
 ONBUILD RUN [ "$OPS_MODE" == "dev" ] || apt-get clean -y
 ONBUILD RUN [ "$OPS_MODE" == "dev" ] || rm -rf /var/lib/apt/lists/*
