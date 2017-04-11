@@ -243,7 +243,7 @@ case $1 in
       start_services
       ;;
 
-    run_both)
+    run_yves_and_zed)
       ENABLED_SERVICES="yves zed"
       enable_services
       start_services

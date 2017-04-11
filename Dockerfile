@@ -96,7 +96,7 @@ WORKDIR /data/shop/
 ENTRYPOINT [ "/data/bin/entrypoint.sh" ]
 
 # on default, start yves and zed in one container
-CMD  [ "run_both" ]
+CMD  [ "run_yves_and_zed" ]
 
 
 #
@@ -149,14 +149,11 @@ ONBUILD COPY ./package.json ./composer.json /data/shop/
 ONBUILD RUN  /data/bin/entrypoint.sh build_image
 
 # install ops tools while in debugging and testing stage
-ONBUILD RUN if [ "$OPS_MODE" == "dev" ]; then apt-get install $APT_GET_BASIC_ARGS \
+ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apt-get install $APT_GET_BASIC_ARGS \
       vim \
       less \
-      tree; \
-      fi
+      tree
 
 # clean up docker image if we are in OPS_MODE "dev"
-ONBUILD RUN if [ "$OPS_MODE" == "prod" ]; then \
-              apt-get clean -y; \
-              rm -rf /var/lib/apt/lists/*; \
-              fi
+ONBUILD RUN [ "$OPS_MODE" == "dev" ] || apt-get clean -y
+ONBUILD RUN [ "$OPS_MODE" == "dev" ] || rm -rf /var/lib/apt/lists/*
