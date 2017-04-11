@@ -80,7 +80,7 @@ RUN ln -fs /bin/bash /bin/sh
 
 # copy our command and container entrypoint script
 # also add docker build helper scripts
-COPY entrypoint.sh functions.sh build_scripts/* /data/bin/
+COPY entrypoint.sh functions.sh build/* /data/bin/
 RUN chmod +x /data/bin/*
 
 
