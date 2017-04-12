@@ -1,5 +1,5 @@
 
-FROM ubuntu:xenial
+FROM php:fpm-7.0-alpine
 
 
 # NOTE: to get a list of possible build args,
@@ -40,32 +40,13 @@ ENV SPRYKER_SHOP_CC="DE" \
     JENKINS_BASEURL="http://jenkins:8080/"
 
 
-# debian related vars
-ENV DEBIAN_FRONTEND=noninteractive \
-    APT_GET_BASIC_ARGS="-y  --no-install-recommends"
-
-
-# make apt-get packages cache available
-# and install basic packages
-RUN apt-get update
-RUN apt-get install $APT_GET_BASIC_ARGS \
-      software-properties-common \
-      apt-transport-https \
-      ca-certificates \
-      curl
-
-
-# TODO: make postgres / mysql configureable!
-RUN apt-get install $APT_GET_BASIC_ARGS \
-      nginx \
-      nginx-extras \
+# install basic packages
+# bash is installed as current shell scripts are using bash syntactic sugar
+# so it is required until they are rewritten.
+RUN apk add --no-cache nginx \
       monit \
       git \
-      netcat \
-      net-tools \
-      redis-tools \
-      postgresql-client \
-      mysql-client
+      bash
 
 
 # copy image data and prepare image filesystem structure
@@ -149,11 +130,7 @@ ONBUILD COPY ./package.json ./composer.json /data/shop/
 ONBUILD RUN  /data/bin/entrypoint.sh build_image
 
 # install ops tools while in debugging and testing stage
-ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apt-get install $APT_GET_BASIC_ARGS \
+ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apk add --no-cache \
       vim \
       less \
       tree
-
-# clean up docker image if we are in OPS_MODE "prod"
-ONBUILD RUN [ "$OPS_MODE" == "dev" ] || apt-get clean -y
-ONBUILD RUN [ "$OPS_MODE" == "dev" ] || rm -rf /var/lib/apt/lists/*

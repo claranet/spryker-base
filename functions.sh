@@ -1,11 +1,10 @@
 #!/bin/bash
 
-if [[ -z "$SETUP" ]]; then
-    tput setab 1
-    echo "Please do not run this script individually"
-    tput sgr0
-    exit 0
-fi
+export SHOP="/data/shop"
+export SETUP=spryker
+export TERM=xterm 
+export VERBOSITY='-v'
+
 
 CURL=`which curl`
 NPM=`which npm`
@@ -274,23 +273,9 @@ function resetYves {
     fi
 }
 
-function checkNodejsVersion {
-    if [[ `node -v | grep -E '^v[0-4]'` ]]; then
-        labelText "Upgrade Node.js"
-        $CURL -sL https://deb.nodesource.com/setup_5.x | $SUDO_CMD -E bash -
-
-        $SUDO_CMD apt-get install -y nodejs
-
-        successText "Node.js updated to version `node -v`"
-        successText "NPM updated to version `$NPM -v`"
-    fi
-}
-
 function installAntelope {
-    checkNodejsVersion
-
     labelText "Install or Update Antelope tool globally"
-    $SUDO_CMD $NPM install -g antelope
+    $SUDO_CMD $NPM install antelope
     writeErrorMessage "Antelope setup failed"
 }
 

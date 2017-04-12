@@ -3,17 +3,9 @@
 # Author: Tony Fahrion <tony.fahrion@de.clara.net>
 
 #
-# This script installs the PHP core packages and specified PHP extensions
-# It requires that the ENV var PHP_VERSION is set!
+# This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-SUPPORTED_PHP_VERSIONS='5.6 7.0'
-
-
-export SHOP="/data/shop"
-export SETUP=spryker
-export TERM=xterm 
-export VERBOSITY='-v'
 
 
 # include helper functions
@@ -23,39 +15,27 @@ source ./functions.sh
 # abort on error
 set -e
 
-#
-#  Prepare
-#
-
-infoText "check if we support the requested PHP_VERSION"
-if is_not_in_list "$PHP_VERSION" "$SUPPORTED_PHP_VERSIONS"; then
-  errorText "Requested PHP_VERSION '$PHP_VERSION' is not supported. Abort!"
-  infoText  "Supported PHP version is one of: $SUPPORTED_PHP_VERSIONS"
-  exit 1
-fi
-successText "YES! Support is available for $PHP_VERSION"
-
-
-infoText "set up PHP ppa to support even newer versions of PHP"
-infoText "as this seems to fail sometimes (but works), ignore possible errors"
-add-apt-repository ppa:ondrej/php || true
-
-
-infoText "update apt cache to make use of the new PPA repo"
-apt-get update
-
 
 #
-#  Install PHP core
+#  Install PHP extensions
 #
 
-infoText "install requested PHP core packages"
-apt-get install $APT_GET_BASIC_ARGS --allow-unauthenticated \
-    php${PHP_VERSION}-fpm \
-    php${PHP_VERSION}-cli
+PHP_DEPENDENCIES="$PHP_EXTENSION_DEPENDENCIES \
+  libfreetype6 \
+  libjpeg62-turbo \
+  libmcrypt \
+  libpng12"
 
-infoText "generalize init.d script file name for monit"
-ln -fs /etc/init.d/php${PHP_VERSION}-fpm /etc/init.d/php-fpm
+apk install --no-cache $PHP_DEPENDENCIES
+
+# install base PHP extensions
+docker-php-ext-install -j$(nproc) iconv mcrypt
+docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+docker-php-ext-install -j$(nproc) gd
+
+# FIXME: install extensions, some of them need a special install way
+# write functions to install special extensions
+# same goes for pecl
 
 
 #
