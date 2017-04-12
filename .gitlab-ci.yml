@@ -27,7 +27,7 @@ before_script:
     - docker:dind
   only:
     - master
-    - feature/prepareForLocalDev
+    - feature/migrateToAlpineLinux
 
 .release_docker_image_template: &release_docker_image_definition
   stage: release
@@ -35,9 +35,7 @@ before_script:
   script:
     - docker pull $CONTAINER_IMAGE_NAME
     - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_RELEASE_NAME
-    - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_VERSION_NAME
     - docker push $CONTAINER_IMAGE_RELEASE_NAME
-    - docker push $CONTAINER_IMAGE_VERSION_NAME
   services:
     - docker:dind
   only:
@@ -51,7 +49,7 @@ before_script:
 build_spryker_base_image:
   <<: *build_php_definition
   variables:
-    CONTAINER_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}
+    CONTAINER_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}-alpine
 
 
 # ===================
@@ -61,6 +59,5 @@ build_spryker_base_image:
 release_spryker_base_image:
   <<: *release_docker_image_definition
   variables:
-    CONTAINER_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}
-    CONTAINER_IMAGE_VERSION_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:0.8.0
-    CONTAINER_IMAGE_RELEASE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:latest
+    CONTAINER_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}-alpine
+    CONTAINER_IMAGE_RELEASE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:latest-alpine
