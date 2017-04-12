@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 export SHOP="/data/shop"
 export SETUP=spryker
 export TERM=xterm 
@@ -11,20 +9,17 @@ export CONSOLE=vendor/bin/console
 # NOTE: requires $PHP_VERSION to be set from outside!
 ENABLED_SERVICES=""
 
+
 source /data/bin/functions.sh
+
+# abort on first error
+set -e
 
 cd $SHOP
 
 
 function generate_configurations {
   labelText "Create runtime configuration ..."
-
-  infoText "Applying confd templates ..."
-  if [ -n "$ETCD_NODE" ]; then
-      confd -backend etcd -node ${ETCD_NODE} -prefix ${ETCD_PREFIX} -onetime
-  else
-      confd -backend env -onetime
-  fi
 
   if [ -e $CONSOLE ]; then
     infoText "Propel - Converting configuration ..."
@@ -38,7 +33,11 @@ function install_dependencies {
 
     if [ -n "$PHP_EXTENSIONS" ]; then
       export DEBIAN_FRONTEND=noninteractive
-      exts=$(echo "$PHP_EXTENSIONS" | awk  'BEGIN {RS=" "} { if (length($1) != 0) { printf "php${PHP_VERSION}-%s ", $1 }}' )
+      
+      for i in $PHP_EXTENSIONS; do
+        exts="php${PHP_VERSION}-${i} $exts"
+      done
+      
       infoText "Installing required PHP extensions: $exts"
       apt-get -y update
       apt-get -y --allow-unauthenticated --no-install-recommends install $exts
@@ -171,50 +170,47 @@ function enable_nginx_vhost {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 function enable_phpfpm_app {
-  FPM_APPS_AVAILABLE="/etc/php/$PHP_VERSION/fpm/apps-available"
+  FPM_APPS_AVAILABLE="/etc/php/apps"
   FPM_APPS_ENABLED="/etc/php/$PHP_VERSION/fpm/pool.d"
+  
   APP="${1}.conf"
+  MONIT_APP="${1}"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
   fi
   
+  # enable php-fpm pool config
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
+  
+  # enable monit php-fpm app check
+  ln -fs /etc/monit/apps-available/$MONIT_APP /etc/monit/conf.d/$MONIT_APP
 }
 
 
-function enable_yves {
-  labelText "Enable Yves vHost and PHP-FPM app..."
-  
-  infoText "Enbable Yves - Link nginx vHost to sites-enabled/..."
-  enable_nginx_vhost yves
-  
-  infoText "Enable Yves - Link php-fpm pool app config to pool.d/..."
-  enable_phpfpm_app yves
-  
-  ENABLED_SERVICES="$ENABLED_SERVICES yves"
-}
-
-
-function enable_zed {
-  labelText "Enable Zed vHost and PHP-FPM app..."
-  
-  infoText "Enbable Zed - Link nginx vHost to sites-enabled/..."
-  enable_nginx_vhost zed
-  
-  infoText "Enable Zed - Link php-fpm pool app config to pool.d/..."
-  enable_phpfpm_app zed
-  
-  ENABLED_SERVICES="$ENABLED_SERVICES zed"
+function enable_services {
+  for SERVICE in $ENABLED_SERVICES; do
+    labelText "Enable ${SERVICE} vHost and PHP-FPM app..."
+    
+    infoText "Enbable ${SERVICE} - Link nginx vHost to sites-enabled/..."
+    enable_nginx_vhost ${SERVICE}
+    
+    infoText "Enable ${SERVICE} - Link php-fpm pool app config to pool.d/..."
+    enable_phpfpm_app ${SERVICE}
+  done
 }
 
 
 function start_services {
   labelText "Starting enabled services $ENABLED_SERVICES"
   
+  # fix error with missing event log dir
+  mkdir -p /data/shop/data/$SPRYKER_SHOP_CC/logs/
+  
   generate_configurations
   /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
-  chown -R www-data: /data/shop/data
+  # TODO: increase security by making this more granular
+  chown -R www-data: /data/{logs,shop}
 }
 
 
@@ -236,18 +232,20 @@ function exec_hooks {
 
 case $1 in 
     run_yves)
-      enable_yves
+      ENABLED_SERVICES="yves"
+      enable_services
       start_services
       ;;
 
     run_zed)
-      enable_zed
+      ENABLED_SERVICES="zed"
+      enable_services
       start_services
       ;;
 
-    run_both)
-      enable_zed
-      enable_yves
+    run_yves_and_zed)
+      ENABLED_SERVICES="yves zed"
+      enable_services
       start_services
       ;;
 

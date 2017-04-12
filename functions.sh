@@ -12,6 +12,10 @@ NPM=`which npm`
 GIT=`which git`
 PHP=`which php`
 
+# empty sudo command to avoid using sudo
+# if you want to enable sudo, specify it as ENV var:
+# SUDO_CMD="sudo"
+
 ERROR_BKG=`tput setab 1` # background red
 GREEN_BKG=`tput setab 2` # background green
 BLUE_BKG=`tput setab 4` # background blue
@@ -70,7 +74,7 @@ function writeErrorMessage {
 
 function createDevelopmentDatabase {
     # postgres
-    sudo createdb ${DATABASE_NAME}
+    $SUDO_CMD createdb ${DATABASE_NAME}
 
     # mysql
     # mysql -u root -e "CREATE DATABASE DE_development_zed;"
@@ -90,9 +94,9 @@ function restoreDevelopmentDatabase {
             export PGPASSWORD=$DATABASE_PASSWORD
             export LC_ALL="en_US.UTF-8"
 
-            sudo pg_ctlcluster 9.4 main restart --force
-            sudo dropdb $DATABASE_NAME
-            sudo createdb $DATABASE_NAME
+            $SUDO_CMD pg_ctlcluster 9.4 main restart --force
+            $SUDO_CMD dropdb $DATABASE_NAME
+            $SUDO_CMD createdb $DATABASE_NAME
             pg_restore -i -h 127.0.0.1 -p 5432 -U $DATABASE_USER -d $DATABASE_NAME -v $DATABASE_NAME.backup
             ;;
         *)
@@ -200,14 +204,14 @@ function resetDevelopmentState {
 }
 
 function dropDevelopmentDatabase {
-    if [ `sudo psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
+    if [ `$SUDO_CMD psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
 
         PG_CTL_CLUSTER=`which pg_ctlcluster`
         DROP_DB=`which dropdb`
 
         if [[ -f $PG_CTL_CLUSTER ]] && [[ -f $DROP_DB ]]; then
             labelText "Deleting PostgreSql Database: ${DATABASE_NAME} "
-            sudo pg_ctlcluster 9.4 main restart --force && sudo dropdb $DATABASE_NAME 1>/dev/null
+            $SUDO_CMD pg_ctlcluster 9.4 main restart --force && $SUDO_CMD dropdb $DATABASE_NAME 1>/dev/null
             writeErrorMessage "Deleting DB command failed"
         fi
     fi
@@ -273,9 +277,9 @@ function resetYves {
 function checkNodejsVersion {
     if [[ `node -v | grep -E '^v[0-4]'` ]]; then
         labelText "Upgrade Node.js"
-        $CURL -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+        $CURL -sL https://deb.nodesource.com/setup_5.x | $SUDO_CMD -E bash -
 
-        sudo apt-get install -y nodejs
+        $SUDO_CMD apt-get install -y nodejs
 
         successText "Node.js updated to version `node -v`"
         successText "NPM updated to version `$NPM -v`"
@@ -286,7 +290,7 @@ function installAntelope {
     checkNodejsVersion
 
     labelText "Install or Update Antelope tool globally"
-    sudo $NPM install -g antelope
+    $SUDO_CMD $NPM install -g antelope
     writeErrorMessage "Antelope setup failed"
 }
 

@@ -15,4 +15,3 @@
  check file nginx_rc with path /etc/init.d/nginx
    group nginx
    include /etc/monit/templates/rootbin
-

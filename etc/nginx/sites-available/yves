@@ -1,1 +1,22 @@
-# placeholder - actual configuration will be written by confd during runtime
+
+server {
+    listen 80 sndbuf=65535 rcvbuf=16384 default_server;
+
+    # 
+    # This vhost will be enabled by /entrypoint.sh with the 'run_yves' or 'run_both' argument
+    # 
+
+    server_name ~".*yves.*";
+
+    access_log  /data/logs/yves-access.log extended;
+
+    root /data/shop/public/Yves;
+
+    include "spryker/yves.conf";
+
+    ###
+    ### Rewrite rules
+    ###
+    ### Beware of load balancer heartbeat check (/monitoring/heartbeat), it must stay not rewritten.
+
+}
