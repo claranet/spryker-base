@@ -19,7 +19,7 @@ before_script:
 
 .build_php_template: &build_php_definition
   stage: build
-  image: docker:git
+  image: docker:stable
   script:
     - docker build -t $CONTAINER_IMAGE_NAME .
     - docker push $CONTAINER_IMAGE_NAME
@@ -31,11 +31,13 @@ before_script:
 
 .release_docker_image_template: &release_docker_image_definition
   stage: release
-  image: docker:git
+  image: docker:stable
   script:
     - docker pull $CONTAINER_IMAGE_NAME
     - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_RELEASE_NAME
+    - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_VERSION_NAME
     - docker push $CONTAINER_IMAGE_RELEASE_NAME
+    - docker push $CONTAINER_IMAGE_VERSION_NAME
   services:
     - docker:dind
   only:
@@ -60,4 +62,5 @@ release_spryker_base_image:
   <<: *release_docker_image_definition
   variables:
     CONTAINER_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:${CI_BUILD_REF}
+    CONTAINER_IMAGE_VERSION_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:0.8.0
     CONTAINER_IMAGE_RELEASE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH:latest
