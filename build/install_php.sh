@@ -27,7 +27,7 @@ set -e
 function install_imagick() {
   apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS imagemagick-dev libtool
   pecl install imagick-3.4.3
-  docker-php-ext-enable -j$(nproc) imagick
+  docker-php-ext-enable imagick
   apk add --no-cache --virtual .imagick-runtime-deps imagemagick
   apk del .phpize-deps
 }
@@ -49,8 +49,16 @@ function install_xcache() {
     && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
     && rm xcache.tar.gz \
     && docker-php-ext-configure /tmp/xcache --enable-xcache \
-    && docker-php-ext-install /tmp/xcache \
+    && docker-php-ext-install -j$(nproc) /tmp/xcache \
     && rm -r /tmp/xcache
+}
+
+function install_redis() {
+  apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS redis
+  
+  pecl install redis
+  docker-php-ext-enable redis
+  apk del .phpize-deps
 }
 
 docker-php-source extract
@@ -58,7 +66,7 @@ docker-php-source extract
 for ext in $PHP_EXTENSIONS; do
   
   case $ext in
-    imagick|gd|xcache)
+    imagick|gd|xcache|redis)
       install_$ext
       ;;
     *)
