@@ -1,5 +1,5 @@
 
-FROM php:fpm-7.0-alpine
+FROM php:7.0-fpm-alpine
 
 
 # NOTE: to get a list of possible build args,
