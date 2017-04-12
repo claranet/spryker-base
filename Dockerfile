@@ -67,8 +67,7 @@ RUN chmod +x /data/bin/*
 
 # fix wrong permissions of monitrc, else monit will refuse to run
 # and remove nginx default vhost
-RUN chmod 0700 /etc/monit/monitrc \
-    && rm /etc/nginx/sites-enabled/default
+RUN chmod 0700 /etc/monit/monitrc
 
 
 EXPOSE 80
