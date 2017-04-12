@@ -69,6 +69,8 @@ for ext in $PHP_EXTENSIONS; do
   
 done
 
+docker-php-source delete
+
 
 #
 #   Composer
