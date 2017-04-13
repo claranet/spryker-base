@@ -11,6 +11,11 @@
 # include helper functions
 source ./functions.sh
 
+# include custom build config on demand
+if [[ -e "$WORKDIR/docker/build.conf" ]]; then
+  source "$WORKDIR/docker/build.conf"
+fi
+
 # abort on error
 set -e
 
