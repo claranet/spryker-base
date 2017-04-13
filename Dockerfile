@@ -16,6 +16,7 @@ LABEL org.label-schema.name="spryker-base" \
       maintainer="Fabian Dörk <fabian.doerk@de.clara.net>" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
+ENV PHP_VERSION=7.0
 
 # Spryker config related ENV vars
 ENV SPRYKER_SHOP_CC="DE" \
@@ -97,12 +98,6 @@ ONBUILD ENV OPS_MODE=${OPS_MODE:-prod}
 # defaults to "production"
 ONBUILD ARG APPLICATION_ENV
 ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production}
-
-# support PHP_VERSION as ARG to support an easy way to build multiple flavors
-# of your image (one for e.g. 5.6 and one for 7.0)
-# This is especially useful while in OPS_MODE=dev! Or for OPS tests.
-ONBUILD ARG PHP_VERSION
-ONBUILD ENV PHP_VERSION=${PHP_VERSION:-7.0}
 
 # support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
 ONBUILD ARG NODEJS_VERSION
