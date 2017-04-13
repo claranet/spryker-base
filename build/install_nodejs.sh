@@ -11,6 +11,7 @@
 
 SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
+NPM='npm'
 
 
 # include helper functions
@@ -56,6 +57,7 @@ fi
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
   apk add --no-cache yarn
+  NPM='yarn'
 fi
 
 
@@ -63,6 +65,15 @@ fi
 #  Install antelope
 #
 
-infoText "install antelope, which is used for assets generation"
-cd $WORKDIR
-$NODEJS_PACKAGE_MANAGER install antelope
+
+function installAntelope {
+    labelText "Install antelope tool (static assets generator)"
+    
+    apk add --no-cache --virtual .antelope_deps python make gcc g++ linux-headers git
+    $NPM install antelope
+    apk del .antelope_deps
+    
+    writeErrorMessage "Antelope setup failed"
+}
+
+installAntelope

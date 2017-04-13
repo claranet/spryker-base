@@ -30,20 +30,6 @@ function generate_configurations {
 
 function install_dependencies {
     labelText "Resolving dependencies ..."
-    
-    # FIXME THIS NEEDS TO BE REWRITTEN!
-
-    # if [ -n "$PHP_EXTENSIONS" ]; then
-    #   export DEBIAN_FRONTEND=noninteractive
-    #   
-    #   for i in $PHP_EXTENSIONS; do
-    #     exts="php${PHP_VERSION}-${i} $exts"
-    #   done
-    #   
-    #   infoText "Installing required PHP extensions: $exts"
-    #   apt-get -y update
-    #   apt-get -y --allow-unauthenticated --no-install-recommends install $exts
-    # fi
 
     if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
       infoText "Installing required NPM dependencies..."

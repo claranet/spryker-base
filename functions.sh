@@ -6,26 +6,19 @@ export TERM=xterm
 export VERBOSITY='-v'
 
 
-CURL=`which curl`
-NPM=`which npm`
-GIT=`which git`
-PHP=`which php`
+NPM=${NODEJS_PACKAGE_MANAGER:-npm}
 
-# empty sudo command to avoid using sudo
-# if you want to enable sudo, specify it as ENV var:
-# SUDO_CMD="sudo"
+ERROR_BKG=';41m' # background red
+GREEN_BKG=';42m' # background green
+BLUE_BKG=';44m' # background blue
+YELLOW_BKG=';43m' # background yellow
+MAGENTA_BKG=';45m' # background magenta
 
-ERROR_BKG=`tput setab 1` # background red
-GREEN_BKG=`tput setab 2` # background green
-BLUE_BKG=`tput setab 4` # background blue
-YELLOW_BKG=`tput setab 3` # background yellow
-MAGENTA_BKG=`tput setab 5` # background magenta
-
-INFO_TEXT=`tput setaf 3` # yellow text
-WHITE_TEXT=`tput setaf 7` # text white
-BLACK_TEXT=`tput setaf 0` # text black
-RED_TEXT=`tput setaf 1` # text red
-NC=`tput sgr0` # reset
+INFO_TEXT='\033[33' # yellow text
+WHITE_TEXT='\033[37' # text white
+BLACK_TEXT='\033[30' # text black
+RED_TEXT='\033[31' # text red
+NC='\033[0m' # reset
 
 if [[ `echo "$@" | grep '\-v'` ]]; then
     VERBOSITY='-v'
@@ -40,27 +33,27 @@ if [[ `echo "$@" | grep '\-vvv'` ]]; then
 fi
 
 function labelText {
-    echo -e "\n${BLUE_BKG}${WHITE_TEXT}-> ${1} ${NC}\n"
+    echo -e "\n${WHITE_TEXT}${BLUE_BKG}-> ${1} ${NC}\n"
 }
 
 function errorText {
-    echo -e "\n${ERROR_BKG}${WHITE_TEXT}=> ${1} <=${NC}\n"
+    echo -e "\n${WHITE_TEXT}${ERROR_BKG}=> ${1} <=${NC}\n"
 }
 
 function infoText {
-    echo -e "\n${INFO_TEXT}=> ${1} <=${NC}\n"
+    echo -e "\n${INFO_TEXT}m=> ${1} <=${NC}\n"
 }
 
 function successText {
-    echo -e "\n${GREEN_BKG}${BLACK_TEXT}=> ${1} <=${NC}\n"
+    echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
 }
 
 function warningText {
-    echo -e "\n${YELLOW_BKG}${RED_TEXT}=> ${1} <=${NC}\n"
+    echo -e "\n${RED_TEXT}${YELLOW_BKG}=> ${1} <=${NC}\n"
 }
 
 function setupText {
-    echo -e "\n${MAGENTA_BKG}${WHITE_TEXT}=> ${1} <=${NC}\n"
+    echo -e "\n${WHITE_TEXT}${MAGENTA_BKG}=> ${1} <=${NC}\n"
 }
 
 function writeErrorMessage {
@@ -73,7 +66,7 @@ function writeErrorMessage {
 
 function createDevelopmentDatabase {
     # postgres
-    $SUDO_CMD createdb ${DATABASE_NAME}
+    createdb ${DATABASE_NAME}
 
     # mysql
     # mysql -u root -e "CREATE DATABASE DE_development_zed;"
@@ -93,9 +86,9 @@ function restoreDevelopmentDatabase {
             export PGPASSWORD=$DATABASE_PASSWORD
             export LC_ALL="en_US.UTF-8"
 
-            $SUDO_CMD pg_ctlcluster 9.4 main restart --force
-            $SUDO_CMD dropdb $DATABASE_NAME
-            $SUDO_CMD createdb $DATABASE_NAME
+            pg_ctlcluster 9.4 main restart --force
+            dropdb $DATABASE_NAME
+            createdb $DATABASE_NAME
             pg_restore -i -h 127.0.0.1 -p 5432 -U $DATABASE_USER -d $DATABASE_NAME -v $DATABASE_NAME.backup
             ;;
         *)
@@ -143,7 +136,7 @@ function installZed {
     $CONSOLE setup:jenkins:generate $VERBOSITY
     writeErrorMessage "Cronjob setup failed"
 
-    antelopeInstallZed
+    antelopeInstall
 
     labelText "Zed setup successful"
 }
@@ -151,7 +144,7 @@ function installZed {
 function installYves {
     setupText "Yves setup"
 
-    antelopeInstallYves
+    antelopeInstall
 
     labelText "Yves setup successful"
 }
@@ -203,14 +196,14 @@ function resetDevelopmentState {
 }
 
 function dropDevelopmentDatabase {
-    if [ `$SUDO_CMD psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
+    if [ `psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
 
         PG_CTL_CLUSTER=`which pg_ctlcluster`
         DROP_DB=`which dropdb`
 
         if [[ -f $PG_CTL_CLUSTER ]] && [[ -f $DROP_DB ]]; then
             labelText "Deleting PostgreSql Database: ${DATABASE_NAME} "
-            $SUDO_CMD pg_ctlcluster 9.4 main restart --force && $SUDO_CMD dropdb $DATABASE_NAME 1>/dev/null
+            pg_ctlcluster 9.4 main restart --force && dropdb $DATABASE_NAME 1>/dev/null
             writeErrorMessage "Deleting DB command failed"
         fi
     fi
@@ -227,7 +220,7 @@ function updateComposerBinary {
 
     if [[ ! -f "./composer.phar" ]]; then
         labelText "Download composer.phar"
-        $CURL -sS https://getcomposer.org/installer | $PHP
+        curl -sS https://getcomposer.org/installer | php
     fi
 
     COMPOSER_TIMESTAMP=$(stat -c %Y "composer.phar")
@@ -238,18 +231,18 @@ function updateComposerBinary {
 
     if [[ $COMPOSER_FILE_AGE > $THIRTY_DAYS_AGE ]]; then
         labelText "Install Composer Dependencies"
-        $PHP composer.phar selfupdate
+        php composer.phar selfupdate
     fi
 }
 
 function composerInstall {
     echo $@
     labelText "Installing composer packages"
-    $PHP composer.phar install --prefer-dist
+    php composer.phar install --prefer-dist
 }
 
 function dumpAutoload {
-    $PHP composer.phar dump-autoload
+    php composer.phar dump-autoload
 }
 
 function resetYves {
@@ -273,40 +266,13 @@ function resetYves {
     fi
 }
 
-function installAntelope {
-    labelText "Install or Update Antelope tool globally"
-    $SUDO_CMD $NPM install antelope
-    writeErrorMessage "Antelope setup failed"
-}
+function antelopeInstall {
+    labelText "Installing project dependencies"
+    antelope install
 
-function antelopeInstallZed {
-    installAntelope
-
-    ANTELOPE_TOOL=`which antelope`
-
-    if [[ -f $ANTELOPE_TOOL ]]; then
-        labelText "Installing project dependencies"
-        $ANTELOPE_TOOL install
-
-        labelText "Building and optimizing assets for Zed"
-        $ANTELOPE_TOOL build zed
-        writeErrorMessage "Antelope build failed"
-    fi
-}
-
-function antelopeInstallYves {
-    installAntelope
-
-    ANTELOPE_TOOL=`which antelope`
-
-    if [[ -f $ANTELOPE_TOOL ]]; then
-        labelText "Installing project dependencies"
-        $ANTELOPE_TOOL install
-
-        labelText "Building and optimizing assets for Yves"
-        $ANTELOPE_TOOL build yves
-        writeErrorMessage "Antelope build failed"
-    fi
+    labelText "Building and optimizing assets for Zed"
+    antelope build zed
+    writeErrorMessage "Antelope build failed"
 }
 
 function displayHeader {

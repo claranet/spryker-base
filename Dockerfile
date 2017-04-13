@@ -17,6 +17,7 @@ LABEL org.label-schema.name="spryker-base" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
 ENV PHP_VERSION=7.0
+ENV WORKDIR=/data/shop
 
 # Spryker config related ENV vars
 ENV SPRYKER_SHOP_CC="DE" \
@@ -55,7 +56,9 @@ RUN apk add --no-cache nginx \
 # copy prepared config files
 COPY etc/ /etc/
 RUN mkdir -pv /data/logs /data/bin /data/etc /data/shop
-ENV PATH="/data/bin/:$PATH"
+
+# add our scripts to PATH and nodejs modules
+ENV PATH="/data/bin/:$PATH:/node_modules/.bin"
 
 # make bash default shell for better syntax support
 RUN ln -fs /bin/bash /bin/sh
@@ -90,28 +93,26 @@ CMD  [ "run_yves_and_zed" ]
 # in which ENV the application is installed.
 # supported vaules are (dev/prod), defaults to "prod"
 ONBUILD ARG OPS_MODE
-ONBUILD ENV OPS_MODE=${OPS_MODE:-prod}
+ONBUILD ARG APPLICATION_ENV
+ONBUILD ARG NODEJS_VERSION
+ONBUILD ARG NODEJS_PACKAGE_MANAGER
+
+
+ONBUILD ENV OPS_MODE=${OPS_MODE:-prod} \
+            APPLICATION_ENV=${APPLICATION_ENV:-production} \
+            NODEJS_VERSION=${NODEJS_VERSION:-6} \
+            NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
+            
 
 # application env decides in which mode the application is installed/runned.
 # so if you choose development here, e.g. composer and npm/yarn will also install
 # dev dependencies! There are more modifications, which depend on this switch.
 # defaults to "production"
-ONBUILD ARG APPLICATION_ENV
-ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production}
 
 # support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
-ONBUILD ARG NODEJS_VERSION
-ONBUILD ENV NODEJS_VERSION=${NODEJS_VERSION:-6}
 
 # support different nodejs package managers, as spryker supports npm and yarn!
-ONBUILD ARG NODEJS_PACKAGE_MANAGER
-ONBUILD ENV NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
-
-# via PHP_VERSION you can control which PHP version you need. Version 7.0 is default
-# via NODEJS_VERSION you can control which nodejs version you need. Version 6 (LTS) is default
-ONBUILD RUN cd /data/bin/ && ./install_php.sh
-ONBUILD RUN cd /data/bin/ && ./install_nodejs.sh
 
 
 ONBUILD COPY ./src /data/shop/src
@@ -120,8 +121,12 @@ ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
 
-# 
-ONBUILD RUN  /data/bin/entrypoint.sh build_image
+
+# via PHP_VERSION you can control which PHP version you need. Version 7.0 is default
+# via NODEJS_VERSION you can control which nodejs version you need. Version 6 (LTS) is default
+ONBUILD RUN cd /data/bin/ && ./install_php.sh \
+            && ./install_nodejs.sh \
+            && ./entrypoint.sh build_image
 
 # install ops tools while in debugging and testing stage
 ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apk add --no-cache \
