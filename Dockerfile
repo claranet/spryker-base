@@ -16,9 +16,6 @@ LABEL org.label-schema.name="spryker-base" \
       maintainer="Fabian Dörk <fabian.doerk@de.clara.net>" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
-ENV PHP_VERSION=7.0
-ENV WORKDIR=/data/shop
-
 # Spryker config related ENV vars
 ENV SPRYKER_SHOP_CC="DE" \
     ZED_HOST="zed" \
@@ -47,8 +44,7 @@ ENV SPRYKER_SHOP_CC="DE" \
 # so it is required until they are rewritten.
 RUN apk add --no-cache nginx \
       monit \
-      git \
-      bash
+      git
 
 
 # copy image data and prepare image filesystem structure
@@ -57,11 +53,9 @@ RUN apk add --no-cache nginx \
 COPY etc/ /etc/
 RUN mkdir -pv /data/logs /data/bin /data/etc /data/shop
 
-# add our scripts to PATH and nodejs modules
-ENV PATH="/data/bin/:$PATH:/node_modules/.bin"
 
-# make bash default shell for better syntax support
-RUN ln -fs /bin/bash /bin/sh
+ENV PHP_VERSION=7.0 \
+    WORKDIR=/data/shop
 
 # copy our command and container entrypoint script
 # also add docker build helper scripts
@@ -70,7 +64,6 @@ RUN chmod +x /data/bin/*
 
 
 # fix wrong permissions of monitrc, else monit will refuse to run
-# and remove nginx default vhost
 RUN chmod 0700 /etc/monit/monitrc
 
 

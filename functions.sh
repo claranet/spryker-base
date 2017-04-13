@@ -1,9 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 export SHOP="/data/shop"
 export SETUP=spryker
 export TERM=xterm 
 export VERBOSITY='-v'
+
+ANTELOPE='/node_modules/.bin/antelope'
 
 
 NPM=${NODEJS_PACKAGE_MANAGER:-npm}
@@ -32,31 +34,31 @@ if [[ `echo "$@" | grep '\-vvv'` ]]; then
     VERBOSITY='-vvv'
 fi
 
-function labelText {
+labelText() {
     echo -e "\n${WHITE_TEXT}${BLUE_BKG}-> ${1} ${NC}\n"
 }
 
-function errorText {
+errorText() {
     echo -e "\n${WHITE_TEXT}${ERROR_BKG}=> ${1} <=${NC}\n"
 }
 
-function infoText {
+infoText() {
     echo -e "\n${INFO_TEXT}m=> ${1} <=${NC}\n"
 }
 
-function successText {
+successText() {
     echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
 }
 
-function warningText {
+warningText() {
     echo -e "\n${RED_TEXT}${YELLOW_BKG}=> ${1} <=${NC}\n"
 }
 
-function setupText {
+setupText() {
     echo -e "\n${WHITE_TEXT}${MAGENTA_BKG}=> ${1} <=${NC}\n"
 }
 
-function writeErrorMessage {
+writeErrorMessage() {
     if [[ $? != 0 ]]; then
         errorText "${1}"
         errorText "Command unsuccessful"
@@ -64,7 +66,7 @@ function writeErrorMessage {
     fi
 }
 
-function createDevelopmentDatabase {
+createDevelopmentDatabase() {
     # postgres
     createdb ${DATABASE_NAME}
 
@@ -72,14 +74,14 @@ function createDevelopmentDatabase {
     # mysql -u root -e "CREATE DATABASE DE_development_zed;"
 }
 
-function dumpDevelopmentDatabase {
+dumpDevelopmentDatabase() {
     export PGPASSWORD=$DATABASE_PASSWORD
     export LC_ALL="en_US.UTF-8"
 
     pg_dump -i -h 127.0.0.1 -U $DATABASE_USER  -F c -b -v -f  $DATABASE_NAME.backup $DATABASE_NAME
 }
 
-function restoreDevelopmentDatabase {
+restoreDevelopmentDatabase() {
     read -r -p "Restore database ${DATABASE_NAME} ? [y/N] " response
     case $response in
         [yY][eE][sS]|[yY])
@@ -97,10 +99,9 @@ function restoreDevelopmentDatabase {
     esac
 }
 
-function installDemoshop {
+installDemoshop() {
     labelText "Preparing to install Spryker Platform..."
 
-    updateComposerBinary
     composerInstall
 
     installZed
@@ -113,7 +114,7 @@ function installDemoshop {
     infoText "\nYves URL: http://www.de.spryker.dev/\nZed URL: http://zed.de.spryker.dev/\n"
 }
 
-function installZed {
+installZed() {
     setupText "Zed setup"
 
     resetDataStores
@@ -141,7 +142,7 @@ function installZed {
     labelText "Zed setup successful"
 }
 
-function installYves {
+installYves() {
     setupText "Yves setup"
 
     antelopeInstall
@@ -149,20 +150,13 @@ function installYves {
     labelText "Yves setup successful"
 }
 
-function configureCodeception {
+configureCodeception() {
     labelText "Configuring test environment"
     vendor/bin/codecept build -q $VERBOSITY
     writeErrorMessage "Test configuration failed"
 }
 
-function optimizeRepo {
-    labelText "Optimizing repository"
-    git gc              # garbage collector
-    git prune           # kills loose garbage
-    writeErrorMessage "Repository optimization failed"
-}
-
-function resetDataStores {
+resetDataStores() {
     labelText "Flushing Elasticsearch"
     curl -XDELETE 'http://localhost:10005/de_search/'
     writeErrorMessage "Elasticsearch reset failed"
@@ -172,7 +166,7 @@ function resetDataStores {
     writeErrorMessage "Redis reset failed"
 }
 
-function resetDevelopmentState {
+resetDevelopmentState() {
     labelText "Preparing to reset data..."
     sleep 1
 
@@ -195,7 +189,7 @@ function resetDevelopmentState {
     writeErrorMessage "DB setup failed"
 }
 
-function dropDevelopmentDatabase {
+dropDevelopmentDatabase() {
     if [ `psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
 
         PG_CTL_CLUSTER=`which pg_ctlcluster`
@@ -215,37 +209,17 @@ function dropDevelopmentDatabase {
     # fi
 }
 
-function updateComposerBinary {
-    labelText "Setting up composer"
-
-    if [[ ! -f "./composer.phar" ]]; then
-        labelText "Download composer.phar"
-        curl -sS https://getcomposer.org/installer | php
-    fi
-
-    COMPOSER_TIMESTAMP=$(stat -c %Y "composer.phar")
-    CURRENT_TIMESTAMP=$(date +"%s")
-
-    COMPOSER_FILE_AGE=$(($CURRENT_TIMESTAMP-$COMPOSER_TIMESTAMP))
-    THIRTY_DAYS_AGE=$((60*60*24*30))
-
-    if [[ $COMPOSER_FILE_AGE > $THIRTY_DAYS_AGE ]]; then
-        labelText "Install Composer Dependencies"
-        php composer.phar selfupdate
-    fi
-}
-
-function composerInstall {
+composerInstall() {
     echo $@
     labelText "Installing composer packages"
-    php composer.phar install --prefer-dist
+    php /data/bin/composer.phar install --prefer-dist
 }
 
-function dumpAutoload {
-    php composer.phar dump-autoload
+dumpAutoload() {
+    php /data/bin/composer.phar dump-autoload
 }
 
-function resetYves {
+resetYves() {
     if [[ -d "./node_modules" ]]; then
         labelText "Remove node_modules directory"
         rm -rf "./node_modules"
@@ -266,21 +240,21 @@ function resetYves {
     fi
 }
 
-function antelopeInstall {
+antelopeInstall() {
     labelText "Installing project dependencies"
-    antelope install
+    $ANTELOPE install
 
     labelText "Building and optimizing assets for Zed"
-    antelope build zed
+    $ANTELOPE build zed
     writeErrorMessage "Antelope build failed"
 }
 
-function displayHeader {
+displayHeader() {
     labelText "Spryker Platform Setup"
     echo "./$(basename $0) [OPTION] [VERBOSITY]"
 }
 
-function displayHelp {
+displayHelp() {
 
     displayHeader
 

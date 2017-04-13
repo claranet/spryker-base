@@ -1,9 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ash
 
-export SHOP="/data/shop"
-export SETUP=spryker
-export TERM=xterm 
-export VERBOSITY='-v'
 export CONSOLE=vendor/bin/console
 
 # NOTE: requires $PHP_VERSION to be set from outside!
@@ -11,6 +7,7 @@ ENABLED_SERVICES=""
 
 
 source /data/bin/functions.sh
+[ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
 
 # abort on first error
 set -e
@@ -18,7 +15,7 @@ set -e
 cd $SHOP
 
 
-function generate_configurations {
+generate_configurations() {
   labelText "Create runtime configuration ..."
 
   if [ -e $CONSOLE ]; then
@@ -28,27 +25,27 @@ function generate_configurations {
 }
 
 
-function install_dependencies {
+install_dependencies() {
     labelText "Resolving dependencies ..."
 
     if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
       infoText "Installing required NPM dependencies..."
-      npm install --only=production
+      $NPM install --only=production
       infoText "Installing required PHP dependencies..."
       php /data/bin/composer.phar install --prefer-dist --no-dev
     else
       infoText "Installing required NPM dependencies (including dev) ..."
-      npm install
+      $NPM install
       infoText "Installing required PHP dependencies (including PHP) ..."
       php /data/bin/composer.phar install --prefer-dist
     fi
     php /data/bin/composer.phar clear-cache
 
-    antelope install
+    $ANTELOPE install
 }
 
 
-function generate_shared_code {
+generate_shared_code() {
     labelText "Generate code for both Yves and Zed ..."
 
     infoText "Generate transfer objects ..."
@@ -56,7 +53,7 @@ function generate_shared_code {
 }
 
 
-function generate_zed_code {
+generate_zed_code() {
     labelText "Generate code for Zed ..."
 
     infoText "Propel - Copy schema files ..."
@@ -73,19 +70,19 @@ function generate_zed_code {
 }
 
 
-function build_assets_for_yves {
+build_assets_for_yves() {
     labelText "Building and optimizing assets of Yves"
-    antelope build yves
+    $ANTELOPE build yves
 }
 
 
-function build_assets_for_zed {
+build_assets_for_zed() {
     labelText "Building and optimizing assets of Zed"
-    antelope build zed
+    $ANTELOPE build zed
 }
 
 
-function init_shared {
+init_shared() {
     labelText "Initializing setup"
 
     infoText "Propel - Converting configuration ..."
@@ -106,14 +103,14 @@ function init_shared {
 }
 
 
-function init_yves {
+init_yves() {
     labelText "Initializing Yves ..."
 
     exec_hooks "$SHOP/docker/init.d/Yves"
 }
 
 
-function init_zed {
+init_zed() {
     labelText "Initializing Zed ..."
 
     infoText "Propel - Create database ..."
@@ -143,9 +140,10 @@ function init_zed {
 
 
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
-function enable_nginx_vhost {
+enable_nginx_vhost() {
   NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
   NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
+  mkdir -p $NGINX_SITES_ENABLED $NGINX_SITES_AVAILABLE
   VHOST=$1
   if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
     errorText "\t nginx vhost '$VHOST' not found! Can't enable vhost!"
@@ -157,9 +155,10 @@ function enable_nginx_vhost {
 
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
-function enable_phpfpm_app {
+enable_phpfpm_app() {
   FPM_APPS_AVAILABLE="/etc/php/apps"
-  FPM_APPS_ENABLED="/etc/php/$PHP_VERSION/fpm/pool.d"
+  FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
+  mkdir -p $FPM_APPS_ENABLED $FPM_APPS_AVAILABLE
   
   APP="${1}.conf"
   MONIT_APP="${1}"
@@ -176,7 +175,7 @@ function enable_phpfpm_app {
 }
 
 
-function enable_services {
+enable_services() {
   for SERVICE in $ENABLED_SERVICES; do
     labelText "Enable ${SERVICE} vHost and PHP-FPM app..."
     
@@ -189,7 +188,7 @@ function enable_services {
 }
 
 
-function start_services {
+start_services() {
   labelText "Starting enabled services $ENABLED_SERVICES"
   
   # fix error with missing event log dir
@@ -202,7 +201,7 @@ function start_services {
 }
 
 
-function exec_hooks {
+exec_hooks() {
     hook_d=$1
     if [ -e "$hook_d" -a -n "`ls -1 $hook_d/`" ]; then
       max=$(ls -1 $hook_d/|wc -l)
@@ -240,11 +239,12 @@ case $1 in
     build_image)
         # target during build time of child docker image executed by ONBUILD
         # build trigger of base image
-        [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
         generate_configurations
         generate_shared_code
         generate_zed_code
+        
+        mkdir -pv /data/shop/assets/{Yves,Zed}
 
         exec_hooks "$SHOP/docker/build.d"
 
@@ -255,7 +255,7 @@ case $1 in
         generate_configurations
         # wait for depending services and then initialize redis, elasticsearch and postgres
         # Run once per setup 
-        mkdir -p /data/shop/assets/{Yves,Zed}
+        
 
         build_assets_for_yves
         build_assets_for_zed

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Author: Tony Fahrion <tony.fahrion@de.clara.net>
 
@@ -66,7 +66,7 @@ fi
 #
 
 
-function installAntelope {
+installAntelope() {
     labelText "Install antelope tool (static assets generator)"
     
     apk add --no-cache --virtual .antelope_deps python make gcc g++ linux-headers git
