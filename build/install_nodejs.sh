@@ -21,6 +21,9 @@ source ./functions.sh
 # abort on error
 set -e
 
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
+
 #
 #  Prepare
 #
@@ -70,7 +73,7 @@ installAntelope() {
     labelText "Install antelope tool (static assets generator)"
     
     apk add --no-cache --virtual .antelope_deps python make gcc g++ linux-headers git
-    $NPM install antelope
+    MAKEFLAGS="-j$COMPILE_JOBS" $NPM install antelope
     apk del .antelope_deps
     
     writeErrorMessage "Antelope setup failed"

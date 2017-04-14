@@ -21,6 +21,10 @@ fi
 # abort on error
 set -e
 
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
+
+
 
 #
 #  Install PHP extensions
@@ -35,7 +39,7 @@ install_simple_extension() {
   DEPS="$2"
   
   apk add --no-cache --virtual .phpmodule-deps $DEPS
-  docker-php-ext-install $EXTENSION
+  docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
   apk del .phpmodule-deps
 }
 
@@ -56,7 +60,7 @@ install_gd() {
         libpng-dev
   
   docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
-  docker-php-ext-install -j2 gd
+  docker-php-ext-install -j$COMPILE_JOBS gd
   apk del .phpmodule-deps
   
   $apk_add libpng
@@ -68,7 +72,7 @@ install_xcache() {
     && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
     && rm xcache.tar.gz \
     && docker-php-ext-configure /tmp/xcache --enable-xcache \
-    && docker-php-ext-install -j2 /tmp/xcache \
+    && docker-php-ext-install -j$COMPILE_JOBS /tmp/xcache \
     && rm -r /tmp/xcache
 }
 
@@ -141,7 +145,7 @@ if [[ ! -z "$PHP_EXTENSIONS" ]]; then
     else
       # try to install unknown extensions as it is possible, that they are part of the core
       # TODO: check, if the ext is part of the core
-      docker-php-ext-install -j2 $ext
+      docker-php-ext-install -j$COMPILE_JOBS $ext
     fi
   done
   
@@ -162,6 +166,10 @@ php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== tri
 
 infoText "install PHP composer to /data/bin/"
 php /tmp/composer-setup.php --install-dir=/data/bin/
+
+
+# make the installation process of `composer install` faster by parallel downloads
+/data/bin/composer.phar global require hirak/prestissimo
 
 
 #
