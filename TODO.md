@@ -11,6 +11,10 @@
 * secure php installation (disable functions/classes, set open_basedir, ...)
 * clean up commit history
 * write user documentation
+* fix bug in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
+  * https://github.com/docker-library/php/issues/240
+  * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+
 
 ## Open discussion 
 
