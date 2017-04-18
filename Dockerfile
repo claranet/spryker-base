@@ -16,6 +16,10 @@ LABEL org.label-schema.name="spryker-base" \
       maintainer="Fabian Dörk <fabian.doerk@de.clara.net>" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
+
+ENV PHP_VERSION=7.0 \
+    WORKDIR=/data/shop
+
 # Spryker config related ENV vars
 ENV SPRYKER_SHOP_CC="DE" \
     ZED_HOST="zed" \
@@ -39,32 +43,26 @@ ENV SPRYKER_SHOP_CC="DE" \
     JENKINS_BASEURL="http://jenkins:8080/"
 
 
+COPY etc/ /etc/
+COPY entrypoint.sh functions.sh build/* /data/bin/
+
+
+# first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
 # install basic packages
 # bash is installed as current shell scripts are using bash syntactic sugar
 # so it is required until they are rewritten.
-RUN apk add --no-cache nginx \
-      monit \
-      git
-
-
-# copy image data and prepare image filesystem structure
-
-# copy prepared config files
-COPY etc/ /etc/
-RUN mkdir -pv /data/logs /data/bin /data/etc /data/shop
-
-
-ENV PHP_VERSION=7.0 \
-    WORKDIR=/data/shop
-
-# copy our command and container entrypoint script
-# also add docker build helper scripts
-COPY entrypoint.sh functions.sh build/* /data/bin/
-RUN chmod +x /data/bin/*
-
-
-# fix wrong permissions of monitrc, else monit will refuse to run
-RUN chmod 0700 /etc/monit/monitrc
+RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade \
+    && apk add monit git \
+    
+    # fix wrong permissions of monitrc, else monit will refuse to run
+    && chmod 0700 /etc/monit/monitrc \
+    
+    # our own copied scripts
+    && chmod +x /data/bin/* \
+    
+    # create required shop directories
+    && mkdir -pv /data/logs /data/bin /data/etc /data/shop
+    
 
 
 EXPOSE 80
@@ -85,17 +83,6 @@ CMD  [ "run_yves_and_zed" ]
 # ops mode defines the mode while building docker images... it does NOT control
 # in which ENV the application is installed.
 # supported vaules are (dev/prod), defaults to "prod"
-ONBUILD ARG OPS_MODE
-ONBUILD ARG APPLICATION_ENV
-ONBUILD ARG NODEJS_VERSION
-ONBUILD ARG NODEJS_PACKAGE_MANAGER
-
-
-ONBUILD ENV OPS_MODE=${OPS_MODE:-prod} \
-            APPLICATION_ENV=${APPLICATION_ENV:-production} \
-            NODEJS_VERSION=${NODEJS_VERSION:-6} \
-            NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
-            
 
 # application env decides in which mode the application is installed/runned.
 # so if you choose development here, e.g. composer and npm/yarn will also install
@@ -103,9 +90,18 @@ ONBUILD ENV OPS_MODE=${OPS_MODE:-prod} \
 # defaults to "production"
 
 # support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
+# NODEJS_PACKAGE_MANAGER: you can, additionally to npm, install yarn; if you select yarn here
+# also, if yarn is selected, it would be used while running the base installation
+ONBUILD ARG OPS_MODE
+ONBUILD ARG APPLICATION_ENV
+ONBUILD ARG NODEJS_VERSION
+ONBUILD ARG NODEJS_PACKAGE_MANAGER
 
-# support different nodejs package managers, as spryker supports npm and yarn!
 
+ONBUILD ENV OPS_MODE=${OPS_MODE:-production} \
+            APPLICATION_ENV=${APPLICATION_ENV:-production} \
+            NODEJS_VERSION=${NODEJS_VERSION:-6} \
+            NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
 ONBUILD COPY ./src /data/shop/src
@@ -115,14 +111,18 @@ ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
 
 
-# via PHP_VERSION you can control which PHP version you need. Version 7.0 is default
-# via NODEJS_VERSION you can control which nodejs version you need. Version 6 (LTS) is default
-ONBUILD RUN cd /data/bin/ && ./install_php.sh \
+# use ccache to decrease compile times
+ONBUILD RUN apk add ccache \
+            && cd /data/bin/ && ./install_php.sh \
             && ./install_nodejs.sh \
-            && ./entrypoint.sh build_image
-
-# install ops tools while in debugging and testing stage
-ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apk add --no-cache \
-      vim \
-      less \
-      tree
+            && ./install_nginx.sh \
+            && ./entrypoint.sh build_image \
+            
+            # install ops tools while in debugging and testing stage
+            && [ "$OPS_MODE" = "production" ] || apk add --no-cache \
+                  vim \
+                  less \
+                  tree \
+            
+            # clean up if in production mode
+            && [ "$OPS_MODE" = "development" ] || apk del ccache

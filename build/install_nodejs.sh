@@ -51,15 +51,15 @@ successText "YES! Support is available for $NODEJS_PACKAGE_MANAGER"
 
 infoText "install nodejs version $NODEJS_VERSION and npm"
 if [ "$NODEJS_VERSION" = "7" ]; then
-  apk add --no-cache nodejs-current
+  apk add nodejs-current
 else
-  apk add --no-cache nodejs
+  apk add nodejs
 fi
 
 
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
-  apk add --no-cache yarn
+  apk add yarn
   NPM='yarn'
 fi
 
@@ -72,7 +72,7 @@ fi
 installAntelope() {
     labelText "Install antelope tool (static assets generator)"
     
-    apk add --no-cache --virtual .antelope_deps python make gcc g++ linux-headers git
+    apk add --virtual .antelope_deps python make gcc g++ linux-headers git
     MAKEFLAGS="-j$COMPILE_JOBS" $NPM install antelope
     apk del .antelope_deps
     

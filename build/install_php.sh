@@ -7,7 +7,7 @@
 #
 
 # shortcut for apk add
-apk_add='apk add --no-cache'
+apk_add='apk add'
 
 
 # include helper functions
