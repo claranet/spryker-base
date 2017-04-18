@@ -21,10 +21,9 @@ ENV PHP_VERSION=7.0 \
     WORKDIR=/data/shop
 
 # Spryker config related ENV vars
+# ENV configs for ZED_HOST and YVES_HOST should be set by child Dockerfiles, or left to default
 ENV SPRYKER_SHOP_CC="DE" \
-    ZED_HOST="zed" \
     PUBLIC_ZED_DOMAIN="zed.spryker.dev" \
-    YVES_HOST="yves" \
     PUBLIC_YVES_DOMAIN="yves.spryker.dev" \
     ES_HOST="elasticsearch" \
     ES_PROTOCOL="http" \

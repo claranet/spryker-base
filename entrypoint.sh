@@ -158,10 +158,8 @@ enable_nginx_vhost() {
 enable_phpfpm_app() {
   FPM_APPS_AVAILABLE="/etc/php/apps"
   FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
-  mkdir -p $FPM_APPS_ENABLED $FPM_APPS_AVAILABLE
   
   APP="${1}.conf"
-  MONIT_APP="${1}"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
@@ -193,14 +191,12 @@ start_services() {
   
   generate_configurations
   
-  # start fpm in background, to start nginx in forground
-  php-fpm --fpm-config /usr/local/etc/php-fpm.conf --daemonize
-  
   # TODO: increase security by making this more granular
   chown -R www-data: /data/logs /data/shop
   
-  # starts nginx in not daemonized
-  nginx -g 'daemon off;'
+  # starts nginx daemonized, to start php-fpm in background
+  # check if nginx failed...
+  nginx && php-fpm --fpm-config /usr/local/etc/php-fpm.conf
 }
 
 

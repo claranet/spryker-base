@@ -5,7 +5,7 @@ export SETUP=spryker
 export TERM=xterm 
 export VERBOSITY='-v'
 
-ANTELOPE='/data/bin/node_modules/.bin/antelope'
+ANTELOPE='/data/shop/node_modules/.bin/antelope'
 
 
 NPM=${NODEJS_PACKAGE_MANAGER:-npm}

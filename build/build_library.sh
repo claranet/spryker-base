@@ -19,5 +19,9 @@ is_in_list() {
 
 # the opposit of is_in_list
 is_not_in_list() {
-  is_in_list "$1" "$2" && false
+  if is_in_list "$1" "$2"; then
+    return 1
+  else
+    return 0
+  fi
 }

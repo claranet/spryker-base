@@ -38,7 +38,7 @@ install_simple_extension() {
   EXTENSION=$1
   DEPS="$2"
   
-  apk add --no-cache --virtual .phpmodule-deps $DEPS
+  $apk_add --virtual .phpmodule-deps $DEPS
   docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
   apk del .phpmodule-deps
 }
@@ -54,7 +54,7 @@ install_imagick() {
 }
 
 install_gd() {
-  apk add --no-cache --virtual .phpmodule-deps freetype-dev \
+  $apk_add --virtual .phpmodule-deps freetype-dev \
         libjpeg-turbo-dev \
         libmcrypt-dev \
         libpng-dev
@@ -63,7 +63,7 @@ install_gd() {
   docker-php-ext-install -j$COMPILE_JOBS gd
   apk del .phpmodule-deps
   
-  $apk_add libpng
+  $apk_add libpng libjpeg-turbo
 }
 
 install_xcache() {
@@ -136,7 +136,7 @@ install_zip() {
 
 if [[ ! -z "$PHP_EXTENSIONS" ]]; then
   docker-php-source extract
-  apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
+  $apk_add --virtual .phpize-deps $PHPIZE_DEPS
   
   for ext in $PHP_EXTENSIONS; do
     infoText "installing PHP extension $ext"
@@ -178,4 +178,4 @@ php /tmp/composer-setup.php --install-dir=/data/bin/
 
 infoText "clean up PHP and composer installation"
 rm -rf /tmp/composer-setup*
-rm -f /etc/php/*/fpm/pool.d/www.conf
+rm /usr/local/etc/php-fpm.d/www.conf*
