@@ -1,6 +1,6 @@
 ---
 
-# gitlab-runner must started with DOCKER_PRIVILEGED=yes
+image: docker:latest
 
 stages:
   - build
@@ -19,7 +19,6 @@ before_script:
 
 .build_php_template: &build_php_definition
   stage: build
-  image: docker:stable
   script:
     - docker build -t $CONTAINER_IMAGE_NAME .
     - docker push $CONTAINER_IMAGE_NAME
@@ -29,7 +28,6 @@ before_script:
 
 .release_docker_image_template: &release_docker_image_definition
   stage: release
-  image: docker:stable
   script:
     - docker pull $CONTAINER_IMAGE_NAME
     - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_RELEASE_NAME
