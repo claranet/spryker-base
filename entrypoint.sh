@@ -1,4 +1,4 @@
-#!/usr/bin/env ash
+#!/bin/sh
 
 export CONSOLE=vendor/bin/console
 
