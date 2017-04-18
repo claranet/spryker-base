@@ -1,5 +1,17 @@
 # Todo items
 
+## just a bunch of small reminders
+
+* add ability to provide...
+  * 404 page / destination
+  * maintenance.html (which might be exported to be delivered externally by the LB)
+  * error page for 5xx
+* clean up alpine linux container for sleeker images
+* clean up nginx config and make it more robust
+* secure php installation (disable functions/classes, set open_basedir, ...)
+* clean up commit history
+* write user documentation
+
 ## Open discussion 
 
 * We need to maintain two branches of this docker image, one for PHP5.6 and one
