@@ -23,8 +23,6 @@ before_script:
   script:
     - docker build -t $CONTAINER_IMAGE_NAME .
     - docker push $CONTAINER_IMAGE_NAME
-  services:
-    - docker:dind
   only:
     - master
     - feature/migrateToAlpineLinux
@@ -36,8 +34,6 @@ before_script:
     - docker pull $CONTAINER_IMAGE_NAME
     - docker tag $CONTAINER_IMAGE_NAME $CONTAINER_IMAGE_RELEASE_NAME
     - docker push $CONTAINER_IMAGE_RELEASE_NAME
-  services:
-    - docker:dind
   only:
     - master
     - feature/prepareForLocalDev
