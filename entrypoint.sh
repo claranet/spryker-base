@@ -142,15 +142,15 @@ init_zed() {
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
 enable_nginx_vhost() {
   NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
-  NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
-  mkdir -p $NGINX_SITES_ENABLED $NGINX_SITES_AVAILABLE
+  NGINX_SITES_ENABLED='/etc/nginx/conf.d'
   VHOST=$1
+  
   if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
     errorText "\t nginx vhost '$VHOST' not found! Can't enable vhost!"
     return
   fi
   
-  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/$VHOST
+  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/${VHOST}.conf
 }
 
 
@@ -169,9 +169,6 @@ enable_phpfpm_app() {
   
   # enable php-fpm pool config
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
-  
-  # enable monit php-fpm app check
-  ln -fs /etc/monit/apps-available/$MONIT_APP /etc/monit/conf.d/$MONIT_APP
 }
 
 
@@ -195,9 +192,15 @@ start_services() {
   mkdir -p /data/shop/data/$SPRYKER_SHOP_CC/logs/
   
   generate_configurations
-  /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
+  
+  # start fpm in background, to start nginx in forground
+  php-fpm --fpm-config /usr/local/etc/php-fpm.conf --daemonize
+  
   # TODO: increase security by making this more granular
-  chown -R www-data: /data/{logs,shop}
+  chown -R www-data: /data/logs /data/shop
+  
+  # starts nginx in not daemonized
+  nginx -g 'daemon off;'
 }
 
 
@@ -210,7 +213,7 @@ exec_hooks() {
       for hook in `find $hook_d -type f ! -name '\.*' -a -name '*.sh'`; do
         hook="${hook%\\n}"
         infoText "Executing $i/$max hook script: $hook ..."
-        bash $hook
+        sh $hook
         let "i += 1"
       done
     fi
@@ -244,7 +247,7 @@ case $1 in
         generate_shared_code
         generate_zed_code
         
-        mkdir -pv /data/shop/assets/{Yves,Zed}
+        mkdir -pv /data/shop/assets/Yves /data/shop/assets/Zed
 
         exec_hooks "$SHOP/docker/build.d"
 
@@ -271,6 +274,10 @@ case $1 in
 
         # FIXME Poor mans waiting-for-depending-services-to-be-online needs to be fixed
         sleep 5
+        
+        # FIXME //TRANSLIT isn't supported with musl-libc, by intension!
+        # see https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+        sed -i 's#//TRANSLIT##g'  /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
 
         # The different init stages has been already prepared to be split up in future
         init_shared
@@ -281,6 +288,6 @@ case $1 in
         ;;
     *)
         generate_configurations
-        bash -c "$*"
+        sh -c "$*"
         ;;
 esac
