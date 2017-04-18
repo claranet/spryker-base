@@ -48,14 +48,12 @@ COPY entrypoint.sh functions.sh build/* /data/bin/
 
 
 # first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
+# `apk upgrade --clean-protected` for not creating *.apk-new (config)files
 # install basic packages
 # bash is installed as current shell scripts are using bash syntactic sugar
 # so it is required until they are rewritten.
-RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade \
-    && apk add monit git \
-    
-    # fix wrong permissions of monitrc, else monit will refuse to run
-    && chmod 0700 /etc/monit/monitrc \
+RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade --clean-protected \
+    && apk add git \
     
     # our own copied scripts
     && chmod +x /data/bin/* \
@@ -113,16 +111,17 @@ ONBUILD COPY ./package.json ./composer.json /data/shop/
 
 # use ccache to decrease compile times
 ONBUILD RUN apk add ccache \
+            
+            # add psql command, should be removed later on... this should be done in an init task or externally!
+            && apk add postgresql-client \
+            
             && cd /data/bin/ && ./install_php.sh \
             && ./install_nodejs.sh \
             && ./install_nginx.sh \
             && ./entrypoint.sh build_image \
             
             # install ops tools while in debugging and testing stage
-            && [ "$OPS_MODE" = "production" ] || apk add --no-cache \
-                  vim \
-                  less \
-                  tree \
+            && [ "$OPS_MODE" = "production" ] || apk add vim less tree \
             
             # clean up if in production mode
             && [ "$OPS_MODE" = "development" ] || apk del ccache
