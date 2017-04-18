@@ -136,7 +136,7 @@ install_zip() {
 
 if [[ ! -z "$PHP_EXTENSIONS" ]]; then
   docker-php-source extract
-  $apk_add --virtual .phpize-deps $PHPIZE_DEPS
+  $apk_add re2c
   
   for ext in $PHP_EXTENSIONS; do
     infoText "installing PHP extension $ext"
@@ -149,7 +149,7 @@ if [[ ! -z "$PHP_EXTENSIONS" ]]; then
     fi
   done
   
-  apk del .phpize-deps
+  apk del re2c
   docker-php-source delete
 fi
 

@@ -109,7 +109,7 @@ ONBUILD COPY ./package.json ./composer.json /data/shop/
 
 
 # use ccache to decrease compile times
-ONBUILD RUN apk add ccache \
+ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc-dev make pkgconf \
             
             # add psql command, should be removed later on... this should be done in an init task or externally!
             && apk add postgresql-client \
@@ -123,4 +123,4 @@ ONBUILD RUN apk add ccache \
             && [ "$OPS_MODE" = "production" ] || apk add vim less tree \
             
             # clean up if in production mode
-            && [ "$OPS_MODE" = "development" ] || apk del ccache
+            && [ "$OPS_MODE" = "development" ] || apk del .base_build_deps
