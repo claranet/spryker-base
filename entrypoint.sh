@@ -2,7 +2,7 @@
 
 export CONSOLE=vendor/bin/console
 
-# NOTE: requires $PHP_VERSION to be set from outside!
+# services activated for this docker container instance will be added to this string
 ENABLED_SERVICES=""
 
 

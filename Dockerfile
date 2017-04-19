@@ -20,8 +20,7 @@ LABEL org.label-schema.name="spryker-base" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
 
-ENV PHP_VERSION=7.0 \
-    WORKDIR=/data/shop
+ENV WORKDIR=/data/shop
 
 # Spryker config related ENV vars
 # ENV configs for ZED_HOST and YVES_HOST should be set by child Dockerfiles, or left to default
@@ -89,7 +88,7 @@ CMD  [ "run_yves_and_zed" ]
 # dev dependencies! There are more modifications, which depend on this switch.
 # defaults to "production"
 
-# support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
+# support NODEJS_VERSION as ARG to let the user switch between nodejs 6.x and 7.x
 # NODEJS_PACKAGE_MANAGER: you can, additionally to npm, install yarn; if you select yarn here
 # also, if yarn is selected, it would be used while running the base installation
 ONBUILD ARG OPS_MODE
