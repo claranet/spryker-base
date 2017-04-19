@@ -196,7 +196,7 @@ start_services() {
   
   # starts nginx daemonized, to start php-fpm in background
   # check if nginx failed...
-  nginx && php-fpm --fpm-config /usr/local/etc/php-fpm.conf
+  nginx && php-fpm --nodaemonize
 }
 
 

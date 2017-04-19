@@ -178,4 +178,6 @@ php /tmp/composer-setup.php --install-dir=/data/bin/
 
 infoText "clean up PHP and composer installation"
 rm -rf /tmp/composer-setup*
-rm /usr/local/etc/php-fpm.d/www.conf*
+
+# remove php-fpm configs as they are adding a "www" pool, which does not exist
+rm /usr/local/etc/php-fpm.d/*
