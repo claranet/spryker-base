@@ -34,7 +34,7 @@ before_script:
     - docker push $CONTAINER_IMAGE_RELEASE_NAME
   only:
     - master
-    - feature/prepareForLocalDev
+    - feature/migrateToAlpineLinux
 
 # ===================
 #        BUILD
