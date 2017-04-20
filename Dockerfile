@@ -77,9 +77,9 @@ CMD  [ "run_yves_and_zed" ]
 # 
 
 
-# ops mode defines the mode while building docker images... it does NOT control
-# in which ENV the application is installed.
-# supported vaules are (dev/prod), defaults to "prod"
+# With DEV_TOOLS=on, we won't clean up the image from build tools and debugging tools.
+# Even further we will add tools like vim, tree and less.
+# supported vaules are (on/off), defaults to "off"
 
 # application env decides in which mode the application is installed/runned.
 # so if you choose development here, e.g. composer and npm/yarn will also install
@@ -89,13 +89,13 @@ CMD  [ "run_yves_and_zed" ]
 # support NODEJS_VERSION as ARG to let the user switch between nodejs 6.x and 7.x
 # NODEJS_PACKAGE_MANAGER: you can, additionally to npm, install yarn; if you select yarn here
 # also, if yarn is selected, it would be used while running the base installation
-ONBUILD ARG OPS_MODE
+ONBUILD ARG DEV_TOOLS
 ONBUILD ARG APPLICATION_ENV
 ONBUILD ARG NODEJS_VERSION
 ONBUILD ARG NODEJS_PACKAGE_MANAGER
 
 
-ONBUILD ENV OPS_MODE=${OPS_MODE:-production} \
+ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
             APPLICATION_ENV=${APPLICATION_ENV:-production} \
             NODEJS_VERSION=${NODEJS_VERSION:-6} \
             NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
@@ -120,7 +120,7 @@ ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc
             && ./entrypoint.sh build_image \
             
             # install ops tools while in debugging and testing stage
-            && [ "$OPS_MODE" = "production" ] || apk add vim less tree \
+            && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \
             
             # clean up if in production mode
-            && [ "$OPS_MODE" = "development" ] || apk del .base_build_deps
+            && [ "$DEV_TOOLS" = "on" ] || apk del .base_build_deps
