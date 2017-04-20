@@ -1,5 +1,29 @@
 # Todo items
 
+## just a bunch of small reminders
+
+* add ability to provide...
+  * 404 page / destination
+  * maintenance.html (which might be exported to be delivered externally by the LB)
+  * error page for 5xx
+* clean up alpine linux container for sleeker images
+  * remove apk caches / index files
+  * remove antelope for prod modes ( DEV_TOOLS=off )
+* clean up nginx config and make it more robust
+* secure php installation (disable functions/classes, set open_basedir, ...)
+* clean up commit history
+* write user documentation
+* fix bug in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
+  * https://github.com/docker-library/php/issues/240
+  * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+
+
+* docu for users
+* local dev testing
+* clean up git history
+
+
+
 ## Open discussion 
 
 * We need to maintain two branches of this docker image, one for PHP5.6 and one

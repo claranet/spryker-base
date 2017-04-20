@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Author: Tony Fahrion <tony.fahrion@de.clara.net>
 
@@ -11,25 +11,16 @@
 
 SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
-
-# different nodejs package manager have different install command arguments
-# this makes using them more easily
-# If you specify "yarn" as package manager, this var will be overriden later
-# on.
-NODEJS_PACKAGE_MANAGER_INSTALL_GLOBAL='npm install -g'
+NPM='npm'
 
 
-export SHOP="/data/shop"
-export SETUP=spryker
-export TERM=xterm 
-export VERBOSITY='-v'
-
-# include helper functions
+# include helper functions and common settings
 source ./build_library.sh
 source ./functions.sh
 
-# abort on error
-set -e
+
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
 #
 #  Prepare
@@ -52,32 +43,22 @@ fi
 successText "YES! Support is available for $NODEJS_PACKAGE_MANAGER"
 
 
-infoText "set up nodejs repo to install nodejs via apt"
-echo "deb https://deb.nodesource.com/node_${NODEJS_VERSION}.x xenial main" > /etc/apt/sources.list.d/nodesource.list
-curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add -
-
-
-infoText "update apt cache to make use of the new nodejs repo"
-apt-get update
-
-
 #
 #  Install nodejs & package manager
 #
 
 infoText "install nodejs version $NODEJS_VERSION and npm"
-apt-get install $APT_GET_BASIC_ARGS --allow-unauthenticated nodejs
+if [ "$NODEJS_VERSION" = "7" ]; then
+  $apk_add nodejs-current
+else
+  $apk_add nodejs
+fi
 
 
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
-  NODEJS_PACKAGE_MANAGER_INSTALL_GLOBAL='yarn global add'
-  
-  # see https://yarnpkg.com/en/docs/install#linux-tab
-  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
-  apt-get update
-  apt-get install $APT_GET_BASIC_ARGS yarn
+  $apk_add yarn
+  NPM='yarn'
 fi
 
 
@@ -85,5 +66,17 @@ fi
 #  Install antelope
 #
 
-infoText "install antelope, which is used for assets generation"
-$NODEJS_PACKAGE_MANAGER_INSTALL_GLOBAL antelope
+
+installAntelope() {
+    labelText "Install antelope tool (static assets generator)"
+    
+    $apk_add --virtual .antelope_deps python linux-headers
+    cd /data/shop # change to shop to make use of node_modules cache...
+    MAKEFLAGS="-j$COMPILE_JOBS" $NPM install antelope
+    cd -
+    apk del .antelope_deps
+    
+    writeErrorMessage "Antelope setup failed"
+}
+
+installAntelope

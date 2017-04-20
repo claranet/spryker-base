@@ -1,32 +1,39 @@
-#!/bin/bash
+#!/bin/sh
 
-if [[ -z "$SETUP" ]]; then
-    tput setab 1
-    echo "Please do not run this script individually"
-    tput sgr0
-    exit 0
+# abort on error
+set -eu -o pipefail
+
+export SHOP="/data/shop"
+export SETUP=spryker
+export TERM=xterm 
+export VERBOSITY='-v'
+
+# path to our antelope binary
+ANTELOPE='/data/shop/node_modules/.bin/antelope'
+
+# make modifying parameters easy by a central apk add command
+apk_add='apk add'
+
+
+# include custom build config on demand
+if [[ -e "$WORKDIR/docker/build.conf" ]]; then
+  source "$WORKDIR/docker/build.conf"
 fi
 
-CURL=`which curl`
-NPM=`which npm`
-GIT=`which git`
-PHP=`which php`
 
-# empty sudo command to avoid using sudo
-# if you want to enable sudo, specify it as ENV var:
-# SUDO_CMD="sudo"
+NPM=${NODEJS_PACKAGE_MANAGER:-npm}
 
-ERROR_BKG=`tput setab 1` # background red
-GREEN_BKG=`tput setab 2` # background green
-BLUE_BKG=`tput setab 4` # background blue
-YELLOW_BKG=`tput setab 3` # background yellow
-MAGENTA_BKG=`tput setab 5` # background magenta
+ERROR_BKG=';41m' # background red
+GREEN_BKG=';42m' # background green
+BLUE_BKG=';44m' # background blue
+YELLOW_BKG=';43m' # background yellow
+MAGENTA_BKG=';45m' # background magenta
 
-INFO_TEXT=`tput setaf 3` # yellow text
-WHITE_TEXT=`tput setaf 7` # text white
-BLACK_TEXT=`tput setaf 0` # text black
-RED_TEXT=`tput setaf 1` # text red
-NC=`tput sgr0` # reset
+INFO_TEXT='\033[33' # yellow text
+WHITE_TEXT='\033[37' # text white
+BLACK_TEXT='\033[30' # text black
+RED_TEXT='\033[31' # text red
+NC='\033[0m' # reset
 
 if [[ `echo "$@" | grep '\-v'` ]]; then
     VERBOSITY='-v'
@@ -40,31 +47,31 @@ if [[ `echo "$@" | grep '\-vvv'` ]]; then
     VERBOSITY='-vvv'
 fi
 
-function labelText {
-    echo -e "\n${BLUE_BKG}${WHITE_TEXT}-> ${1} ${NC}\n"
+labelText() {
+    echo -e "\n${WHITE_TEXT}${BLUE_BKG}-> ${1} ${NC}\n"
 }
 
-function errorText {
-    echo -e "\n${ERROR_BKG}${WHITE_TEXT}=> ${1} <=${NC}\n"
+errorText() {
+    echo -e "\n${WHITE_TEXT}${ERROR_BKG}=> ${1} <=${NC}\n"
 }
 
-function infoText {
-    echo -e "\n${INFO_TEXT}=> ${1} <=${NC}\n"
+infoText() {
+    echo -e "\n${INFO_TEXT}m=> ${1} <=${NC}\n"
 }
 
-function successText {
-    echo -e "\n${GREEN_BKG}${BLACK_TEXT}=> ${1} <=${NC}\n"
+successText() {
+    echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
 }
 
-function warningText {
-    echo -e "\n${YELLOW_BKG}${RED_TEXT}=> ${1} <=${NC}\n"
+warningText() {
+    echo -e "\n${RED_TEXT}${YELLOW_BKG}=> ${1} <=${NC}\n"
 }
 
-function setupText {
-    echo -e "\n${MAGENTA_BKG}${WHITE_TEXT}=> ${1} <=${NC}\n"
+setupText() {
+    echo -e "\n${WHITE_TEXT}${MAGENTA_BKG}=> ${1} <=${NC}\n"
 }
 
-function writeErrorMessage {
+writeErrorMessage() {
     if [[ $? != 0 ]]; then
         errorText "${1}"
         errorText "Command unsuccessful"
@@ -72,31 +79,31 @@ function writeErrorMessage {
     fi
 }
 
-function createDevelopmentDatabase {
+createDevelopmentDatabase() {
     # postgres
-    $SUDO_CMD createdb ${DATABASE_NAME}
+    createdb ${DATABASE_NAME}
 
     # mysql
     # mysql -u root -e "CREATE DATABASE DE_development_zed;"
 }
 
-function dumpDevelopmentDatabase {
+dumpDevelopmentDatabase() {
     export PGPASSWORD=$DATABASE_PASSWORD
     export LC_ALL="en_US.UTF-8"
 
     pg_dump -i -h 127.0.0.1 -U $DATABASE_USER  -F c -b -v -f  $DATABASE_NAME.backup $DATABASE_NAME
 }
 
-function restoreDevelopmentDatabase {
+restoreDevelopmentDatabase() {
     read -r -p "Restore database ${DATABASE_NAME} ? [y/N] " response
     case $response in
         [yY][eE][sS]|[yY])
             export PGPASSWORD=$DATABASE_PASSWORD
             export LC_ALL="en_US.UTF-8"
 
-            $SUDO_CMD pg_ctlcluster 9.4 main restart --force
-            $SUDO_CMD dropdb $DATABASE_NAME
-            $SUDO_CMD createdb $DATABASE_NAME
+            pg_ctlcluster 9.4 main restart --force
+            dropdb $DATABASE_NAME
+            createdb $DATABASE_NAME
             pg_restore -i -h 127.0.0.1 -p 5432 -U $DATABASE_USER -d $DATABASE_NAME -v $DATABASE_NAME.backup
             ;;
         *)
@@ -105,10 +112,9 @@ function restoreDevelopmentDatabase {
     esac
 }
 
-function installDemoshop {
+installDemoshop() {
     labelText "Preparing to install Spryker Platform..."
 
-    updateComposerBinary
     composerInstall
 
     installZed
@@ -121,7 +127,7 @@ function installDemoshop {
     infoText "\nYves URL: http://www.de.spryker.dev/\nZed URL: http://zed.de.spryker.dev/\n"
 }
 
-function installZed {
+installZed() {
     setupText "Zed setup"
 
     resetDataStores
@@ -144,33 +150,26 @@ function installZed {
     $CONSOLE setup:jenkins:generate $VERBOSITY
     writeErrorMessage "Cronjob setup failed"
 
-    antelopeInstallZed
+    antelopeInstall
 
     labelText "Zed setup successful"
 }
 
-function installYves {
+installYves() {
     setupText "Yves setup"
 
-    antelopeInstallYves
+    antelopeInstall
 
     labelText "Yves setup successful"
 }
 
-function configureCodeception {
+configureCodeception() {
     labelText "Configuring test environment"
     vendor/bin/codecept build -q $VERBOSITY
     writeErrorMessage "Test configuration failed"
 }
 
-function optimizeRepo {
-    labelText "Optimizing repository"
-    git gc              # garbage collector
-    git prune           # kills loose garbage
-    writeErrorMessage "Repository optimization failed"
-}
-
-function resetDataStores {
+resetDataStores() {
     labelText "Flushing Elasticsearch"
     curl -XDELETE 'http://localhost:10005/de_search/'
     writeErrorMessage "Elasticsearch reset failed"
@@ -180,7 +179,7 @@ function resetDataStores {
     writeErrorMessage "Redis reset failed"
 }
 
-function resetDevelopmentState {
+resetDevelopmentState() {
     labelText "Preparing to reset data..."
     sleep 1
 
@@ -203,15 +202,15 @@ function resetDevelopmentState {
     writeErrorMessage "DB setup failed"
 }
 
-function dropDevelopmentDatabase {
-    if [ `$SUDO_CMD psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
+dropDevelopmentDatabase() {
+    if [ `psql -l | grep ${DATABASE_NAME} | wc -l` -ne 0 ]; then
 
         PG_CTL_CLUSTER=`which pg_ctlcluster`
         DROP_DB=`which dropdb`
 
         if [[ -f $PG_CTL_CLUSTER ]] && [[ -f $DROP_DB ]]; then
             labelText "Deleting PostgreSql Database: ${DATABASE_NAME} "
-            $SUDO_CMD pg_ctlcluster 9.4 main restart --force && $SUDO_CMD dropdb $DATABASE_NAME 1>/dev/null
+            pg_ctlcluster 9.4 main restart --force && dropdb $DATABASE_NAME 1>/dev/null
             writeErrorMessage "Deleting DB command failed"
         fi
     fi
@@ -223,37 +222,17 @@ function dropDevelopmentDatabase {
     # fi
 }
 
-function updateComposerBinary {
-    labelText "Setting up composer"
-
-    if [[ ! -f "./composer.phar" ]]; then
-        labelText "Download composer.phar"
-        $CURL -sS https://getcomposer.org/installer | $PHP
-    fi
-
-    COMPOSER_TIMESTAMP=$(stat -c %Y "composer.phar")
-    CURRENT_TIMESTAMP=$(date +"%s")
-
-    COMPOSER_FILE_AGE=$(($CURRENT_TIMESTAMP-$COMPOSER_TIMESTAMP))
-    THIRTY_DAYS_AGE=$((60*60*24*30))
-
-    if [[ $COMPOSER_FILE_AGE > $THIRTY_DAYS_AGE ]]; then
-        labelText "Install Composer Dependencies"
-        $PHP composer.phar selfupdate
-    fi
-}
-
-function composerInstall {
+composerInstall() {
     echo $@
     labelText "Installing composer packages"
-    $PHP composer.phar install --prefer-dist
+    php /data/bin/composer.phar install --prefer-dist
 }
 
-function dumpAutoload {
-    $PHP composer.phar dump-autoload
+dumpAutoload() {
+    php /data/bin/composer.phar dump-autoload
 }
 
-function resetYves {
+resetYves() {
     if [[ -d "./node_modules" ]]; then
         labelText "Remove node_modules directory"
         rm -rf "./node_modules"
@@ -274,62 +253,21 @@ function resetYves {
     fi
 }
 
-function checkNodejsVersion {
-    if [[ `node -v | grep -E '^v[0-4]'` ]]; then
-        labelText "Upgrade Node.js"
-        $CURL -sL https://deb.nodesource.com/setup_5.x | $SUDO_CMD -E bash -
+antelopeInstall() {
+    labelText "Installing project dependencies"
+    $ANTELOPE install
 
-        $SUDO_CMD apt-get install -y nodejs
-
-        successText "Node.js updated to version `node -v`"
-        successText "NPM updated to version `$NPM -v`"
-    fi
+    labelText "Building and optimizing assets for Zed"
+    $ANTELOPE build zed
+    writeErrorMessage "Antelope build failed"
 }
 
-function installAntelope {
-    checkNodejsVersion
-
-    labelText "Install or Update Antelope tool globally"
-    $SUDO_CMD $NPM install -g antelope
-    writeErrorMessage "Antelope setup failed"
-}
-
-function antelopeInstallZed {
-    installAntelope
-
-    ANTELOPE_TOOL=`which antelope`
-
-    if [[ -f $ANTELOPE_TOOL ]]; then
-        labelText "Installing project dependencies"
-        $ANTELOPE_TOOL install
-
-        labelText "Building and optimizing assets for Zed"
-        $ANTELOPE_TOOL build zed
-        writeErrorMessage "Antelope build failed"
-    fi
-}
-
-function antelopeInstallYves {
-    installAntelope
-
-    ANTELOPE_TOOL=`which antelope`
-
-    if [[ -f $ANTELOPE_TOOL ]]; then
-        labelText "Installing project dependencies"
-        $ANTELOPE_TOOL install
-
-        labelText "Building and optimizing assets for Yves"
-        $ANTELOPE_TOOL build yves
-        writeErrorMessage "Antelope build failed"
-    fi
-}
-
-function displayHeader {
+displayHeader() {
     labelText "Spryker Platform Setup"
     echo "./$(basename $0) [OPTION] [VERBOSITY]"
 }
 
-function displayHelp {
+displayHelp() {
 
     displayHeader
 

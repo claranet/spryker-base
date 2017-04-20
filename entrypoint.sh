@@ -1,16 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-export SHOP="/data/shop"
-export SETUP=spryker
-export TERM=xterm 
-export VERBOSITY='-v'
 export CONSOLE=vendor/bin/console
 
-# NOTE: requires $PHP_VERSION to be set from outside!
+# services activated for this docker container instance will be added to this string
 ENABLED_SERVICES=""
 
 
 source /data/bin/functions.sh
+[ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
 
 # abort on first error
 set -e
@@ -18,7 +15,7 @@ set -e
 cd $SHOP
 
 
-function generate_configurations {
+generate_configurations() {
   labelText "Create runtime configuration ..."
 
   if [ -e $CONSOLE ]; then
@@ -28,39 +25,27 @@ function generate_configurations {
 }
 
 
-function install_dependencies {
+install_dependencies() {
     labelText "Resolving dependencies ..."
-
-    if [ -n "$PHP_EXTENSIONS" ]; then
-      export DEBIAN_FRONTEND=noninteractive
-      
-      for i in $PHP_EXTENSIONS; do
-        exts="php${PHP_VERSION}-${i} $exts"
-      done
-      
-      infoText "Installing required PHP extensions: $exts"
-      apt-get -y update
-      apt-get -y --allow-unauthenticated --no-install-recommends install $exts
-    fi
 
     if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
       infoText "Installing required NPM dependencies..."
-      npm install --only=production
+      $NPM install --only=production
       infoText "Installing required PHP dependencies..."
       php /data/bin/composer.phar install --prefer-dist --no-dev
     else
       infoText "Installing required NPM dependencies (including dev) ..."
-      npm install
+      $NPM install
       infoText "Installing required PHP dependencies (including PHP) ..."
       php /data/bin/composer.phar install --prefer-dist
     fi
     php /data/bin/composer.phar clear-cache
 
-    antelope install
+    $ANTELOPE install
 }
 
 
-function generate_shared_code {
+generate_shared_code() {
     labelText "Generate code for both Yves and Zed ..."
 
     infoText "Generate transfer objects ..."
@@ -68,7 +53,7 @@ function generate_shared_code {
 }
 
 
-function generate_zed_code {
+generate_zed_code() {
     labelText "Generate code for Zed ..."
 
     infoText "Propel - Copy schema files ..."
@@ -85,19 +70,19 @@ function generate_zed_code {
 }
 
 
-function build_assets_for_yves {
+build_assets_for_yves() {
     labelText "Building and optimizing assets of Yves"
-    antelope build yves
+    $ANTELOPE build yves
 }
 
 
-function build_assets_for_zed {
+build_assets_for_zed() {
     labelText "Building and optimizing assets of Zed"
-    antelope build zed
+    $ANTELOPE build zed
 }
 
 
-function init_shared {
+init_shared() {
     labelText "Initializing setup"
 
     infoText "Propel - Converting configuration ..."
@@ -118,14 +103,14 @@ function init_shared {
 }
 
 
-function init_yves {
+init_yves() {
     labelText "Initializing Yves ..."
 
     exec_hooks "$SHOP/docker/init.d/Yves"
 }
 
 
-function init_zed {
+init_zed() {
     labelText "Initializing Zed ..."
 
     infoText "Propel - Create database ..."
@@ -155,26 +140,26 @@ function init_zed {
 
 
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
-function enable_nginx_vhost {
+enable_nginx_vhost() {
   NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
-  NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
+  NGINX_SITES_ENABLED='/etc/nginx/conf.d'
   VHOST=$1
+  
   if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
     errorText "\t nginx vhost '$VHOST' not found! Can't enable vhost!"
     return
   fi
   
-  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/$VHOST
+  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/${VHOST}.conf
 }
 
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
-function enable_phpfpm_app {
+enable_phpfpm_app() {
   FPM_APPS_AVAILABLE="/etc/php/apps"
-  FPM_APPS_ENABLED="/etc/php/$PHP_VERSION/fpm/pool.d"
+  FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
   
   APP="${1}.conf"
-  MONIT_APP="${1}"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
@@ -182,13 +167,10 @@ function enable_phpfpm_app {
   
   # enable php-fpm pool config
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
-  
-  # enable monit php-fpm app check
-  ln -fs /etc/monit/apps-available/$MONIT_APP /etc/monit/conf.d/$MONIT_APP
 }
 
 
-function enable_services {
+enable_services() {
   for SERVICE in $ENABLED_SERVICES; do
     labelText "Enable ${SERVICE} vHost and PHP-FPM app..."
     
@@ -201,20 +183,24 @@ function enable_services {
 }
 
 
-function start_services {
+start_services() {
   labelText "Starting enabled services $ENABLED_SERVICES"
   
   # fix error with missing event log dir
   mkdir -p /data/shop/data/$SPRYKER_SHOP_CC/logs/
   
   generate_configurations
-  /usr/bin/monit -d 10 -Ic /etc/monit/monitrc
+  
   # TODO: increase security by making this more granular
-  chown -R www-data: /data/{logs,shop}
+  chown -R www-data: /data/logs /data/shop
+  
+  # starts nginx daemonized, to start php-fpm in background
+  # check if nginx failed...
+  nginx && php-fpm --nodaemonize
 }
 
 
-function exec_hooks {
+exec_hooks() {
     hook_d=$1
     if [ -e "$hook_d" -a -n "`ls -1 $hook_d/`" ]; then
       max=$(ls -1 $hook_d/|wc -l)
@@ -223,7 +209,7 @@ function exec_hooks {
       for hook in `find $hook_d -type f ! -name '\.*' -a -name '*.sh'`; do
         hook="${hook%\\n}"
         infoText "Executing $i/$max hook script: $hook ..."
-        bash $hook
+        sh $hook
         let "i += 1"
       done
     fi
@@ -252,11 +238,12 @@ case $1 in
     build_image)
         # target during build time of child docker image executed by ONBUILD
         # build trigger of base image
-        [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
         install_dependencies
         generate_configurations
         generate_shared_code
         generate_zed_code
+        
+        mkdir -pv /data/shop/assets/Yves /data/shop/assets/Zed
 
         exec_hooks "$SHOP/docker/build.d"
 
@@ -267,7 +254,7 @@ case $1 in
         generate_configurations
         # wait for depending services and then initialize redis, elasticsearch and postgres
         # Run once per setup 
-        mkdir -p /data/shop/assets/{Yves,Zed}
+        
 
         build_assets_for_yves
         build_assets_for_zed
@@ -283,6 +270,10 @@ case $1 in
 
         # FIXME Poor mans waiting-for-depending-services-to-be-online needs to be fixed
         sleep 5
+        
+        # FIXME //TRANSLIT isn't supported with musl-libc, by intension!
+        # see https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+        sed -i 's#//TRANSLIT##g'  /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
 
         # The different init stages has been already prepared to be split up in future
         init_shared
@@ -293,6 +284,6 @@ case $1 in
         ;;
     *)
         generate_configurations
-        bash -c "$*"
+        sh -c "$*"
         ;;
 esac

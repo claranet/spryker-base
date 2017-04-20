@@ -1,5 +1,8 @@
 
-FROM ubuntu:xenial
+# stuck on 7.0.17 as 7.0.18 breaks spryker predis usage
+# see https://github.com/php/php-src/commit/bab0b99f376dac9170ac81382a5ed526938d595a for details
+# php bug report: https://bugs.php.net/bug.php?id=74429
+FROM php:7.0.17-fpm-alpine
 
 
 # NOTE: to get a list of possible build args,
@@ -17,12 +20,13 @@ LABEL org.label-schema.name="spryker-base" \
       co_author="Tony Fahrion <tony.fahrion@de.clara.net>"
 
 
+ENV WORKDIR=/data/shop
+
 # Spryker config related ENV vars
+# ENV configs for ZED_HOST and YVES_HOST should be set by child Dockerfiles, or left to default
 ENV SPRYKER_SHOP_CC="DE" \
     ZED_HOST="zed" \
-    PUBLIC_ZED_DOMAIN="zed.spryker.dev" \
     YVES_HOST="yves" \
-    PUBLIC_YVES_DOMAIN="yves.spryker.dev" \
     ES_HOST="elasticsearch" \
     ES_PROTOCOL="http" \
     ES_PORT="9200" \
@@ -40,54 +44,22 @@ ENV SPRYKER_SHOP_CC="DE" \
     JENKINS_BASEURL="http://jenkins:8080/"
 
 
-# debian related vars
-ENV DEBIAN_FRONTEND=noninteractive \
-    APT_GET_BASIC_ARGS="-y  --no-install-recommends"
-
-
-# make apt-get packages cache available
-# and install basic packages
-RUN apt-get update
-RUN apt-get install $APT_GET_BASIC_ARGS \
-      software-properties-common \
-      apt-transport-https \
-      ca-certificates \
-      curl
-
-
-# TODO: make postgres / mysql configureable!
-RUN apt-get install $APT_GET_BASIC_ARGS \
-      nginx \
-      nginx-extras \
-      monit \
-      git \
-      netcat \
-      net-tools \
-      redis-tools \
-      postgresql-client \
-      mysql-client
-
-
-# copy image data and prepare image filesystem structure
-
-# copy prepared config files
 COPY etc/ /etc/
-RUN mkdir -pv /data/logs /data/bin /data/etc /data/shop
-ENV PATH="/data/bin/:$PATH"
-
-# make bash default shell for better syntax support
-RUN ln -fs /bin/bash /bin/sh
-
-# copy our command and container entrypoint script
-# also add docker build helper scripts
 COPY entrypoint.sh functions.sh build/* /data/bin/
-RUN chmod +x /data/bin/*
 
 
-# fix wrong permissions of monitrc, else monit will refuse to run
-# and remove nginx default vhost
-RUN chmod 0700 /etc/monit/monitrc \
-    && rm /etc/nginx/sites-enabled/default
+# first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
+# `apk upgrade --clean-protected` for not creating *.apk-new (config)files
+# install basic packages (currently just git)
+RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade --clean-protected \
+    && apk add git \
+    
+    # our own copied scripts
+    && chmod +x /data/bin/* \
+    
+    # create required shop directories
+    && mkdir -pv /data/logs /data/bin /data/etc /data/shop
+    
 
 
 EXPOSE 80
@@ -105,38 +77,28 @@ CMD  [ "run_yves_and_zed" ]
 # 
 
 
-# ops mode defines the mode while building docker images... it does NOT control
-# in which ENV the application is installed.
-# supported vaules are (dev/prod), defaults to "prod"
-ONBUILD ARG OPS_MODE
-ONBUILD ENV OPS_MODE=${OPS_MODE:-prod}
+# With DEV_TOOLS=on, we won't clean up the image from build tools and debugging tools.
+# Even further we will add tools like vim, tree and less.
+# supported vaules are (on/off), defaults to "off"
 
 # application env decides in which mode the application is installed/runned.
 # so if you choose development here, e.g. composer and npm/yarn will also install
 # dev dependencies! There are more modifications, which depend on this switch.
 # defaults to "production"
+
+# support NODEJS_VERSION as ARG to let the user switch between nodejs 6.x and 7.x
+# NODEJS_PACKAGE_MANAGER: you can, additionally to npm, install yarn; if you select yarn here
+# also, if yarn is selected, it would be used while running the base installation
+ONBUILD ARG DEV_TOOLS
 ONBUILD ARG APPLICATION_ENV
-ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production}
-
-# support PHP_VERSION as ARG to support an easy way to build multiple flavors
-# of your image (one for e.g. 5.6 and one for 7.0)
-# This is especially useful while in OPS_MODE=dev! Or for OPS tests.
-ONBUILD ARG PHP_VERSION
-ONBUILD ENV PHP_VERSION=${PHP_VERSION:-7.0}
-
-# support NODEJS_VERSION as ARG for the same reason we support PHP_VERSION
 ONBUILD ARG NODEJS_VERSION
-ONBUILD ENV NODEJS_VERSION=${NODEJS_VERSION:-6}
-
-# support different nodejs package managers, as spryker supports npm and yarn!
 ONBUILD ARG NODEJS_PACKAGE_MANAGER
-ONBUILD ENV NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
-# via PHP_VERSION you can control which PHP version you need. Version 7.0 is default
-# via NODEJS_VERSION you can control which nodejs version you need. Version 6 (LTS) is default
-ONBUILD RUN cd /data/bin/ && ./install_php.sh
-ONBUILD RUN cd /data/bin/ && ./install_nodejs.sh
+ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
+            APPLICATION_ENV=${APPLICATION_ENV:-production} \
+            NODEJS_VERSION=${NODEJS_VERSION:-6} \
+            NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
 ONBUILD COPY ./src /data/shop/src
@@ -145,15 +107,20 @@ ONBUILD COPY ./public /data/shop/public
 ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
 
-# 
-ONBUILD RUN  /data/bin/entrypoint.sh build_image
 
-# install ops tools while in debugging and testing stage
-ONBUILD RUN [ "$OPS_MODE" == "prod" ] || apt-get install $APT_GET_BASIC_ARGS \
-      vim \
-      less \
-      tree
-
-# clean up docker image if we are in OPS_MODE "prod"
-ONBUILD RUN [ "$OPS_MODE" == "dev" ] || apt-get clean -y
-ONBUILD RUN [ "$OPS_MODE" == "dev" ] || rm -rf /var/lib/apt/lists/*
+# use ccache to decrease compile times
+ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc-dev make pkgconf \
+            
+            # add psql command, should be removed later on... this should be done in an init task or externally!
+            && apk add postgresql-client \
+            
+            && cd /data/bin/ && ./install_php.sh \
+            && ./install_nodejs.sh \
+            && ./install_nginx.sh \
+            && ./entrypoint.sh build_image \
+            
+            # install ops tools while in debugging and testing stage
+            && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \
+            
+            # clean up if in production mode
+            && [ "$DEV_TOOLS" = "on" ] || apk del .base_build_deps

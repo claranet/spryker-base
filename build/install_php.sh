@@ -1,61 +1,145 @@
-#!/bin/bash
+#!/bin/sh
 
 # Author: Tony Fahrion <tony.fahrion@de.clara.net>
 
 #
-# This script installs the PHP core packages and specified PHP extensions
-# It requires that the ENV var PHP_VERSION is set!
+# This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-SUPPORTED_PHP_VERSIONS='5.6 7.0'
+# include helper functions and common settings
+source functions.sh
+
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
 
-export SHOP="/data/shop"
-export SETUP=spryker
-export TERM=xterm 
-export VERBOSITY='-v'
-
-
-# include helper functions
-source ./build_library.sh
-source ./functions.sh
-
-# abort on error
-set -e
 
 #
-#  Prepare
+#  Install PHP extensions
 #
 
-infoText "check if we support the requested PHP_VERSION"
-if is_not_in_list "$PHP_VERSION" "$SUPPORTED_PHP_VERSIONS"; then
-  errorText "Requested PHP_VERSION '$PHP_VERSION' is not supported. Abort!"
-  infoText  "Supported PHP version is one of: $SUPPORTED_PHP_VERSIONS"
-  exit 1
+# helper to deduplicate common code
+# installs special php extension dependencies before "install" is called
+# removes those dependencies after "install" finishes
+# arg1: extension name; arg2: list of dependencies
+install_simple_extension() {
+  EXTENSION=$1
+  DEPS="$2"
+  
+  $apk_add --virtual .phpmodule-deps $DEPS
+  docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
+  apk del .phpmodule-deps
+}
+
+install_imagick() {
+  $apk_add --virtual .phpmodule-deps imagemagick-dev libtool
+  $apk_add imagemagick
+
+  pecl install imagick-3.4.3
+  docker-php-ext-enable imagick
+
+  apk del .phpmodule-deps
+}
+
+install_gd() {
+  $apk_add --virtual .phpmodule-deps freetype-dev \
+        libjpeg-turbo-dev \
+        libmcrypt-dev \
+        libpng-dev
+  
+  docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+  docker-php-ext-install -j$COMPILE_JOBS gd
+  apk del .phpmodule-deps
+  
+  $apk_add libpng libjpeg-turbo
+}
+
+install_xcache() {
+  curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
+    && mkdir -p /tmp/xcache \
+    && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
+    && rm xcache.tar.gz \
+    && docker-php-ext-configure /tmp/xcache --enable-xcache \
+    && docker-php-ext-install -j$COMPILE_JOBS /tmp/xcache \
+    && rm -r /tmp/xcache
+}
+
+install_redis() {
+  $apk_add --virtual .phpmodule-deps redis
+  
+  pecl install redis
+  docker-php-ext-enable redis
+  apk del .phpmodule-deps
+}
+
+install_curl() {
+  install_simple_extension $ext "curl-dev"
+  $apk_add libcurl
+}
+
+install_mcrypt() {
+  install_simple_extension $ext "libmcrypt-dev"
+  $apk_add libmcrypt
+}
+
+install_gmp() {
+  install_simple_extension $ext "gmp-dev"
+  $apk_add gmp
+}
+
+install_intl() {
+  install_simple_extension $ext "icu-dev libintl"
+  $apk_add libintl icu-libs
+}
+
+install_pgsql() {
+  install_simple_extension $ext "postgresql-dev"
+  $apk_add postgresql-dev
+}
+
+install_pdo_pgsql() {
+  install_simple_extension $ext "postgresql-dev"
+  $apk_add postgresql-dev
+}
+
+install_readline() {
+  install_simple_extension $ext "readline-dev libedit-dev"
+  $apk_add readline libedit
+}
+
+install_dom() {
+  install_simple_extension $ext "libxml2-dev"
+  $apk_add libxml2
+}
+
+install_xml() {
+  install_simple_extension $ext "libxml2-dev"
+  $apk_add libxml2
+}
+
+install_zip() {
+  install_simple_extension $ext "zlib-dev"
+}
+
+
+if [[ ! -z "$PHP_EXTENSIONS" ]]; then
+  docker-php-source extract
+  $apk_add re2c
+  
+  for ext in $PHP_EXTENSIONS; do
+    infoText "installing PHP extension $ext"
+    if type install_$ext; then
+      install_$ext
+    else
+      # try to install unknown extensions as it is possible, that they are part of the core
+      # TODO: check, if the ext is part of the core
+      docker-php-ext-install -j$COMPILE_JOBS $ext
+    fi
+  done
+  
+  apk del re2c
+  docker-php-source delete
 fi
-successText "YES! Support is available for $PHP_VERSION"
-
-
-infoText "set up PHP ppa to support even newer versions of PHP"
-infoText "as this seems to fail sometimes (but works), ignore possible errors"
-add-apt-repository ppa:ondrej/php || true
-
-
-infoText "update apt cache to make use of the new PPA repo"
-apt-get update
-
-
-#
-#  Install PHP core
-#
-
-infoText "install requested PHP core packages"
-apt-get install $APT_GET_BASIC_ARGS --allow-unauthenticated \
-    php${PHP_VERSION}-fpm \
-    php${PHP_VERSION}-cli
-
-infoText "generalize init.d script file name for monit"
-ln -fs /etc/init.d/php${PHP_VERSION}-fpm /etc/init.d/php-fpm
 
 
 #
@@ -72,10 +156,16 @@ infoText "install PHP composer to /data/bin/"
 php /tmp/composer-setup.php --install-dir=/data/bin/
 
 
+# make the installation process of `composer install` faster by parallel downloads
+/data/bin/composer.phar global require hirak/prestissimo
+
+
 #
 #  Clean up
 #
 
 infoText "clean up PHP and composer installation"
 rm -rf /tmp/composer-setup*
-rm -f /etc/php/*/fpm/pool.d/www.conf
+
+# remove php-fpm configs as they are adding a "www" pool, which does not exist
+rm /usr/local/etc/php-fpm.d/*
