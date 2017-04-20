@@ -18,6 +18,12 @@
   * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
 
 
+* docu for users
+* local dev testing
+* clean up git history
+
+
+
 ## Open discussion 
 
 * We need to maintain two branches of this docker image, one for PHP5.6 and one
