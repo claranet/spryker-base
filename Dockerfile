@@ -50,9 +50,7 @@ COPY entrypoint.sh functions.sh build/* /data/bin/
 
 # first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
 # `apk upgrade --clean-protected` for not creating *.apk-new (config)files
-# install basic packages
-# bash is installed as current shell scripts are using bash syntactic sugar
-# so it is required until they are rewritten.
+# install basic packages (currently just git)
 RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade --clean-protected \
     && apk add git \
     

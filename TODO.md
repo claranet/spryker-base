@@ -7,6 +7,8 @@
   * maintenance.html (which might be exported to be delivered externally by the LB)
   * error page for 5xx
 * clean up alpine linux container for sleeker images
+  * remove apk caches / index files
+  * remove antelope for prod modes ( DEV_TOOLS=off )
 * clean up nginx config and make it more robust
 * secure php installation (disable functions/classes, set open_basedir, ...)
 * clean up commit history

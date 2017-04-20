@@ -1,11 +1,24 @@
 #!/bin/sh
 
+# abort on error
+set -eu -o pipefail
+
 export SHOP="/data/shop"
 export SETUP=spryker
 export TERM=xterm 
 export VERBOSITY='-v'
 
+# path to our antelope binary
 ANTELOPE='/data/shop/node_modules/.bin/antelope'
+
+# make modifying parameters easy by a central apk add command
+apk_add='apk add'
+
+
+# include custom build config on demand
+if [[ -e "$WORKDIR/docker/build.conf" ]]; then
+  source "$WORKDIR/docker/build.conf"
+fi
 
 
 NPM=${NODEJS_PACKAGE_MANAGER:-npm}

@@ -6,20 +6,9 @@
 # This script installs the nginx webserver
 #
 
-# shortcut for apk add
-apk_add='apk add'
 
-
-# include helper functions
+# include helper functions and common settings
 source functions.sh
-
-# include custom build config on demand
-if [[ -e "$WORKDIR/docker/build.conf" ]]; then
-  source "$WORKDIR/docker/build.conf"
-fi
-
-# abort on error
-set -e
 
 
 # we are using more_clear_headers to remove client header

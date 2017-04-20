@@ -6,20 +6,8 @@
 # This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-# shortcut for apk add
-apk_add='apk add'
-
-
-# include helper functions
+# include helper functions and common settings
 source functions.sh
-
-# include custom build config on demand
-if [[ -e "$WORKDIR/docker/build.conf" ]]; then
-  source "$WORKDIR/docker/build.conf"
-fi
-
-# abort on error
-set -e
 
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))

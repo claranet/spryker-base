@@ -14,12 +14,10 @@ SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
 NPM='npm'
 
 
-# include helper functions
+# include helper functions and common settings
 source ./build_library.sh
 source ./functions.sh
 
-# abort on error
-set -e
 
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
@@ -51,15 +49,15 @@ successText "YES! Support is available for $NODEJS_PACKAGE_MANAGER"
 
 infoText "install nodejs version $NODEJS_VERSION and npm"
 if [ "$NODEJS_VERSION" = "7" ]; then
-  apk add nodejs-current
+  $apk_add nodejs-current
 else
-  apk add nodejs
+  $apk_add nodejs
 fi
 
 
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
-  apk add yarn
+  $apk_add yarn
   NPM='yarn'
 fi
 
@@ -72,7 +70,7 @@ fi
 installAntelope() {
     labelText "Install antelope tool (static assets generator)"
     
-    apk add --virtual .antelope_deps python linux-headers
+    $apk_add --virtual .antelope_deps python linux-headers
     cd /data/shop # change to shop to make use of node_modules cache...
     MAKEFLAGS="-j$COMPILE_JOBS" $NPM install antelope
     cd -
