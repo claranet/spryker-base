@@ -21,6 +21,18 @@
 * docu for users
 * local dev testing
 * clean up git history
+* clean up $\_ENV and $\_SERVER at the bottom of config\_local.php
+* report to https://github.com/spryker/support
+  * //TRANSLIT issue with muslc
+  * report composer.json issue with external repositories
+    * https://github.com/spryker/demoshop/blob/168ebe26b8f4a7074286b20dfa444a85b59d4128/composer.json#L202
+* migrate to docker stack, as docker-compose is about to be deprecated in the near future
+  * see https://github.com/docker/compose/issues/4305#issuecomment-276527457
+  * and https://docs.docker.com/docker-cloud/apps/stack-yaml-reference/
+  * advantage: no docker-compose needed, so 3rd party dependency is gone!
+* use spryker/oryx to replace antelope
+* make git clone to use https for github.com
+
 
 
 
