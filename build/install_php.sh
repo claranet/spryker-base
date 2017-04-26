@@ -55,6 +55,7 @@ install_gd() {
 }
 
 install_xcache() {
+  # FIXEM: replace by opcache - no support for PHP 7.x!
   curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
     && mkdir -p /tmp/xcache \
     && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
