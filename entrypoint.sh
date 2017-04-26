@@ -328,8 +328,8 @@ case $1 in
         infoText "Build assets for Yves/Zed"
         
         # TODO: add zed:prod and yves:prod possibility
-        npm run zed
-        npm run yves
+        $NPM run zed
+        $NPM run yves
     
         # ============= ORM code / schema generation ===============
         
