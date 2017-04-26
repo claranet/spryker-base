@@ -8,9 +8,6 @@ export SETUP=spryker
 export TERM=xterm 
 export VERBOSITY='-v'
 
-# path to our antelope binary
-ANTELOPE='/data/shop/node_modules/.bin/antelope'
-
 # make modifying parameters easy by a central apk add command
 apk_add='apk add'
 

@@ -60,23 +60,3 @@ if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
   $apk_add yarn
   NPM='yarn'
 fi
-
-
-#
-#  Install antelope
-#
-
-
-installAntelope() {
-    labelText "Install antelope tool (static assets generator)"
-    
-    $apk_add --virtual .antelope_deps python linux-headers
-    cd /data/shop # change to shop to make use of node_modules cache...
-    MAKEFLAGS="-j$COMPILE_JOBS" $NPM install antelope
-    cd -
-    apk del .antelope_deps
-    
-    writeErrorMessage "Antelope setup failed"
-}
-
-installAntelope

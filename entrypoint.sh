@@ -294,39 +294,42 @@ case $1 in
     
         # rule of thumb:
         # zed is able to work without yves, so generate zed data first!
-    
+        
+        
         # ============= install dependencies PHP/NodeJS ===============
-    
+        
+        
+        infoText "Installing required PHP dependencies..."
+        
         if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
-          NPM_ARGUMENTS="--only=production"
           COMPOSER_ARGUMENTS="--no-dev"
         fi
         
-        #get amount of available prozessors * 2 for faster compiling of sources
-        COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
-        
-        # make is required for node-gyp compilation while npm install runs
-        infoText "Installing required NPM dependencies..."
-        MAKEFLAGS="-j$COMPILE_JOBS" $NPM install $NPM_ARGUMENTS
-        
-        infoText "Installing required PHP dependencies..."
         php /data/bin/composer.phar install --prefer-dist $COMPOSER_ARGUMENTS
+        php /data/bin/composer.phar clear-cache # Clears composer's internal package cache
         
-        # Clears composer's internal package cache
-        php /data/bin/composer.phar clear-cache
-
-        # installs antelope dependencies
-        # Install all project dependencies
-        # requires python binary!
-        apk add python
-        MAKEFLAGS="-j$COMPILE_JOBS"  $ANTELOPE install
-        apk del python
+        
+        # install dependencies for building asset
+        # --with-dev is required to install spryker/oryx (works behind npm run x)
+        infoText "Installing required NPM dependencies..."
+        $NPM install --with-dev
+        
+        # as we are collecting assets from various vendor/ composer modules
+        # we also need to install possible assets-build dependencies from those
+        # modules
+        for i in `find vendor/ -name 'package.json' | egrep 'assets/(Zed|Yves)/package.json'`; do
+          cd `dirname $i`
+          $NPM install
+          cd $WORKDIR
+        done
         
         # ============= build assets ===============
         
-        mkdir -pv /data/shop/assets/Yves /data/shop/assets/Zed
-        $ANTELOPE build zed
-        $ANTELOPE build yves
+        infoText "Build assets for Yves/Zed"
+        
+        # TODO: add zed:prod and yves:prod possibility
+        npm run zed
+        npm run yves
     
         # ============= ORM code / schema generation ===============
         
