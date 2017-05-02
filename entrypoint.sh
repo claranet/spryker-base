@@ -59,7 +59,7 @@ enable_services() {
     # if we are the ZED instance, init ENV
     if [ "${SERVICE}" = "zed" ]; then
       infoText "init external services (DBMS, ES)"
-      /data/bin/entrypoint.sh optimized_init
+      /data/bin/entrypoint.sh bootstrap_external_services
     fi
     
   done
@@ -137,160 +137,8 @@ case $1 in
       enable_services
       start_services
       ;;
-
-    generate_code_and_assets)
     
-        # NOTE: unused, just for a clear overview about the complete setup/init process and it's order
-    
-        # ============= install_dependencies ===============
-    
-            if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
-              infoText "Installing required NPM dependencies..."
-              $NPM install --only=production
-              infoText "Installing required PHP dependencies..."
-              php /data/bin/composer.phar install --prefer-dist --no-dev
-            else
-              infoText "Installing required NPM dependencies (including dev) ..."
-              $NPM install
-              infoText "Installing required PHP dependencies (including PHP) ..."
-              php /data/bin/composer.phar install --prefer-dist
-            fi
-            php /data/bin/composer.phar clear-cache
-
-            # installs antelope dependencies
-            # Install all project dependencies
-            # requires python binary!
-            apk add python
-            $ANTELOPE install
-    
-    
-    
-        # ============= generate_zed_code ===============
-            
-            infoText "Propel - Copy schema files ..."
-            # Copy schema files from packages to generated folder
-            $CONSOLE propel:schema:copy
-
-            infoText "Propel - Build models ..."
-            # Build Propel2 classes
-            $CONSOLE propel:model:build
-
-            infoText "Propel - Removing old migration plans ..."
-            rm -f $SHOP/src/Orm/Propel/*/Migration_pgsql/*
-            
-            infoText "Zed - generate navigation cache files"
-            # [application:build-navigation-cache] Build the navigation tree and persist it
-            $CONSOLE navigation:build-cache
-    
-            mkdir -pv /data/shop/assets/Yves /data/shop/assets/Zed
-        
-        # ============= generate_configurations ===============
-        
-            # propel code
-            # Write Propel2 configuration
-            # any, should be service instance independend
-            $CONSOLE propel:config:convert
-        
-        # ============= build_assets_for_zed ===============
-        
-            # assets
-            # time: any, static code/assets generator
-            $ANTELOPE build zed
-        
-        # ============= build_assets_for_yves ===============
-        
-            # time: any, static code/assets generator
-            $ANTELOPE build yves
-        
-        # ============= generate_shared_code ===============
-        
-            # FIXME the following line is workaround:
-            #   (1) setup:search must be run at runtime 
-            #   (2) therefore ./src/Generated needs to be a shared volume
-            #   (3) thats why the transfer objects generated during build time are not available anymore
-            #   (4) but we need them there, because propel generation relies on these transfer objects
-            #   (5) and thats why we need to regenerate them here 
-            # If search:setup task has been split up into a build and init time part, we are able to clean this up
-            
-            
-            # zed <-> yves transfer objects
-            # Generates transfer objects from transfer XML definition files
-            # time: any, static code generator
-            $CONSOLE transfer:generate
-        
-        
-            # FIXME //TRANSLIT isn't supported with musl-libc, by intension!
-            # see https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
-            sed -i 's#//TRANSLIT##g'  /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
-        
-        
-        # ============= init_shared ===============
-        
-            infoText "Propel - Converting configuration ..."
-            # Write Propel2 configuration
-            $CONSOLE propel:config:convert
-
-            # FIXME Does this task makes sense during init stage? Since it works on
-            # ./data which is not a shared volume? 
-            infoText "Cleaning cache ..."
-            # Deletes all cache files from /data/{Store}/cache for all stores
-            $CONSOLE cache:delete-all
-
-            infoText "Create Search Index and Mapping Types; Generate Mapping Code."
-            # This command will run installer for search
-            # migth be split into:
-            #   setup:search:index-map              This command will generate the PageIndexMap without requiring the actual Elasticsearch index
-            $CONSOLE setup:search
-
-            infoText "Build Zeds Navigation Cache ..."
-            # in 2.11, this is missing? => replaced by navigation:build-cache (it's currently the same/an alias!)
-            $CONSOLE application:build-navigation-cache
-
-            exec_hooks "$SHOP/docker/init.d/Shared"
-        
-        
-        # ============= init_zed ===============
-        
-            infoText "Propel - Create database ..."
-            # Create database if it does not already exist
-            $CONSOLE propel:database:create
-
-            infoText "Propel - Insert PG compatibility ..."
-            # Adjust Propel-XML schema files to work with PostgreSQL
-            $CONSOLE propel:pg-sql-compat
-
-            infoText "Propel - Create schema diff ..."
-            # Generate diff for Propel2
-            $CONSOLE propel:diff
-
-            infoText "Propel - Migrate Schema ..."
-            # Migrate database
-            $CONSOLE propel:migrate
-
-            infoText "Propel - Initialize database ..."
-            # Fill the database with required data
-            $CONSOLE setup:init-db
-
-            exec_hooks "$SHOP/docker/init.d/Zed"
-
-            infoText "Jenkins - Register setup wide cronjobs ..."
-            # FIXME [bug01] until the code of the following cronsole command completely
-            # relies on API calls, we need to workaround the issue with missing local
-            # jenkins job definitions.
-            mkdir -p /tmp/jenkins/jobs
-            # Generate Jenkins jobs configuration
-            $CONSOLE setup:jenkins:generate
-        
-        
-        # ============= init_yves ===============
-        
-            exec_hooks "$SHOP/docker/init.d/Yves"
-        
-        ;;
-    
-    
-    
-    optimized_build)
+    build_image)
     
         # rule of thumb:
         # zed is able to work without yves, so generate zed data first!
@@ -361,7 +209,7 @@ case $1 in
         
         ;;
     
-    optimized_init)
+    bootstrap_external_services)
         
         # ElasticSearch init
         

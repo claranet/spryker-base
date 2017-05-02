@@ -119,7 +119,7 @@ ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc
             && cd /data/bin/ && ./install_php.sh \
             && ./install_nodejs.sh \
             && ./install_nginx.sh \
-            && ./entrypoint.sh optimized_build \
+            && ./entrypoint.sh build_image \
             
             # install ops tools while in debugging and testing stage
             && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \
