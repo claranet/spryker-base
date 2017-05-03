@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # abort on error
-set -eu -o pipefail
+set -e -o pipefail
 
 export SHOP="/data/shop"
 export SETUP=spryker
