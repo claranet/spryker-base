@@ -9,9 +9,6 @@ ENABLED_SERVICES=""
 source /data/bin/functions.sh
 [ -e "$SHOP/docker/build.conf" ] && source $SHOP/docker/build.conf
 
-# abort on first error
-set -e
-
 cd $SHOP
 
 
@@ -59,7 +56,7 @@ enable_services() {
     # if we are the ZED instance, init ENV
     if [ "${SERVICE}" = "zed" ]; then
       infoText "init external services (DBMS, ES)"
-      /data/bin/entrypoint.sh bootstrap_external_services
+      /data/bin/entrypoint.sh init_setup
     fi
     
   done
@@ -71,9 +68,6 @@ start_services() {
   
   # fix error with missing event log dir
   mkdir -p /data/shop/data/$SPRYKER_SHOP_CC/logs/
-  
-  # might be dropped in optimized mode
-  # generate_configurations
   
   # TODO: increase security by making this more granular
   chown -R www-data: /data/logs /data/shop
@@ -107,16 +101,6 @@ wait_for_service() {
   
   echo "$1 seems to be up, port is open"
 }
-
-
-# build steps from `console setup:install`
-# DeleteAllCachesConsole::COMMAND_NAME,
-# RemoveGeneratedDirectoryConsole::COMMAND_NAME,
-# PropelInstallConsole::COMMAND_NAME => ['--' . PropelInstallConsole::OPTION_NO_DIFF => true],
-# GeneratorConsole::COMMAND_NAME,
-# InitializeDatabaseConsole::COMMAND_NAME,
-# BuildNavigationConsole::COMMAND_NAME,
-# SearchConsole::COMMAND_NAME,
 
 
 case $1 in 
@@ -194,13 +178,12 @@ case $1 in
         $CONSOLE transfer:generate
         
         infoText "Create Search Index and Mapping Types; Generate Mapping Code."
-        # This command will run installer for search
-        # migth be split into:
-        #   setup:search:index-map              This command will generate the PageIndexMap without requiring the actual Elasticsearch index
+        # Generate elasticsarch code classes to access indexes
         $CONSOLE setup:search:index-map
     
-        # FIXME //TRANSLIT isn't supported with musl-libc, by intension!
+        # FIXME //TRANSLIT isn't supported with musl-libc (used by alpine linux), by intension!
         # see https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+        # and http://wiki.musl-libc.org/wiki/Functional_differences_from_glibc#iconv
         sed -i 's#//TRANSLIT##g'  /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
         
         
@@ -209,7 +192,7 @@ case $1 in
         
         ;;
     
-    bootstrap_external_services)
+    init_setup)
         
         # ElasticSearch init
         
@@ -269,7 +252,6 @@ case $1 in
     ;;
     
     *)
-        #generate_configurations
         sh -c "$*"
         ;;
 esac
