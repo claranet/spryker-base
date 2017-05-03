@@ -41,7 +41,8 @@ ENV SPRYKER_SHOP_CC="DE" \
     ZED_DB_DATABASE="spryker" \
     ZED_DB_HOST="database" \
     ZED_DB_PORT="5432" \
-    JENKINS_BASEURL="http://jenkins:8080/"
+    JENKINS_HOST="jenkins" \
+    JENKINS_PORT="8080"
 
 
 COPY etc/ /etc/
@@ -58,7 +59,7 @@ RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade 
     && chmod +x /data/bin/* \
     
     # create required shop directories
-    && mkdir -pv /data/logs /data/bin /data/etc /data/shop
+    && mkdir -pv /data/logs /data/bin /data/shop
     
 
 
@@ -101,6 +102,7 @@ ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
             NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
+ONBUILD COPY ./assets /data/shop/assets
 ONBUILD COPY ./src /data/shop/src
 ONBUILD COPY ./config /data/shop/config
 ONBUILD COPY ./public /data/shop/public

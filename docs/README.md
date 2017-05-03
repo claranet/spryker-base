@@ -142,7 +142,7 @@ We distinct the following lifecycle stages and their corresponding responsibilit
   * Propel: Collect and merge schema files, build model classes. 
   * Run user supplied hooks
 * Init - Runs on a setup basis during runtime (once per setup)
-  * CMD: `init_setup`
+  * CMD: `bootstrap_external_services`
   * Build all the static components of the Yves and Zed part. This is an init
     setup instead a build task because we assume that assets are to be built
     once per setup because they're getting served via external volume which is

@@ -8,19 +8,35 @@
   * error page for 5xx
 * clean up alpine linux container for sleeker images
   * remove apk caches / index files
-  * remove antelope for prod modes ( DEV_TOOLS=off )
 * clean up nginx config and make it more robust
 * secure php installation (disable functions/classes, set open_basedir, ...)
 * clean up commit history
 * write user documentation
-* fix bug in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
-  * https://github.com/docker-library/php/issues/240
-  * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
 
 
 * docu for users
 * local dev testing
 * clean up git history
+* clean up $\_ENV and $\_SERVER at the bottom of config\_local.php
+* [x] report to https://github.com/spryker/support
+  * //TRANSLIT issue with muslc
+    * used in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
+    * https://github.com/docker-library/php/issues/240
+    * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+    * http://wiki.musl-libc.org/wiki/Functional_differences_from_glibc#iconv
+    * https://github.com/spryker/support/issues/116
+  * report composer.json issue with external repositories
+    * https://github.com/spryker/support/issues/117
+  * ask about the link generators for Login/Cart/Checkout
+    * see slack channel (spryker: #claranet-partner 2017-05-02 12:44)
+* [ ] migrate to docker stack, as docker-compose is about to be deprecated in the near future
+  * see https://github.com/docker/compose/issues/4305#issuecomment-276527457
+  * and https://docs.docker.com/docker-cloud/apps/stack-yaml-reference/
+  * advantage: no docker-compose needed, so 3rd party dependency is gone!
+* [x] use spryker/oryx to replace antelope
+* [ ] make git clone to use https for github.com
+  * `git config --global url."https://github.com/".insteadOf "git@github.com:" && git config --global url.https://.insteadOf git://`
+
 
 
 
