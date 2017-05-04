@@ -3,6 +3,7 @@ This is the documentation on how to use the docker hub image of `claranet/spryke
 If you are looking for more deep dive information how this docker image works internally,
 please take a look at [our docs/ directory](docs/README.md).
 
+    This project is in ALPHA stage and will eat your children!
 
 # Overview
 
