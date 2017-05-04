@@ -94,14 +94,14 @@ We provide some docker build arguments to let you change the image build result.
 
 After you figured out which build arguments you want (you don't need any, if the defaults fits your needs), you can do a `docker build`:
 
-```
+```sh
 # execute this in your repository root directory
 docker build -t <your-shop-image:latest> .
 ```
 
 After the build is finished, you can start a local demo via `docker-compose`:
 
-```
+```sh
 # execute this in the previously created docker/ directory
 docker-compose -p <your-shop-image> up
 ```
@@ -110,7 +110,7 @@ The shop image should run the initializing and after that you should be able to 
 
 If you want to get into the docker container theirselves:
 
-```
+```sh
 # to get into the yves instance
 docker exec -it your-shop-image_yves_1 /bin/sh
 
