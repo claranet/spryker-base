@@ -162,17 +162,8 @@ execute_scripts_within_directory() {
   fi
 }
 
-# sources additional hooks 
-exec_hooks() {
-    hook_d=$1
-    if [ -d "$hook_d" ]; then
-      for f in `find $hook_d -type f -name '*.sh'`; do
-        infoText "Executing hook script: $f"
-        source $f
-      done
-    fi
-}
 
+# retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_service() {
   until nc -z $1 $2; do
     echo "waiting for $1 to come up..."
