@@ -47,27 +47,12 @@ ENV SPRYKER_SHOP_CC="DE" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
-COPY entrypoint.sh /data/bin/
-
-
-# first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
-# `apk upgrade --clean-protected` for not creating *.apk-new (config)files
-# install basic packages (currently just git)
-RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade --clean-protected \
-    && apk add git \
-    
-    # our own copied scripts
-    && chmod +x /data/bin/* \
-    
-    # create required shop directories
-    && mkdir -pv /data/logs $WORKDIR
-    
-
+COPY entrypoint.sh /usr/bin/
 
 EXPOSE 80
 
 WORKDIR $WORKDIR
-ENTRYPOINT [ "/data/bin/entrypoint.sh" ]
+ENTRYPOINT [ "entrypoint.sh" ]
 
 # on default, start yves and zed in one container
 CMD  [ "run_yves_and_zed" ]
@@ -109,17 +94,4 @@ ONBUILD COPY * $WORKDIR/
 ONBUILD COPY docker docker/
 
 # build the specific shop image
-# use ccache to decrease compile times
-ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc-dev make pkgconf \
-            
-            # add psql command, should be removed later on... this should be done in an init task or externally!
-            && apk add postgresql-client \
-            
-            && /data/bin/entrypoint.sh install_container_services \
-            && /data/bin/entrypoint.sh build \
-            
-            # install ops tools while in debugging and testing stage
-            && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \
-            
-            # clean up if in production mode
-            && [ "$DEV_TOOLS" = "on" ] || apk del .base_build_deps
+ONBUILD RUN entrypoint.sh build

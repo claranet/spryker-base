@@ -8,5 +8,5 @@ if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
   COMPOSER_ARGUMENTS="--no-dev"
 fi
 
-php /data/bin/composer.phar install --prefer-dist $COMPOSER_ARGUMENTS
-php /data/bin/composer.phar clear-cache # Clears composer's internal package cache
+composer.phar install --prefer-dist $COMPOSER_ARGUMENTS
+composer.phar clear-cache # Clears composer's internal package cache
