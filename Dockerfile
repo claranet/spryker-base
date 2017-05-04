@@ -75,15 +75,12 @@ CMD  [ "run_yves_and_zed" ]
 # support NODEJS_VERSION as ARG to let the user switch between nodejs 6.x and 7.x
 # NODEJS_PACKAGE_MANAGER: you can, additionally to npm, install yarn; if you select yarn here
 # also, if yarn is selected, it would be used while running the base installation
-ONBUILD ARG DEV_TOOLS
+ONBUILD ARG DEV_TOOLS=off
 ONBUILD ARG APPLICATION_ENV
-ONBUILD ARG NODEJS_VERSION
+ONBUILD ARG NODEJS_VERSION=6
 ONBUILD ARG NODEJS_PACKAGE_MANAGER
 
-
-ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
-            APPLICATION_ENV=${APPLICATION_ENV:-production} \
-            NODEJS_VERSION=${NODEJS_VERSION:-6} \
+ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production} \
             NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
