@@ -1,7 +1,5 @@
 #!/bin/sh
 
-cd $WORKDIR
-
 infoText "Installing required PHP dependencies..."
 
 if [ "${APPLICATION_ENV}x" != "developmentx" ]; then

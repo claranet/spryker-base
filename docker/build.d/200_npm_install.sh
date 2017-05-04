@@ -1,7 +1,5 @@
 #!/bin/sh
 
-cd $WORKDIR
-
 # install dependencies for building asset
 # --with-dev is required to install spryker/oryx (works behind npm run x)
 infoText "Installing required NPM dependencies..."

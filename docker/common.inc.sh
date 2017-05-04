@@ -154,6 +154,7 @@ execute_scripts_within_directory() {
       local script_name=`basename $f`
       
       infoText "Executing script ($scripts_counter of $scripts_count) : $script_name"
+      cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
       let "scripts_counter += 1"
