@@ -249,6 +249,9 @@ case $1 in
         exec_hooks "$SHOP/docker/init.d/Zed"
         exec_hooks "$SHOP/docker/init.d/Yves"
         
+        
+        successText "Setup Initialization has been successfully FINISHED"
+        
     ;;
     
     *)
