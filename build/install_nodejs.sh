@@ -15,7 +15,7 @@ NPM='npm'
 
 
 # include helper functions and common settings
-source ./build_library.sh
+source ./library.sh
 source ./functions.sh
 
 
