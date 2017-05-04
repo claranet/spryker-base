@@ -5,7 +5,7 @@ CONSOLE="execute_console_command"
 # services activated for this docker container instance will be added to this string
 ENABLED_SERVICES=""
 
-source $WORKDIR/docker/build_library.sh
+source $WORKDIR/docker/common.inc.sh
 
 cd $WORKDIR
 
@@ -34,13 +34,13 @@ case $1 in
       successText "installing container services FINISHED"
       ;;
     
-    build_image)
-      execute_scripts_within_directory "$WORKDIR/docker/build_image.d/"
+    build)
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/"
       successText "building image tasks FINISHED"
       ;;
     
-    init_setup)
-      execute_scripts_within_directory "$WORKDIR/docker/init_setup.d/"
+    init)
+      execute_scripts_within_directory "$WORKDIR/docker/init.d/"
       successText "Setup initialization tasks FINISHED"
     ;;
     

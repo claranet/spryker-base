@@ -107,7 +107,7 @@ enable_services() {
     # if we are the ZED instance, init ENV
     if [ "${SERVICE}" = "zed" ]; then
       infoText "init external services (DBMS, ES)"
-      /data/bin/entrypoint.sh init_setup
+      /data/bin/entrypoint.sh init
     fi
     
   done

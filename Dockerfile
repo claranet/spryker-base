@@ -116,7 +116,7 @@ ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc
             && apk add postgresql-client \
             
             && /data/bin/entrypoint.sh install_container_services \
-            && /data/bin/entrypoint.sh build_image \
+            && /data/bin/entrypoint.sh build \
             
             # install ops tools while in debugging and testing stage
             && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \
