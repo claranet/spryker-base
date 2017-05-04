@@ -7,7 +7,7 @@
 #
 
 # include helper functions and common settings
-source functions.sh
+source library.sh
 
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))

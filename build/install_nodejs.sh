@@ -11,12 +11,10 @@
 
 SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
-NPM='npm'
 
 
 # include helper functions and common settings
 source ./library.sh
-source ./functions.sh
 
 
 #get amount of available prozessors * 2 for faster compiling of sources
@@ -58,5 +56,4 @@ fi
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
   $apk_add yarn
-  NPM='yarn'
 fi

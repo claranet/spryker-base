@@ -8,7 +8,7 @@
 
 
 # include helper functions and common settings
-source functions.sh
+source library.sh
 
 
 # we are using more_clear_headers to remove client header
