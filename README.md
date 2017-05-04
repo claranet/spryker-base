@@ -94,23 +94,29 @@ We provide some docker build arguments to let you change the image build result.
 
 After you figured out which build arguments you want (you don't need any, if the defaults fits your needs), you can do a `docker build`:
 
->  # execute this in your repository root directory
->  docker build -t <your-shop-image:latest> .
+```
+# execute this in your repository root directory
+docker build -t <your-shop-image:latest> .
+```
 
 After the build is finished, you can start a local demo via `docker-compose`:
 
->  # execute this in the previously created docker/ directory
->  docker-compose -p <your-shop-image> up
+```
+# execute this in the previously created docker/ directory
+docker-compose -p <your-shop-image> up
+```
 
 The shop image should run the initializing and after that you should be able to serve http://localhost:2380 for yves and http://localhost:2381 for zed.
 
 If you want to get into the docker container theirselves:
 
->  # to get into the yves instance
->  docker exec -it your-shop-image_yves_1 /bin/sh
-> 
->  # to get into the zed instance
->  docker exec -it your-shop-image_zed_1 /bin/sh
+```
+# to get into the yves instance
+docker exec -it your-shop-image_yves_1 /bin/sh
+
+# to get into the zed instance
+docker exec -it your-shop-image_zed_1 /bin/sh
+```
 
 # Inside the resulting container image
 
