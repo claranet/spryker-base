@@ -46,7 +46,7 @@ ENV SPRYKER_SHOP_CC="DE" \
 
 
 COPY etc/ /etc/
-COPY docker /data/shop/docker
+COPY docker $WORKDIR/docker
 COPY entrypoint.sh /data/bin/
 
 
@@ -60,13 +60,13 @@ RUN sed -i -e 's/3\.4/3.5/g' /etc/apk/repositories && apk update && apk upgrade 
     && chmod +x /data/bin/* \
     
     # create required shop directories
-    && mkdir -pv /data/logs /data/bin /data/shop
+    && mkdir -pv /data/logs $WORKDIR
     
 
 
 EXPOSE 80
 
-WORKDIR /data/shop/
+WORKDIR $WORKDIR
 ENTRYPOINT [ "/data/bin/entrypoint.sh" ]
 
 # on default, start yves and zed in one container
@@ -75,8 +75,7 @@ CMD  [ "run_yves_and_zed" ]
 
 #
 # all onbuild commands will be executed before a child image gets build.
-# 
-# 
+#
 
 
 # With DEV_TOOLS=on, we won't clean up the image from build tools and debugging tools.
@@ -104,13 +103,10 @@ ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
 
 
 # copy shop specific data
-ONBUILD COPY ./assets /data/shop/assets
-ONBUILD COPY ./src /data/shop/src
-ONBUILD COPY ./config /data/shop/config
-ONBUILD COPY ./public /data/shop/public
-ONBUILD COPY ./docker /data/shop/docker
-ONBUILD COPY ./package.json ./composer.json /data/shop/
-
+# if you want to get some files ignored, please leverage the .dockerignore file
+ONBUILD COPY * $WORKDIR/
+# we have to copy "docker/" distinct from the above, as there is already an docker/ folder
+ONBUILD COPY docker docker/
 
 # build the specific shop image
 # use ccache to decrease compile times
