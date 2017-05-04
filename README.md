@@ -121,3 +121,13 @@ docker exec -it your-shop-image_zed_1 /bin/sh
 # Inside the resulting container image
 
 Please take a look at [the deep dive documentation](docs/README.md)
+
+# FAQ
+
+## Where to find logs
+
+In the yves/zed instance(s) you can find nginx, php-fpm and application logs within */data/logs/*
+
+## Which base image are you using?
+
+We are depending on the official alpinelinux basing [php-fpm docker images](https://hub.docker.com/_/php/)
