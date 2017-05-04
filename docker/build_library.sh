@@ -138,7 +138,7 @@ execute_console_command() {
   vendor/bin/console $@
 }
 
-# uses the find command to select scripts in lexical order
+# uses the find & sort to select scripts in lexical order (alpine doesn't support `find -s`)
 # sources those scripts to make library.sh and other vars available to them
 execute_scripts_within_directory() {
   local directory=$1
@@ -146,7 +146,7 @@ execute_scripts_within_directory() {
   if [ -d "$directory" ]; then
     
     # provide script counting to inform the user about how many steps are available
-    local available_scripts=`find $directory -type f -name '*.sh' -s`
+    local available_scripts=`find $directory -type f -name '*.sh' | sort`
     local scripts_count=`echo "$available_scripts" | wc -l`
     local i=1
     
