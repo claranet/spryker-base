@@ -6,9 +6,6 @@
 # This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-# include helper functions and common settings
-source library.sh
-
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 

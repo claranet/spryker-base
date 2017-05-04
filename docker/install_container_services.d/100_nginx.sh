@@ -7,10 +7,6 @@
 #
 
 
-# include helper functions and common settings
-source library.sh
-
-
 # we are using more_clear_headers to remove client header
 # see: https://github.com/openresty/headers-more-nginx-module
 $apk_add nginx nginx-mod-http-headers-more

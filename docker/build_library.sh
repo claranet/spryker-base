@@ -148,15 +148,15 @@ execute_scripts_within_directory() {
     # provide script counting to inform the user about how many steps are available
     local available_scripts=`find $directory -type f -name '*.sh' | sort`
     local scripts_count=`echo "$available_scripts" | wc -l`
-    local i=1
+    local scripts_counter=1
     
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      infoText "Executing script ($i of $scripts_count) : $script_name"
+      infoText "Executing script ($scripts_counter of $scripts_count) : $script_name"
       source $f
       
-      let "i += 1"
+      let "scripts_counter += 1"
     done
     
   fi

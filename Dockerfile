@@ -46,7 +46,8 @@ ENV SPRYKER_SHOP_CC="DE" \
 
 
 COPY etc/ /etc/
-COPY entrypoint.sh functions.sh build/* /data/bin/
+COPY docker /data/shop/docker
+COPY entrypoint.sh /data/bin/
 
 
 # first start with an upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
@@ -102,6 +103,7 @@ ONBUILD ENV DEV_TOOLS=${DEV_TOOLS:-off} \
             NODEJS_PACKAGE_MANAGER=${NODEJS_PACKAGE_MANAGER:-npm}
 
 
+# copy shop specific data
 ONBUILD COPY ./assets /data/shop/assets
 ONBUILD COPY ./src /data/shop/src
 ONBUILD COPY ./config /data/shop/config
@@ -110,16 +112,15 @@ ONBUILD COPY ./docker /data/shop/docker
 ONBUILD COPY ./package.json ./composer.json /data/shop/
 
 
+# build the specific shop image
 # use ccache to decrease compile times
 ONBUILD RUN apk add --virtual .base_build_deps ccache autoconf file g++ gcc libc-dev make pkgconf \
             
             # add psql command, should be removed later on... this should be done in an init task or externally!
             && apk add postgresql-client \
             
-            && cd /data/bin/ && ./install_php.sh \
-            && ./install_nodejs.sh \
-            && ./install_nginx.sh \
-            && ./entrypoint.sh build_image \
+            && /data/bin/entrypoint.sh install_container_services \
+            && /data/bin/entrypoint.sh build_image \
             
             # install ops tools while in debugging and testing stage
             && [ "$DEV_TOOLS" = "off" ] || apk add vim less tree \

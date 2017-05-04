@@ -13,10 +13,6 @@ SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
 
 
-# include helper functions and common settings
-source ./library.sh
-
-
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
