@@ -86,9 +86,7 @@ ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production} \
 
 # copy shop specific data
 # if you want to get some files ignored, please leverage the .dockerignore file
-ONBUILD COPY * $WORKDIR/
-# we have to copy "docker/" distinct from the above, as there is already an docker/ folder
-ONBUILD COPY docker docker/
+ONBUILD COPY . $WORKDIR
 
 # build the specific shop image
 ONBUILD RUN entrypoint.sh build
