@@ -14,7 +14,7 @@
 * write user documentation
 
 
-* docu for users
+* docs for users
 * local dev testing
 * clean up git history
 * clean up $\_ENV and $\_SERVER at the bottom of config\_local.php
@@ -46,14 +46,6 @@
   for PHP7 environments. The customer should be able to chose between those two
   runtime environments. Questions is, how do we keep the required maintenance
   effort low?
-* Split up Yves/Zed from the very beginning or providing a unified image
-  instead and leave this question open to the engineer running this setup? He
-  could decide to split both parts in order to be able to scale them
-  independently. But this could be done even if we provide a unified image. A
-  unified image further has the advantage of easier handling for developers who
-  want their shop built as a docker image and therefore need only to consider
-  one image.
-* Split up the dynamic and the static part? 
 * How to implement shops for different countries? Do we need separated VHosts
   for this? Will this be achied by env settings of the nginx vhost? 
 * Do we need to split up the components shop wise? One database for DE another for US? 
@@ -87,11 +79,6 @@
       challenge starts if go even further and consider shop upgrade which have
       some impact on the database schema or the something similiar on the
       Redis/ES side. How do we cope with this scenario? 
-* Split off generic and demoshop specific build/init jobs and move them to user
-  supplied hooks. This heavily depends on the bundles being used by the common
-  shops. Which console jobs are reasonbly placed at the generic base image? For
-  example, is the navigation cache for zed to be expected to be used for all or
-  most of the shops out there? 
 
 
 ## Open action items
@@ -174,3 +161,16 @@
 * Write tooling for init during runtime: entrypoint script which implements
     * templatable configuration files 
     * initial database/redis/elasticsarch refuelling
+* Split up Yves/Zed from the very beginning or providing a unified image
+  instead and leave this question open to the engineer running this setup? He
+  could decide to split both parts in order to be able to scale them
+  independently. But this could be done even if we provide a unified image. A
+  unified image further has the advantage of easier handling for developers who
+  want their shop built as a docker image and therefore need only to consider
+  one image.
+* Split up the dynamic and the static part? 
+* Split off generic and demoshop specific build/init jobs and move them to user
+  supplied hooks. This heavily depends on the bundles being used by the common
+  shops. Which console jobs are reasonbly placed at the generic base image? For
+  example, is the navigation cache for zed to be expected to be used for all or
+  most of the shops out there? 

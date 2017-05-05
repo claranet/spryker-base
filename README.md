@@ -1,34 +1,103 @@
 
-This is the documentation on how to use the docker hub image of `claranet/spryker-base` from a user perspective.
-If you are looking for more deep dive information how this docker image works internally,
-please take a look at [our docs/ directory](docs/README.md).
+This images serves the purpose of providing the base infrastructure of Yves and
+Zed. Infrastructure in terms of build/init scripts and further tooling around
+the shop itself.  This image does not provide a ready to use shop! In order to
+use the features implemented here, write your own `Dockerfile` - which uses
+this base image to inherit from - along your actual implementation of a Spryker
+shop. See directory hierarchy explained below in order to understand where to
+place the source code.
 
-    This project is in ALPHA stage and will eat your children!
+**This project is in ALPHA stage and will eat your children!** 
+
+Thats why we are keen to get feedback from you! This is a work in progress
+effort which strives for making dockerizing a Spryker Shop as easy as possible.
+In order to successfully achieve this goal, we need to identify common steps
+worth to be generalized and put into this base image. So tell us about you
+needs and your experiences. 
+
+If you want to see this image in action and how its gonna be used check out the
+containerized [Spryker Demoshop](https://github.com/claranet/spryker-demoshop).
+This demoshop serves as reference implementation for the base image. The same
+way as Spryker is progressing their bundles and making the demoshop reflecting
+those changes we use the demoshop in exactly the same way. 
+
+
+# Benefits of Containerization
+
+* Consistency
+* Reproducibility
+* Portablity
+* Seamless deployment form local development into prod environment
 
 # Overview
 
-This repository is the origin of [docker hub spryker-base image](https://hub.docker.com/claranet/spryker-base). It provides an easy to use docker image to build/setup your own [spryker](https://spryker.com/) spryker shop/instance.
+You can think of this docker image `claranet/spryker-base` as some kind of a
+template/base image for a concrete spryker shop implementation.  So if you want
+to build a spryker shop container image, this image helps you with common tasks
+and is trying to make most of the common steps automatically for you.
+
+Core traits are:
+
+* Uses dockers `ONBUILD` trigger feature to hook into and control the child image build process
+* Its open for customization by providing hookable build and init routines
+* Expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
+* No further constraints, you are absolutely free to design you shop the way you want it to
 
 
-This docker image `claranet/spryker-base` is only a template/base image for a more concrete spryker shop docker image. So if you want to build a spryker shop container image, this image wants to help you with common tasks and is trying to make most of the common steps automatically for you.
+# Interface
 
-* it makes use of dockers `ONBUILD` feature to copy common directories and their files
-* it provides hookable build steps
-* it expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
+In order to reuse the functionalities implemented here, the following aspects
+need to be aligned with the base image: 
+
+* Follow Spryker reference directory hierarchy
+    * `./src/` - Your shop implementation
+    * `./config` - Configuration
+    * `./public/{Yves,Zed}` - Entrypoints to you application (document root)
+* Dependencies
+    * PHP: `composer.json` and `composer.lock`
+    * Node: `packages.json`
+* Make Spryker configuration consider env vars. Checkout the `config/Shared/config_local.php` of the [demoshop](https://github.com/claranet/spryker-demoshop) exemplify what is meant here.
+* Control the PHP extension you want to be installed via `./docker/build.conf`
+* Control the build process of the image by placing your scripts under `./docker/build.d/`
+* Control the initialization process of the setup by placing your scripts under `./docker/init.d/`
+
+Again, check out the [demoshop](https://github.com/claranet/spryker-demoshop)
+we have prepared for using this image here. This should answer all of the
+questions you might have. 
 
 
-# Prepare your own, custom shop repository
+# Create your own image
+
+Either fork the [demoshop](https://github.com/claranet/spryker-demoshop) or
+start from scratch. For the latter you need to consider the following steps.
 
 
-* create a [Dockerfile](https://docs.docker.com/engine/reference/builder/) with the following content: `FROM claranet/spryker-base:latest`
-* create a `docker/` directory in the root of your repository
-* create a `docker-compose.yml` file within the `docker/` directory with your required services and the following lines (adapt them for your needs)
+## Create a Dockerfile
+
+Create a [Dockerfile](https://docs.docker.com/engine/reference/builder/) which
+just inherits from the base image as following: 
+
+    FROM claranet/spryker-base:latest
+
+For most of the cases this is pretty much everything you need.
+
+
+## Prepare file hierachy
+
+What is needed is a `./docker` subfolder where the base image resp. the on
+build trigger are expecting modifications the build and initializations
+routines. 
+
+    $ mkdir -p docker
+
+## Write Spryker Configuration
+
+
+## Write docker-compose.yml
+
 
 ```
---- 
-
-# take a look at https://docs.docker.com/compose/compose-file/ for details
-
+---
 version: '3'
 
 services: 
@@ -68,17 +137,11 @@ services:
     restart: always
 
   elasticsearch:
-    # TODO: images is deprecated and maintained until the 2017-06-20
-    # see https://hub.docker.com/_/elasticsearch/
     image: "elasticsearch:2.4-alpine"
     restart: always
-    # just to create a simple delay for init phase in depending on the database
     depends_on:
       - database
 
-# postgres is listening for incoming sessions even if it is not ready to serve as a service
-# this needs to be considered in the setup step as `wait_for_service` does only check, if the
-# given service is able to establish connections.
   database:
     image: "postgres:9.4.11-alpine"
     restart: always
@@ -91,9 +154,14 @@ services:
 
 ## Build your shop container image
 
-We provide some docker build arguments to let you change the image build result. You can find possible arguments via looking at the Dockerfile in this repository. egrep for "^ONBUILD ARG" to get a list of possible `--build-arg` arguments. Inside the Dockerfile there are more details about the arguments and what they are doing.
+We provide some docker build arguments to let you change the image build
+result. You can find possible arguments via looking at the Dockerfile in this
+repository. egrep for "^ONBUILD ARG" to get a list of possible `--build-arg`
+arguments. Inside the Dockerfile there are more details about the arguments and
+what they are doing.
 
-After you figured out which build arguments you want (you don't need any, if the defaults fits your needs), you can do a `docker build`:
+After you figured out which build arguments you want (you don't need any, if
+the defaults fits your needs), you can do a `docker build`:
 
 ```sh
 # execute this in your repository root directory
@@ -122,6 +190,10 @@ docker exec -it your-shop-image_zed_1 /bin/sh
 # Inside the resulting container image
 
 Please take a look at [the deep dive documentation](docs/README.md)
+
+# Customization
+
+...
 
 # FAQ
 
