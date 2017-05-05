@@ -21,8 +21,8 @@ after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push $image:$tag;
-    fi
-  - if [ "$LATEST" == "yes" ]; then
-      docker tag $image:$tag $image:latest;
-      docker push $image:latest;
+      if [ "$LATEST" == "yes" ]; then
+        docker tag $image:$tag $image:latest;
+        docker push $image:latest;
+      fi
     fi
