@@ -1,4 +1,6 @@
 
+[![build status badge](https://img.shields.io/travis/claranet/spryker-base/master.svg)](https://travis-ci.org/claranet/spryker-base/branches)
+
 This images serves the purpose of providing the base infrastructure of Yves and
 Zed. Infrastructure in terms of build/init scripts and further tooling around
 the shop itself.  This image does not provide a ready to use shop! In order to

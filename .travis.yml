@@ -1,0 +1,28 @@
+sudo: required
+language: bash
+services:
+  - docker
+
+env:
+  - VERSION=0.1.1 VARIANT=php70 LATEST=yes
+
+install:
+  - git clone https://github.com/claranet/spryker-demoshop.git ~/demoshop.git
+
+before_script:
+  - env | sort
+  - image="claranet/spryker-base"
+  - tag="${VERSION}${VARIANT:+-$VARIANT}"
+
+script:
+  - docker build -t $image:$tag .
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push $image:$tag;
+    fi
+  - if [ "$LATEST" == "yes" ]; then
+      docker tag $image:$tag $image:latest;
+      docker push $image:latest;
+    fi
