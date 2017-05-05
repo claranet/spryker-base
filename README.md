@@ -39,6 +39,7 @@ and is trying to make most of the common steps automatically for you.
 Core traits are:
 
 * Uses dockers `ONBUILD` trigger feature to hook into and control the child image build process
+* Provide reasonable default FPM/nginx configuration
 * Its open for customization by providing hookable build and init routines
 * Expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
 * No further constraints, you are absolutely free to design you shop the way you want it to
@@ -193,6 +194,31 @@ Please take a look at [the deep dive documentation](docs/README.md)
 
 # Customization
 
+## PHP Extensions 
+
+...
+
+## Build Arguments
+
+* With `DEV_TOOLS=on`, we won't clean up the image from build tools and
+  debugging tools.  Even further we will add tools like vim, tree and less.
+  supported vaules are (on/off), defaults to "off"
+* `APPLICATION_ENV` decides in which mode the application is installed/runned.
+  so if you choose development here, e.g. composer and npm/yarn will also
+  install dev dependencies! There are more modifications, which depend on this
+  switch.  defaults to "production"
+* Choose node version by supplying `NODEJS_VERSION` as ARG to switch between
+  nodejs 6.x and 7.x.
+* `NODEJS_PACKAGE_MANAGER`: you can, additionally to npm, install yarn; if you
+  select yarn here also, if yarn is selected, it would be used while running
+  the base installation
+
+## Build Hooks
+
+...
+
+## Init Hooks
+
 ...
 
 # FAQ
@@ -204,3 +230,12 @@ In the yves/zed instance(s) you can find nginx, php-fpm and application logs wit
 ## Which base image are you using?
 
 We are depending on the official alpinelinux basing [php-fpm docker images](https://hub.docker.com/_/php/)
+
+
+# Issues 
+
+## PHP Version 7.0.17
+
+We currently stick to 7.0.17 as 7.0.18 breaks spryker predis usage. See
+https://github.com/php/php-src/commit/bab0b99f376dac9170ac81382a5ed526938d595a
+for details and PHP bug report: https://bugs.php.net/bug.php?id=74429
