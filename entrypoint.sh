@@ -29,11 +29,6 @@ case $1 in
       start_services
       ;;
     
-    install_container_services)
-      execute_scripts_within_directory "$WORKDIR/docker/install_container_services.d/"
-      successText "installing container services FINISHED"
-      ;;
-    
     build)
       execute_scripts_within_directory "$WORKDIR/docker/build.d/"
       successText "building image tasks FINISHED"
