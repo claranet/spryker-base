@@ -1,117 +1,12 @@
-# Spryker base docker image 
+# Spryker Docker Base Image 
 
 This images serves the purpose of providing the base infrastructure of Yves and
-Zed. Infrastructure in terms of scripts and tooling around the shop itself.
-This image does not provide a ready to use shop! In order to use the features
-implemented here, build your own image including the actual implementation of a
-shop derived from this image. See directory hierarchy explained below in order
-to understand where to place the source code.
-
-
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Spryker base docker image](#spryker-base-docker-image)
-- [Project specifics](#project-specifics)
-	- [Roadmap](#roadmap)
-	- [Default image services architecture](#default-image-services-architecture)
-- [Image (Container) specifics](#image-container-specifics)
-	- [Features](#features)
-	- [Stages](#stages)
-	- [Directory hierarchy](#directory-hierarchy)
-	- [Using this image](#using-this-image)
-	- [Configuration](#configuration)
-		- [Order of precedence](#order-of-precedence)
-		- [Override base configuration](#override-base-configuration)
-	- [On Environments](#on-environments)
-	- [Scripting](#scripting)
-		- [Build Infrastructure](#build-infrastructure)
-		- [Initializing Infrastructure](#initializing-infrastructure)
-
-<!-- /TOC -->
-
-
-# Project specifics
-
-
-## Roadmap
-
-
-> Please double the estimated times to get an appropriate time buffer. To be save - tripple them (normal thumb rule ;))
-
-* 66h (8,5d), (P1: 34h, 5d) | 02.05.2017: Beta release of local dev env (I've 15 workdays from now 2017-03-21 until the beta release)
-  * 2h **P1** | move project specific configs from spryker-base to shop repo
-    * default_local.conf => customer gets configs via ENV ( getenv() ). we provide predefined default_local.conf with getenv() already in use to provide an example
-  * 8h **P1** | create spryker-base flavors:
-    * for...
-      * PHP versions
-      * prod / dev
-      * spryker core version, based on spryker demoshop version
-    * via docker tag... something like: `php-7.1_spryker-2.9_prod-latest` (7.1 PHP version, 2.9 is spryker core, prod instance env flavor)
-  * - only information | we pre-build local development images (with prod/dev flavor)
-    * if the customer orders a personalized repository for their own shop
-    * customer has to do "git clone && cd docker/ && docker-compose -t spryker up"
-    * so there is no need for a custom install script! But there is need for a good documentation!
-    * if the customer want to start with the demoshop as their base, it is already prepared
-    * if not => he can ask us to docker enable its repository (see first point in this list)
-  * 4h **P1** | package manager (npm/yarn) customizing + init_setup disable via vars in hook vars to support customer customizing
-    * customer can disable init_setup (or parts of it) to set up their own setups/init process
-    * customer can write hooks, which hook into different pre/post steps
-    * customer can install npm/yarn with specific versions via ENV settings (to be specified in shop-implementation)
-      * choose NODEJS_PACKAGE_MANAGER=(npm|yarn) and NODEJS_PACKAGE_MANAGER_VERSION="..."
-      * NODEJS_VERSION=(4.x|6.x|7.x) # 4.x is LTS, 6.x is already matured, 7.x is latest
-    * it hasn't to be perfect! But should work with most common scenarios
-  * - required later on | git repo: instead of upstream pull => fetch directly the tag ref for a merge!
-  * 8h **P1** | clean up demoshop repo:
-    * merge history of Dockerfile and docker/ folder
-    * build up demoshop repo from skretch (fetch upstream tag 2.8 (for spryker core 2.x support) and in addition, tag 2.9 for spryker core 3.x support)
-  * - only information | for local dev: bind-mount read only => to prevent changes in docker image and enforce the user to change files on his system
-  * 4-8h **P3** | why are there diffs between devvm and docker images (e.g. vendor/spryker/library is missing in devvm, and therefore Environment.php)? (**low prio**, optimizing)
-  * ?h | why not using php:70 directly, instead of building on ubuntu:xenial and managing our own PHP infrastructure? (could only find one argument against it - see "how to provide a different PHP version") (**low prio**, optimizing)
-    * would require a clean up of spryker base and a simple adaption in spryker-demoshop
-  * 4h **P2** | sync / check new developments in functions.sh and setup process
-  * 4h **P1** | write docs for users (developers) - at least a base documentation
-    * write notes about when all data in containers gets erased and what docker(-compose) commands are data save...
-  * 8h **P2** | clean up entrypoint.sh (**low prio**, optimizing)
-    * a lot of testing is involved here, this takes time
-  * test local dev env
-    * build instructions (init_setup) depend on module versions installed by php composer - how to deal with that? Currently spryker-base provides the build instructions...
-      * each customer will probably have its own set of dependencies and modules, even custom build steps (affects init_setup)
-      * even config structure will differ per customer (e.g. custom settings, different key/value requirements per module version
-    * 8h **P1** | bind-mounts tests
-    * rebuild composer/npm dependencies?
-      * add variants in documentation for developers
-      * via command within docker image?
-      * via bind-mount, even resolved dependencies are linked in?
-      * if bind-mount => how to run the setup init?
-      * if bind-mount we might need to have an externally available trigger which does the init?
-        * if so, how? and what about a separate Yves/Zed image while in local dev?
-      * via `docker exec`! Or `docker build` by customer
-    * is getting Yves/Zed separated in local dev a wanted feature? (yes it is!)
-      * if so, it might make it more fragil to transfer / migrate a local dev into PROD/STAGE as envs aren't equal
-      * bind-mount read only to prevent changes by docker images
-    * 4h | rebuild docker images locally
-      * check what env is required for this to work sufficient?
-  * 4h **P3** | write script to make installation / setup easier - no aim for a one-shot-run as this might get complicated and risky (requires changes within the unknown dev env of the user)
-    * not yet required! Might become a script which analyze the developers env for troubleshooting
-  * 4h **P3** | provide S3 object store service and how to provide both - S3 and normal FTP?
-    * look for appropriate solutions where API is fine for local dev and PROD
-    * NOT YET! Superreal doesn't support S3 API
-  * how to provide a different PHP version to customers? => rebuild with different versions? (yes, rebuild!)
-    * or local switch? if local switch ( via env setting ) => php:70 base image is obsolete and ubuntu:xenial (or similar) is a good idea
-    * if we provide different versions, automated testing is a must => this is official software development, so it represents our brand!
-    * even without multiple versions - testing should be automated
-
-
-## Default image services architecture
-
-> drawing follows... this is a first draft for an overview
-
-* nginx (gets exposed with yves and zed via port 80)
-* php-fpm (2 instances - ZED and Yves, both localhost only via socket file)
-  * the ZED instance provides the admin interface (admin-frontend in dev speak)
-  * the YVES instance provides the "normal shop customer" frontend
-* monit starts both services (nginx and php-fpm)
-
+Zed. Infrastructure in terms of build/init scripts and further tooling around
+the shop itself.  This image does not provide a ready to use shop! In order to
+use the features implemented here, write your own `Dockerfile` - which uses
+this base image to inherit from - along your actual implementation of a Spryker
+shop. See directory hierarchy explained below in order to understand where to
+place the source code.
 
 
 # Image (Container) specifics
@@ -163,7 +58,7 @@ We distinct the following lifecycle stages and their corresponding responsibilit
       * Generate confd template configuration - depending on real infrastruture configurations
       * Generate Propel Configuration according actually configured resources
 
-## Directory hierarchy
+## Spryker Directory Hierarchy
 
 This hierarchy represents a typical root directory of a spryker based shop:
 

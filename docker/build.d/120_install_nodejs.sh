@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Author: Tony Fahrion <tony.fahrion@de.clara.net>
-
 #
 # This script adds the nodejs package repo and installs nodejs and npm
 # It requires that the ENV var NODEJS_VERSION is set!
@@ -11,12 +9,6 @@
 
 SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
-NPM='npm'
-
-
-# include helper functions and common settings
-source ./build_library.sh
-source ./functions.sh
 
 
 #get amount of available prozessors * 2 for faster compiling of sources
@@ -58,5 +50,4 @@ fi
 # install yarn if requested as package manager
 if [ "$NODEJS_PACKAGE_MANAGER" == 'yarn' ]; then
   $apk_add yarn
-  NPM='yarn'
 fi

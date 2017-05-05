@@ -1,14 +1,8 @@
 #!/bin/sh
 
-# Author: Tony Fahrion <tony.fahrion@de.clara.net>
-
 #
 # This script installs the nginx webserver
 #
-
-
-# include helper functions and common settings
-source functions.sh
 
 
 # we are using more_clear_headers to remove client header

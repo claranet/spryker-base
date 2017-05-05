@@ -1,18 +1,11 @@
 #!/bin/sh
 
-# Author: Tony Fahrion <tony.fahrion@de.clara.net>
-
 #
 # This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-# include helper functions and common settings
-source functions.sh
-
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
-
-
 
 #
 #  Install PHP extensions
@@ -153,12 +146,12 @@ curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
 php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
 
 
-infoText "install PHP composer to /data/bin/"
-php /tmp/composer-setup.php --install-dir=/data/bin/
+infoText "install PHP composer to /usr/bin/"
+php /tmp/composer-setup.php --install-dir=/usr/bin/
 
 
 # make the installation process of `composer install` faster by parallel downloads
-/data/bin/composer.phar global require hirak/prestissimo
+composer.phar global require hirak/prestissimo
 
 
 #
