@@ -1,7 +1,9 @@
 #!/bin/sh
 
-# install ops tools while in debugging and testing stage
-[ "$DEV_TOOLS" = "off" ] || apk add vim less tree
-
-# clean up if in production mode
-[ "$DEV_TOOLS" = "on" ] || apk del .base_build_deps
+if [ "$DEV_TOOLS" = "on" ]; then
+  # install ops tools while in debugging and testing stage
+  apk add vim less tree
+else
+  # clean up if in production mode
+  apk del .base_build_deps
+fi

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Author: Tony Fahrion <tony.fahrion@de.clara.net>
-
 #
 # This script adds the nodejs package repo and installs nodejs and npm
 # It requires that the ENV var NODEJS_VERSION is set!

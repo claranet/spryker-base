@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Author: Tony Fahrion <tony.fahrion@de.clara.net>
-
 #
 # This script installs the nginx webserver
 #
