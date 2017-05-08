@@ -44,7 +44,7 @@ install_gd() {
   docker-php-ext-install -j$COMPILE_JOBS gd
   apk del .phpmodule-deps
   
-  $apk_add libpng libjpeg-turbo
+  $apk_add libpng libjpeg-turbo freetype
 }
 
 install_xcache() {
