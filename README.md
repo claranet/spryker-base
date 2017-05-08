@@ -180,7 +180,7 @@ docker-compose -p <your-shop-image> up
 
 The shop image should run the initializing and after that you should be able to serve http://localhost:2380 for yves and http://localhost:2381 for zed.
 
-If you want to get into the docker container theirselves:
+If you want to get into the docker container themselves:
 
 ```sh
 # to get into the yves instance
