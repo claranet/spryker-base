@@ -7,6 +7,10 @@
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
+# a list of common PHP extensions required to run a spryker shop... so you don't have to
+# specify them within every shop implementation.
+COMMON_PHP_EXTENSIONS="bcmath gd gmp intl mcrypt redis"
+
 #
 #  Install PHP extensions
 #
@@ -66,6 +70,11 @@ install_redis() {
   apk del .phpmodule-deps
 }
 
+install_bz2() {
+  install_simple_extension $ext "bzip-dev"
+  $apk_add bzip2
+}
+
 install_curl() {
   install_simple_extension $ext "curl-dev"
   $apk_add libcurl
@@ -115,12 +124,11 @@ install_zip() {
   install_simple_extension $ext "zlib-dev"
 }
 
-
-if [[ ! -z "$PHP_EXTENSIONS" ]]; then
+php_install_extensions() {
   docker-php-source extract
   $apk_add re2c
   
-  for ext in $PHP_EXTENSIONS; do
+  for ext in $COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS; do
     infoText "installing PHP extension $ext"
     if type install_$ext; then
       install_$ext
@@ -133,7 +141,10 @@ if [[ ! -z "$PHP_EXTENSIONS" ]]; then
   
   apk del re2c
   docker-php-source delete
-fi
+}
+
+
+php_install_extensions
 
 
 #
