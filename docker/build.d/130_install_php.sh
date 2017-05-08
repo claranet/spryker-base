@@ -71,7 +71,7 @@ install_redis() {
 }
 
 install_bz2() {
-  install_simple_extension $ext "bzip-dev"
+  install_simple_extension $ext "bzip2-dev"
   $apk_add bzip2
 }
 
