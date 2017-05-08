@@ -120,13 +120,6 @@ enable_services() {
 start_services() {
   labelText "Starting enabled services $ENABLED_SERVICES"
   
-  # fix error with missing event log dir
-  # TODO: configure log destination to /data/logs/
-  mkdir -p /data/logs $WORKDIR/data/$SPRYKER_SHOP_CC/logs/
-  
-  # TODO: increase security by making this more granular
-  chown -R www-data: /data/logs /data/shop/data
-  
   # starts nginx daemonized to be able to start php-fpm in background
   # TODO: report to the user if nginx configtest fails
   nginx && php-fpm --nodaemonize
