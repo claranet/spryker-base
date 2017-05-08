@@ -11,6 +11,7 @@ apk_add='apk add'
 
 
 # include custom build config on demand
+# TODO: export imported variables so all other commands gets them as ENV vars
 [ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
 
 
