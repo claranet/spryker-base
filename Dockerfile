@@ -46,11 +46,6 @@ ENTRYPOINT [ "entrypoint.sh" ]
 
 CMD  [ "run_yves_and_zed" ]
 
-ONBUILD ARG DEV_TOOLS=off
-
-ONBUILD ARG APPLICATION_ENV
-ONBUILD ENV APPLICATION_ENV=${APPLICATION_ENV:-production}
-
 # You need to maintain a .dockerignore file!
 ONBUILD COPY . $WORKDIR
 

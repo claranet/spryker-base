@@ -1,5 +1,14 @@
 #!/bin/sh
 
+#
+#  General
+#
+
+# FIXME: currently a requirement to be in dev mode! codeception/c3 is only installed with --with-dev
+# but public/Yves/index.php requires this!
+APPLICATION_ENV="development"
+DEV_TOOLS="on"
+
 
 #
 #  NodeJS defaults
