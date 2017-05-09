@@ -117,7 +117,10 @@ php_install_extensions() {
   docker-php-source extract
   $apk_add re2c
   
-  for ext in $COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS; do
+  # get a uniq list of extensions
+  local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | sort | uniq`
+  
+  for ext in $UNIQ_PHP_EXTENSION_LIST; do
     infoText "installing PHP extension $ext"
     if type php_install_$ext; then
       php_install_$ext
