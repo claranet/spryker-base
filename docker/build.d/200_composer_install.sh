@@ -1,6 +1,7 @@
 #!/bin/sh
 
 
+COMPOSER_ARGUMENTS=""
 if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
   sectionNote "do composer install without dev dependencies"
   COMPOSER_ARGUMENTS="--no-dev"
