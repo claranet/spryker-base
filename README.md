@@ -180,7 +180,7 @@ docker-compose -p <your-shop-image> up
 
 The shop image should run the initializing and after that you should be able to serve http://localhost:2380 for yves and http://localhost:2381 for zed.
 
-If you want to get into the docker container theirselves:
+If you want to get into the docker container themselves:
 
 ```sh
 # to get into the yves instance
@@ -209,11 +209,6 @@ Please take a look at [the deep dive documentation](docs/README.md)
   so if you choose development here, e.g. composer and npm/yarn will also
   install dev dependencies! There are more modifications, which depend on this
   switch.  defaults to "production"
-* Choose node version by supplying `NODEJS_VERSION` as ARG to switch between
-  nodejs 6.x and 7.x.
-* `NODEJS_PACKAGE_MANAGER`: you can, additionally to npm, install yarn; if you
-  select yarn here also, if yarn is selected, it would be used while running
-  the base installation
 
 ## Build Hooks
 

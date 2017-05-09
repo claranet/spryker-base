@@ -4,7 +4,7 @@ services:
   - docker
 
 env:
-  - VERSION=0.1.1 VARIANT=php70 LATEST=yes
+  - VERSION=0.2.0 VARIANT=php70 LATEST=yes
 
 install:
   - git clone https://github.com/claranet/spryker-demoshop.git ~/demoshop.git
