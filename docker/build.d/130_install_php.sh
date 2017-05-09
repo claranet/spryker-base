@@ -19,7 +19,7 @@ COMMON_PHP_EXTENSIONS="bcmath gd gmp intl mcrypt redis"
 # installs special php extension dependencies before "install" is called
 # removes those dependencies after "install" finishes
 # arg1: extension name; arg2: list of dependencies
-install_simple_extension() {
+php_install_simple_extension() {
   EXTENSION=$1
   DEPS="$2"
   
@@ -28,7 +28,7 @@ install_simple_extension() {
   apk del .phpmodule-deps
 }
 
-install_imagick() {
+php_install_imagick() {
   $apk_add --virtual .phpmodule-deps imagemagick-dev libtool
   $apk_add imagemagick
 
@@ -38,7 +38,7 @@ install_imagick() {
   apk del .phpmodule-deps
 }
 
-install_gd() {
+php_install_gd() {
   $apk_add --virtual .phpmodule-deps freetype-dev \
         libjpeg-turbo-dev \
         libmcrypt-dev \
@@ -51,7 +51,7 @@ install_gd() {
   $apk_add libpng libjpeg-turbo freetype
 }
 
-install_xcache() {
+php_install_xcache() {
   # FIXEM: replace by opcache - no support for PHP 7.x!
   curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
     && mkdir -p /tmp/xcache \
@@ -62,7 +62,7 @@ install_xcache() {
     && rm -r /tmp/xcache
 }
 
-install_redis() {
+php_install_redis() {
   $apk_add --virtual .phpmodule-deps redis
   
   pecl install redis
@@ -70,58 +70,58 @@ install_redis() {
   apk del .phpmodule-deps
 }
 
-install_bz2() {
-  install_simple_extension $ext "bzip2-dev"
+php_install_bz2() {
+  php_install_simple_extension $ext "bzip2-dev"
   $apk_add bzip2
 }
 
-install_curl() {
-  install_simple_extension $ext "curl-dev"
+php_install_curl() {
+  php_install_simple_extension $ext "curl-dev"
   $apk_add libcurl
 }
 
-install_mcrypt() {
-  install_simple_extension $ext "libmcrypt-dev"
+php_install_mcrypt() {
+  php_install_simple_extension $ext "libmcrypt-dev"
   $apk_add libmcrypt
 }
 
-install_gmp() {
-  install_simple_extension $ext "gmp-dev"
+php_install_gmp() {
+  php_install_simple_extension $ext "gmp-dev"
   $apk_add gmp
 }
 
-install_intl() {
-  install_simple_extension $ext "icu-dev libintl"
+php_install_intl() {
+  php_install_simple_extension $ext "icu-dev libintl"
   $apk_add libintl icu-libs
 }
 
-install_pgsql() {
-  install_simple_extension $ext "postgresql-dev"
+php_install_pgsql() {
+  php_install_simple_extension $ext "postgresql-dev"
   $apk_add postgresql-dev
 }
 
-install_pdo_pgsql() {
-  install_simple_extension $ext "postgresql-dev"
+php_install_pdo_pgsql() {
+  php_install_simple_extension $ext "postgresql-dev"
   $apk_add postgresql-dev
 }
 
-install_readline() {
-  install_simple_extension $ext "readline-dev libedit-dev"
+php_install_readline() {
+  php_install_simple_extension $ext "readline-dev libedit-dev"
   $apk_add readline libedit
 }
 
-install_dom() {
-  install_simple_extension $ext "libxml2-dev"
+php_install_dom() {
+  php_install_simple_extension $ext "libxml2-dev"
   $apk_add libxml2
 }
 
-install_xml() {
-  install_simple_extension $ext "libxml2-dev"
+php_install_xml() {
+  php_install_simple_extension $ext "libxml2-dev"
   $apk_add libxml2
 }
 
-install_zip() {
-  install_simple_extension $ext "zlib-dev"
+php_install_zip() {
+  php_install_simple_extension $ext "zlib-dev"
 }
 
 php_install_extensions() {
@@ -130,8 +130,8 @@ php_install_extensions() {
   
   for ext in $COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS; do
     infoText "installing PHP extension $ext"
-    if type install_$ext; then
-      install_$ext
+    if type php_install_$ext; then
+      php_install_$ext
     else
       # try to install unknown extensions as it is possible, that they are part of the core
       # TODO: check, if the ext is part of the core
