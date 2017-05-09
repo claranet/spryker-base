@@ -131,7 +131,7 @@ php_install_extensions() {
   $apk_add re2c
   
   # get a uniq list of extensions
-  local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | sort | uniq`
+  local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | tr "[[:space:]]" "\n" | sort | uniq`
   local PHP_EXTENSIONS_COUNT=`echo $UNIQ_PHP_EXTENSION_LIST | wc -w`
   local PHP_EXTENSIONS_COUNTER="1"
   
