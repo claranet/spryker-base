@@ -18,28 +18,24 @@ COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 #  Prepare
 #
 
-infoText "check if we support the requested NODEJS_VERSION"
 if ! is_in_list "$NODEJS_VERSION" "$SUPPORTED_NODEJS_VERSIONS"; then
-  errorText "Requested NODEJS_VERSION '$NODEJS_VERSION' is not supported. Abort!"
-  infoText  "Supported nodejs version is one of: $SUPPORTED_NODEJS_VERSIONS"
+  errorText "NodeJS version '$NODEJS_VERSION' is not supported. Choose one of $SUPPORTED_NODEJS_VERSIONS. Abort!"
   exit 1
 fi
-successText "YES! Support is available for $NODEJS_VERSION"
+sectionNote "NodeJS version $NODEJS_VERSION is supported"
 
-infoText "check if we support the requested NODEJS_PACKAGE_MANAGER"
 if ! is_in_list "$NPM" "$SUPPORTED_NODEJS_PACKAGE_MANAGER"; then
-  errorText "Requested NODEJS_PACKAGE_MANAGER '$NPM' is not supported. Abort!"
-  infoText  "Supported nodejs package manager is one of: $SUPPORTED_NODEJS_PACKAGE_MANAGER"
+  errorText "NodeJS package manager '$NPM' is not supported. Choose one of $SUPPORTED_NODEJS_PACKAGE_MANAGER. Abort!"
   exit 1
 fi
-successText "YES! Support is available for $NPM"
+sectionNote "NodeJS package manager '$NPM' is supported"
 
 
 #
 #  Install nodejs & package manager
 #
 
-infoText "install nodejs version $NODEJS_VERSION and npm"
+sectionNote "install nodejs version $NODEJS_VERSION"
 if [ "$NODEJS_VERSION" = "7" ]; then
   $apk_add nodejs-current
 else
@@ -49,5 +45,6 @@ fi
 
 # install yarn if requested as package manager
 if [ "$NPM" = 'yarn' ]; then
+  sectionNote "install $NPM"
   $apk_add yarn
 fi

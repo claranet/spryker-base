@@ -30,36 +30,35 @@ RED_TEXT='\033[31' # text red
 NC='\033[0m' # reset
 
 
-labelText() {
-    echo -e "\n${WHITE_TEXT}${BLUE_BKG}-> ${1} ${NC}\n"
-}
-
 errorText() {
-    echo -e "\n${WHITE_TEXT}${ERROR_BKG}=> ${1} <=${NC}\n"
-}
-
-infoText() {
-    echo -e "\n${INFO_TEXT}m=> ${1} <=${NC}\n"
+  echo -e "\n${WHITE_TEXT}${ERROR_BKG}!!! ${1} !!!${NC}\n"
+  echo -e "\n!!! $1 !!!\n" >> /var/log/docker_build.log
 }
 
 successText() {
-    echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
+  echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
+  echo -e "SUCCESS: $1" >> /var/log/docker_build.log
 }
 
-warningText() {
-    echo -e "\n${RED_TEXT}${YELLOW_BKG}=> ${1} <=${NC}\n"
+# use this for section headlines; think of it like <h1></h1>
+sectionHeadline() {
+  echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}\n"
+  echo -e "\n==> $1" >> /var/log/docker_build.log
 }
 
-setupText() {
-    echo -e "\n${WHITE_TEXT}${MAGENTA_BKG}=> ${1} <=${NC}\n"
+# use this for information texts inside a section; like <p></p>
+sectionNote() {
+  echo -e "${INFO_TEXT}m\t... ${1}${NC}"
+  echo -e "\n\t... $1" >> /var/log/docker_build.log
 }
+
 
 writeErrorMessage() {
-    if [[ $? != 0 ]]; then
-        errorText "${1}"
-        errorText "Command unsuccessful"
-        exit 1
-    fi
+  if [[ $? != 0 ]]; then
+    errorText "${1}"
+    errorText "Command FAILED"
+    exit 1
+  fi
 }
 
 
@@ -74,6 +73,7 @@ enable_nginx_vhost() {
     return
   fi
   
+  sectionNote "enable nginx vhost $VHOST"
   ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/${VHOST}.conf
 }
 
@@ -89,7 +89,7 @@ enable_phpfpm_app() {
     return
   fi
   
-  # enable php-fpm pool config
+  sectionNote "enable php-fpm config for $1"
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
 }
 
@@ -97,20 +97,13 @@ enable_phpfpm_app() {
 # activates zed and/or yves instance, based the value of $ENABLED_SERVICES
 enable_services() {
   for SERVICE in $ENABLED_SERVICES; do
-    labelText "Enable ${SERVICE} vHost and PHP-FPM app..."
+    sectionHeadline "Enable ${SERVICE} vHost and PHP-FPM app"
     
-    infoText "Enbable ${SERVICE} - Link nginx vHost to sites-enabled/..."
     enable_nginx_vhost ${SERVICE}
-    
-    infoText "Enable ${SERVICE} - Link php-fpm pool app config to pool.d/..."
     enable_phpfpm_app ${SERVICE}
     
-    # if we are the ZED instance, init ENV
-    if [ "${SERVICE}" = "zed" ]; then
-      infoText "init external services (DBMS, ES)"
-      entrypoint.sh init
-    fi
-    
+    # if we are the ZED instance, init external services like the DBMS, ES and redis
+    [ "${SERVICE}" = "zed" ] && entrypoint.sh init
   done
 }
 
@@ -119,7 +112,7 @@ enable_services() {
 # nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
 # php-fpm starts unforked and remains in the forground
 start_services() {
-  labelText "Starting enabled services $ENABLED_SERVICES"
+  sectionHeadline "Starting enabled services $ENABLED_SERVICES"
   
   # starts nginx daemonized to be able to start php-fpm in background
   # TODO: report to the user if nginx configtest fails
@@ -128,7 +121,7 @@ start_services() {
 
 # short wrapper for projects "console" executeable
 execute_console_command() {
-  infoText "execute 'console $@'"
+  sectionNote "execute 'console $@'"
   vendor/bin/console $@
 }
 
@@ -147,7 +140,7 @@ execute_scripts_within_directory() {
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      infoText "Executing script ($scripts_counter of $scripts_count) : $script_name"
+      sectionHeadline "Executing script ($scripts_counter of $scripts_count) : $script_name"
       cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
@@ -160,12 +153,13 @@ execute_scripts_within_directory() {
 
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_service() {
+  sectionHeadline "waiting for $1 to come up"
   until nc -z $1 $2; do
-    echo "waiting for $1 to come up..."
+    sectionNote "still waiting for tcp://$1:$2..."
     sleep 1
   done
   
-  echo "$1 seems to be up, port is open"
+  sectionNote "tcp://$1:$2 seems to be up, port is open"
 }
 
 
