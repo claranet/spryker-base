@@ -8,8 +8,10 @@ remove_iconv_translit_usage() {
   
   local FILE_LIST="$WORKDIR/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php"
   for f in $FILE_LIST; do
-    sectionNote "doing it for: $f"
-    sed -i 's#//TRANSLIT##g' $f
+    if [ -e "$f" ]; then
+      sectionNote "doing it for: $f"
+      sed -i 's#//TRANSLIT##g' $f
+    fi
   done
 }
 
