@@ -36,7 +36,6 @@ php_install_simple_extension() {
 php_install_imagick() {
   $apk_add --virtual .phpmodule-deps imagemagick-dev libtool
   $apk_add imagemagick
-  PHP_EXTENSION_IMAGICK=${PHP_EXTENSION_IMAGICK:-"3.4.3"}
 
   pecl install imagick-$PHP_EXTENSION_IMAGICK
   docker-php-ext-enable imagick
@@ -47,7 +46,6 @@ php_install_imagick() {
 # see https://pecl.php.net/package/redis
 php_install_redis() {
   $apk_add --virtual .phpmodule-deps redis
-  PHP_EXTENSION_REDIS=${PHP_EXTENSION_REDIS:-"3.1.2"}
   
   pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis

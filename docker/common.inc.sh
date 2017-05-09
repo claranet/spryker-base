@@ -6,16 +6,16 @@ set -e -o pipefail
 
 export TERM=xterm 
 
-# make modifying parameters easy by a central apk add command
+# makes modifying parameters easy by a central apk add command
 apk_add='apk add'
+
+# import default variables
+source $WORKDIR/docker/defaults.inc.sh
 
 
 # include custom build config on demand
-# TODO: export imported variables so all other commands gets them as ENV vars
 [ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
 
-
-NPM=${NODEJS_PACKAGE_MANAGER:-npm}
 
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
@@ -176,19 +176,10 @@ is_in_list() {
   local LIST="$2"
   
   for i in $LIST; do
-    if [ "$VALUE" == "$i" ]; then
+    if [ "$VALUE" = "$i" ]; then
       return 0
     fi
   done
   
   return 1
-}
-
-# the opposit of is_in_list
-is_not_in_list() {
-  if is_in_list "$1" "$2"; then
-    return 1
-  else
-    return 0
-  fi
 }

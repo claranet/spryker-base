@@ -209,11 +209,6 @@ Please take a look at [the deep dive documentation](docs/README.md)
   so if you choose development here, e.g. composer and npm/yarn will also
   install dev dependencies! There are more modifications, which depend on this
   switch.  defaults to "production"
-* Choose node version by supplying `NODEJS_VERSION` as ARG to switch between
-  nodejs 6.x and 7.x.
-* `NODEJS_PACKAGE_MANAGER`: you can, additionally to npm, install yarn; if you
-  select yarn here also, if yarn is selected, it would be used while running
-  the base installation
 
 ## Build Hooks
 
