@@ -51,17 +51,6 @@ php_install_gd() {
   $apk_add libpng libjpeg-turbo freetype
 }
 
-php_install_xcache() {
-  # FIXEM: replace by opcache - no support for PHP 7.x!
-  curl -fsSL 'https://xcache.lighttpd.net/pub/Releases/3.2.0/xcache-3.2.0.tar.gz' -o xcache.tar.gz \
-    && mkdir -p /tmp/xcache \
-    && tar -xf xcache.tar.gz -C /tmp/xcache --strip-components=1 \
-    && rm xcache.tar.gz \
-    && docker-php-ext-configure /tmp/xcache --enable-xcache \
-    && docker-php-ext-install -j$COMPILE_JOBS /tmp/xcache \
-    && rm -r /tmp/xcache
-}
-
 php_install_redis() {
   $apk_add --virtual .phpmodule-deps redis
   
