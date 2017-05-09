@@ -45,7 +45,7 @@ sectionHeadline() {
 # use this for information texts inside a section; like <p></p>
 sectionNote() {
   echo -e "${INFO_TEXT}m\t... ${1}${NC}"
-  echo -e "\n\t... $1" >> /var/log/docker_build.log
+  echo -e "\n... $1" >> /var/log/docker_build.log
 }
 
 
