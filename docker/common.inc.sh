@@ -2,12 +2,8 @@
 
 # abort on first error
 set -e -o pipefail
+export TERM=xterm
 
-
-export TERM=xterm 
-
-# makes modifying parameters easy by a central apk add command
-apk_add='apk add'
 
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
@@ -59,6 +55,14 @@ writeErrorMessage() {
     errorText "Command FAILED"
     exit 1
   fi
+}
+
+
+install_packages() {
+  local PKG_LIST="$*"
+  local PLAIN_PKG_LIST=`echo "$PKG_LIST" | sed 's/--virtual //g'`
+  sectionNote "install package(s): $PLAIN_PKG_LIST"
+  apk add $PKG_LIST >> /var/log/docker_build.log
 }
 
 

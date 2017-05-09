@@ -8,11 +8,11 @@ NPM_DEPENDENCIES=${NPM_DEPENDENCIES:-}
 
 
 if [ ! -z "$NPM_DEPENDENCIES" ]; then
-  $apk_add --virtual npm_dependencies $NPM_DEPENDENCIES
+  install_packages --virtual npm_dependencies $NPM_DEPENDENCIES
 fi
 
 if [ ! -z "$NPM_BUILD_DEPENDENCIES" ]; then
-  $apk_add --virtual npm_build_dependencies $NPM_BUILD_DEPENDENCIES
+  install_packages --virtual npm_build_dependencies $NPM_BUILD_DEPENDENCIES
 fi
 
 

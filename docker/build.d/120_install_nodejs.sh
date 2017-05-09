@@ -37,14 +37,14 @@ sectionNote "NodeJS package manager '$NPM' is supported"
 
 sectionNote "install nodejs version $NODEJS_VERSION"
 if [ "$NODEJS_VERSION" = "7" ]; then
-  $apk_add nodejs-current
+  install_packages nodejs-current
 else
-  $apk_add nodejs
+  install_packages nodejs
 fi
 
 
 # install yarn if requested as package manager
 if [ "$NPM" = 'yarn' ]; then
   sectionNote "install $NPM"
-  $apk_add yarn
+  install_packages yarn
 fi

@@ -23,7 +23,7 @@ php_install_simple_extension() {
   EXTENSION=$1
   DEPS="$2"
   
-  $apk_add --virtual .phpmodule-deps $DEPS
+  install_packages --virtual .phpmodule-deps $DEPS
   docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
   apk del .phpmodule-deps
 }
@@ -34,8 +34,8 @@ php_install_simple_extension() {
 
 # see https://pecl.php.net/package/imagick
 php_install_imagick() {
-  $apk_add --virtual .phpmodule-deps imagemagick-dev libtool
-  $apk_add imagemagick
+  install_packages --virtual .phpmodule-deps imagemagick-dev libtool
+  install_packages imagemagick
 
   pecl install imagick-$PHP_EXTENSION_IMAGICK
   docker-php-ext-enable imagick
@@ -45,7 +45,7 @@ php_install_imagick() {
 
 # see https://pecl.php.net/package/redis
 php_install_redis() {
-  $apk_add --virtual .phpmodule-deps redis
+  install_packages --virtual .phpmodule-deps redis
   
   pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis
@@ -58,7 +58,7 @@ php_install_redis() {
 
 
 php_install_gd() {
-  $apk_add --virtual .phpmodule-deps freetype-dev \
+  install_packages --virtual .phpmodule-deps freetype-dev \
         libjpeg-turbo-dev \
         libmcrypt-dev \
         libpng-dev
@@ -67,57 +67,57 @@ php_install_gd() {
   docker-php-ext-install -j$COMPILE_JOBS gd
   apk del .phpmodule-deps
   
-  $apk_add libpng libjpeg-turbo freetype
+  install_packages libpng libjpeg-turbo freetype
 }
 
 php_install_bz2() {
   php_install_simple_extension $ext "bzip2-dev"
-  $apk_add bzip2
+  install_packages bzip2
 }
 
 php_install_curl() {
   php_install_simple_extension $ext "curl-dev"
-  $apk_add libcurl
+  install_packages libcurl
 }
 
 php_install_mcrypt() {
   php_install_simple_extension $ext "libmcrypt-dev"
-  $apk_add libmcrypt
+  install_packages libmcrypt
 }
 
 php_install_gmp() {
   php_install_simple_extension $ext "gmp-dev"
-  $apk_add gmp
+  install_packages gmp
 }
 
 php_install_intl() {
   php_install_simple_extension $ext "icu-dev libintl"
-  $apk_add libintl icu-libs
+  install_packages libintl icu-libs
 }
 
 php_install_pgsql() {
   php_install_simple_extension $ext "postgresql-dev"
-  $apk_add postgresql-dev
+  install_packages postgresql-dev
 }
 
 php_install_pdo_pgsql() {
   php_install_simple_extension $ext "postgresql-dev"
-  $apk_add postgresql-dev
+  install_packages postgresql-dev
 }
 
 php_install_readline() {
   php_install_simple_extension $ext "readline-dev libedit-dev"
-  $apk_add readline libedit
+  install_packages readline libedit
 }
 
 php_install_dom() {
   php_install_simple_extension $ext "libxml2-dev"
-  $apk_add libxml2
+  install_packages libxml2
 }
 
 php_install_xml() {
   php_install_simple_extension $ext "libxml2-dev"
-  $apk_add libxml2
+  install_packages libxml2
 }
 
 php_install_zip() {
@@ -128,11 +128,11 @@ php_install_zip() {
 # installs PHP extensions listed in $COMMON_PHP_EXTENSIONS and $PHP_EXTENSIONS
 php_install_extensions() {
   docker-php-source extract
-  $apk_add re2c
+  install_packages re2c
   
   # get a uniq list of extensions
   local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | tr "[[:space:]]" "\n" | sort | uniq`
-  local PHP_EXTENSIONS_COUNT=`echo $UNIQ_PHP_EXTENSION_LIST | wc -l`
+  local PHP_EXTENSIONS_COUNT=`echo $UNIQ_PHP_EXTENSION_LIST | wc -w`
   local PHP_EXTENSIONS_COUNTER="1"
   
   for ext in $UNIQ_PHP_EXTENSION_LIST; do
