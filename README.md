@@ -14,7 +14,7 @@ place the source code.
 Thats why we are keen to get feedback from you! This is a work in progress
 effort which strives for making dockerizing a Spryker Shop as easy as possible.
 In order to successfully achieve this goal, we need to identify common steps
-worth to be generalized and put into this base image. So tell us about you
+worth to be generalized and put into this base image. So tell us about your
 needs and your experiences. 
 
 If you want to see this image in action and how its gonna be used check out the
