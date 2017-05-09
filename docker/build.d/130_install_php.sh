@@ -28,6 +28,11 @@ php_install_simple_extension() {
   apk del .phpmodule-deps
 }
 
+#
+#  3rd party PHP extensions
+#
+
+# see https://pecl.php.net/package/imagick
 php_install_imagick() {
   $apk_add --virtual .phpmodule-deps imagemagick-dev libtool
   $apk_add imagemagick
@@ -38,6 +43,21 @@ php_install_imagick() {
 
   apk del .phpmodule-deps
 }
+
+# see https://pecl.php.net/package/redis
+php_install_redis() {
+  $apk_add --virtual .phpmodule-deps redis
+  PHP_EXTENSION_REDIS=${PHP_EXTENSION_REDIS:-"3.1.2"}
+  
+  pecl install redis-$PHP_EXTENSION_REDIS
+  docker-php-ext-enable redis
+  apk del .phpmodule-deps
+}
+
+#
+#  Core PHP extensions
+#
+
 
 php_install_gd() {
   $apk_add --virtual .phpmodule-deps freetype-dev \
@@ -50,15 +70,6 @@ php_install_gd() {
   apk del .phpmodule-deps
   
   $apk_add libpng libjpeg-turbo freetype
-}
-
-php_install_redis() {
-  $apk_add --virtual .phpmodule-deps redis
-  PHP_EXTENSION_REDIS=${PHP_EXTENSION_REDIS:-"3.1.2"}
-  
-  pecl install redis-$PHP_EXTENSION_REDIS
-  docker-php-ext-enable redis
-  apk del .phpmodule-deps
 }
 
 php_install_bz2() {
@@ -115,6 +126,8 @@ php_install_zip() {
   php_install_simple_extension $ext "zlib-dev"
 }
 
+
+# installs PHP extensions listed in $COMMON_PHP_EXTENSIONS and $PHP_EXTENSIONS
 php_install_extensions() {
   docker-php-source extract
   $apk_add re2c
