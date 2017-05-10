@@ -3,6 +3,7 @@
 # abort on first error
 set -eu -o pipefail
 export TERM=xterm
+BUILD_LOG=/var/log/docker_build.log
 
 
 # import default variables
@@ -28,24 +29,24 @@ NC='\033[0m' # reset
 
 errorText() {
   echo -e "\n${WHITE_TEXT}${ERROR_BKG}!!! ${1} !!!${NC}\n"
-  echo -e "\n!!! $1 !!!\n" >> /var/log/docker_build.log
+  echo -e "\n!!! $1 !!!\n" >> $BUILD_LOG
 }
 
 successText() {
   echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
-  echo -e "SUCCESS: $1" >> /var/log/docker_build.log
+  echo -e "SUCCESS: $1" >> $BUILD_LOG
 }
 
 # use this for section headlines; think of it like <h1></h1>
 sectionHeadline() {
   echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}\n"
-  echo -e "\n==> $1" >> /var/log/docker_build.log
+  echo -e "\n==> $1" >> $BUILD_LOG
 }
 
 # use this for information texts inside a section; like <p></p>
 sectionNote() {
-  echo -e "${INFO_TEXT}m\t... ${1}${NC}"
-  echo -e "\n... $1" >> /var/log/docker_build.log
+  echo -e "${INFO_TEXT}m... ${1}${NC}"
+  echo -e "\n... $1" >> $BUILD_LOG
 }
 
 
@@ -58,11 +59,18 @@ writeErrorMessage() {
 }
 
 
+# arguments: $1 (build|run) $2...x packages to be installed
 install_packages() {
   local PKG_LIST="$*"
-  local PLAIN_PKG_LIST=`echo "$PKG_LIST" | sed 's/--virtual //g'`
-  sectionNote "install package(s): $PLAIN_PKG_LIST"
-  apk add $PKG_LIST >> /var/log/docker_build.log
+  
+  local INSTALL_FLAGS=""
+  if [ "$1" = "--build" ]; then
+    INSTALL_FLAGS="--virtual .build_deps"
+    PKG_LIST=`echo "$PKG_LIST" | sed 's/--build //'` # just drop the first element, which is "build"
+  fi
+  
+  sectionNote "install package(s): $PKG_LIST"
+  apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
 }
 
 
