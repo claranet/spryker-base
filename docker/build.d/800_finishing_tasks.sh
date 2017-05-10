@@ -7,4 +7,4 @@ mkdir -p $WORKDIR/data/$SPRYKER_SHOP_CC/logs/
 
 # TODO: increase security by making this more granular
 sectionNote "fix owner properties for files within /data/"
-chown -R www-data: /data/logs /data/shop/data
+chown -R www-data: /data/logs $WORKDIR/data
