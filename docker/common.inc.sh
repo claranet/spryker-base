@@ -3,7 +3,6 @@
 # abort on first error
 set -eu -o pipefail
 export TERM=xterm
-BUILD_LOG=/var/log/docker_build.log
 
 
 # import default variables
@@ -92,10 +91,10 @@ enable_nginx_vhost() {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 enable_phpfpm_app() {
-  FPM_APPS_AVAILABLE="/etc/php/apps"
-  FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
+  local FPM_APPS_AVAILABLE="/etc/php/apps"
+  local FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
   
-  APP="${1}.conf"
+  local APP="${1}.conf"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
