@@ -1,0 +1,20 @@
+
+# This file should be copied to your shops root
+# rename it to ".dockerignore"
+
+
+.git
+
+# ignore dependency installs
+vendor
+bower_components
+node_modules
+
+# ignore vim swap files
+*.swp
+
+# ignore some spryker data
+./setup
+./setup_test
+./deploy
+
