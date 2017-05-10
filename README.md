@@ -59,14 +59,14 @@ need to be aligned with the base image:
 * Dependencies
     * PHP: `composer.json` and `composer.lock`
     * Node: `packages.json`
-* Make Spryker configuration consider env vars. Checkout the `config/Shared/config_local.php` of the [demoshop](https://github.com/claranet/spryker-demoshop) exemplify what is meant here.
-* Control the PHP extension you want to be installed via `./docker/build.conf`
+* Make Spryker configuration consider env vars. Checkout the [shop_skel/config/Shared/config_local.php](/shop_skel/config/Shared/config_local.php) which is exemplify what is meant here.
+* Control the PHP extensions you want to be installed via `./docker/build.conf`
 * Control the build process of the image by placing your scripts under `./docker/build.d/`
 * Control the initialization process of the setup by placing your scripts under `./docker/init.d/`
 
-Again, check out the [demoshop](https://github.com/claranet/spryker-demoshop)
+Check out the [demoshop](https://github.com/claranet/spryker-demoshop)
 we have prepared for using this image here. This should answer all of the
-questions you might have. 
+questions you might have.
 
 
 # Create your own image
@@ -74,6 +74,24 @@ questions you might have.
 Either fork the [demoshop](https://github.com/claranet/spryker-demoshop) or
 start from scratch. For the latter you need to consider the following steps.
 
+## Copy our prepared shop skeleton to your shops root
+
+In our [skel folder](/shop_skel) we have prepared all required files you need to get started.
+We add our best practices into those files.
+
+The code below creates a config_local.php which is using ENV vars to configure the shop, so
+you can use the resulting image in different environments and the spryker config should adapt.
+
+A dockerignore file ensures, we don't copy to much data into the docker image.
+
+```sh
+YOUR_SHOP="/path/to/your/shops/repository"
+cp -an shop_skel/* "$YOUR_SHOP/"
+[ ! -e "$YOUR_SHOP/.dockerignore" ] && mv "$YOUR_SHOP/docker/dockerignore" "$YOUR_SHOP/.dockerignore"
+cd "$YOUR_SHOP"
+git add .dockerignore docker/ config/Shared/config_local.php
+echo -e "\nDONE\n"
+```
 
 ## Create a Dockerfile
 
