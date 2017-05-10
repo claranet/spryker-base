@@ -1,13 +1,9 @@
 #!/bin/sh
 
 # abort on first error
-set -e -o pipefail
+set -eu -o pipefail
+export TERM=xterm
 
-
-export TERM=xterm 
-
-# makes modifying parameters easy by a central apk add command
-apk_add='apk add'
 
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
@@ -32,24 +28,24 @@ NC='\033[0m' # reset
 
 errorText() {
   echo -e "\n${WHITE_TEXT}${ERROR_BKG}!!! ${1} !!!${NC}\n"
-  echo -e "\n!!! $1 !!!\n" >> /var/log/docker_build.log
+  echo -e "\n!!! $1 !!!\n" >> $BUILD_LOG
 }
 
 successText() {
   echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
-  echo -e "SUCCESS: $1" >> /var/log/docker_build.log
+  echo -e "SUCCESS: $1" >> $BUILD_LOG
 }
 
 # use this for section headlines; think of it like <h1></h1>
 sectionHeadline() {
   echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}\n"
-  echo -e "\n==> $1" >> /var/log/docker_build.log
+  echo -e "\n==> $1" >> $BUILD_LOG
 }
 
 # use this for information texts inside a section; like <p></p>
 sectionNote() {
-  echo -e "${INFO_TEXT}m\t... ${1}${NC}"
-  echo -e "\n\t... $1" >> /var/log/docker_build.log
+  echo -e "${INFO_TEXT}m... ${1}${NC}"
+  echo -e "\n... $1" >> $BUILD_LOG
 }
 
 
@@ -59,6 +55,21 @@ writeErrorMessage() {
     errorText "Command FAILED"
     exit 1
   fi
+}
+
+
+# arguments: $1 (build|run) $2...x packages to be installed
+install_packages() {
+  local PKG_LIST="$*"
+  
+  local INSTALL_FLAGS=""
+  if [ "$1" = "--build" ]; then
+    INSTALL_FLAGS="--virtual .build_deps"
+    PKG_LIST=`echo "$PKG_LIST" | sed 's/--build //'` # just drop the first element, which is "build"
+  fi
+  
+  sectionNote "install package(s): $PKG_LIST"
+  apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
 }
 
 
@@ -80,10 +91,10 @@ enable_nginx_vhost() {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 enable_phpfpm_app() {
-  FPM_APPS_AVAILABLE="/etc/php/apps"
-  FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
+  local FPM_APPS_AVAILABLE="/etc/php/apps"
+  local FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
   
-  APP="${1}.conf"
+  local APP="${1}.conf"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
     return
@@ -103,7 +114,9 @@ enable_services() {
     enable_phpfpm_app ${SERVICE}
     
     # if we are the ZED instance, init external services like the DBMS, ES and redis
-    [ "${SERVICE}" = "zed" ] && entrypoint.sh init
+    if [ "${SERVICE}" = "zed" ]; then
+      entrypoint.sh init
+    fi
   done
 }
 

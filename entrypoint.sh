@@ -30,6 +30,7 @@ case $1 in
       ;;
     
     build)
+      mkdir -pv /data/logs
       execute_scripts_within_directory "$WORKDIR/docker/build.d/"
       successText "building image tasks FINISHED"
       ;;

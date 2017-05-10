@@ -1,0 +1,65 @@
+--- 
+
+version: '3'
+
+services:
+  yves:
+    image: "claranet/spryker-demoshop:latest"
+    command: "run_yves"
+    restart: always
+    depends_on:
+      - zed
+    ports:
+      - "2380:80"
+    links:
+      - zed
+      - redis
+      - elasticsearch
+    env_file: ./docker-compose.env
+
+  zed: 
+    image: "claranet/spryker-demoshop:latest"
+    command: "run_zed"
+    restart: always
+    depends_on:
+      - database
+      - redis
+      - elasticsearch
+    ports:
+      - "2381:80"
+    links:
+      - redis
+      - elasticsearch
+      - database
+      - jenkins
+    env_file: ./docker-compose.env
+
+  redis:
+    image: "redis:3.2-alpine"
+    restart: always
+
+  elasticsearch:
+    # FIXME: images is deprecated and only maintained until the 2017-06-20
+    # see https://hub.docker.com/_/elasticsearch/
+    image: "elasticsearch:2.4-alpine"
+    restart: always
+    depends_on:
+      - database
+
+# FIXME postgres is listening for incoming sessions even if it is not ready to serve as a service
+# this needs to be considered in the setup step as `wait_for_service` does only check, if the
+# given service is able to establish connections.
+  database:
+    image: "postgres:9.4.11-alpine"
+    restart: always
+    env_file: ./docker-compose.env
+
+  jenkins:
+    image: "jenkins:alpine"
+    ports: 
+      - "10007:8080"
+    links:
+      - database
+      - elasticsearch
+      - redis
+    env_file: ./docker-compose.env

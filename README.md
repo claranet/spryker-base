@@ -14,7 +14,7 @@ place the source code.
 Thats why we are keen to get feedback from you! This is a work in progress
 effort which strives for making dockerizing a Spryker Shop as easy as possible.
 In order to successfully achieve this goal, we need to identify common steps
-worth to be generalized and put into this base image. So tell us about you
+worth to be generalized and put into this base image. So tell us about your
 needs and your experiences. 
 
 If you want to see this image in action and how its gonna be used check out the
@@ -59,14 +59,14 @@ need to be aligned with the base image:
 * Dependencies
     * PHP: `composer.json` and `composer.lock`
     * Node: `packages.json`
-* Make Spryker configuration consider env vars. Checkout the `config/Shared/config_local.php` of the [demoshop](https://github.com/claranet/spryker-demoshop) exemplify what is meant here.
-* Control the PHP extension you want to be installed via `./docker/build.conf`
+* Make Spryker configuration consider env vars. Checkout the [shop_skel/config/Shared/config_local.php](/shop_skel/config/Shared/config_local.php) which is exemplify what is meant here.
+* Control the PHP extensions you want to be installed via `./docker/build.conf`
 * Control the build process of the image by placing your scripts under `./docker/build.d/`
 * Control the initialization process of the setup by placing your scripts under `./docker/init.d/`
 
-Again, check out the [demoshop](https://github.com/claranet/spryker-demoshop)
+Check out the [demoshop](https://github.com/claranet/spryker-demoshop)
 we have prepared for using this image here. This should answer all of the
-questions you might have. 
+questions you might have.
 
 
 # Create your own image
@@ -74,26 +74,30 @@ questions you might have.
 Either fork the [demoshop](https://github.com/claranet/spryker-demoshop) or
 start from scratch. For the latter you need to consider the following steps.
 
+## Copy our prepared shop skeleton to your shops root
 
-## Create a Dockerfile
+In our [skel folder](/shop_skel) we have prepared all required files you need to get started.
+We add our best practices into those files.
 
-Create a [Dockerfile](https://docs.docker.com/engine/reference/builder/) which
-just inherits from the base image as following: 
+The code below creates a config_local.php which is using ENV vars to configure the shop, so
+you can use the resulting image in different environments and the spryker config should adapt.
 
-    FROM claranet/spryker-base:latest
+A dockerignore file ensures, we don't copy to much data into the docker image.
 
-For most of the cases this is pretty much everything you need.
+```sh
+YOUR_SHOP="/path/to/your/shops/repository"
+cp -an shop_skel/* "$YOUR_SHOP/"
+[ ! -e "$YOUR_SHOP/.dockerignore" ] && mv "$YOUR_SHOP/docker/dockerignore" "$YOUR_SHOP/.dockerignore"
+cd "$YOUR_SHOP"
+git add .dockerignore docker/ config/Shared/config_local.php
+echo -e "\nDONE\n"
+```
 
-
-## Prepare file hierachy
-
-What is needed is a `./docker` subfolder where the base image resp. the on
-build trigger are expecting modifications the build and initializations
-routines. 
-
-    $ mkdir -p docker
+With this skeleton, you are ready to customize your repository to your individual needs. The
+skeleton can be used untouched, if you want to use it for the demoshop.
 
 ## Write Spryker Configuration
+
 
 
 ## Write docker-compose.yml
@@ -189,6 +193,58 @@ docker exec -it your-shop-image_yves_1 /bin/sh
 # to get into the zed instance
 docker exec -it your-shop-image_zed_1 /bin/sh
 ```
+
+# Enhance / customize the build/init process for your own needs
+
+## The build.conf file
+
+Is essentially a shell script, but should only be used for defining variables!
+
+Location: `docker/`
+
+
+## Install additional PHP extensions
+
+...
+
+```
+# in build.conf
+PHP_EXTENSIONS="imagick pdo_psql"
+```
+
+## Logging
+
+...
+
+```
+errorText
+successText
+sectionHeadline
+sectionNote
+```
+
+## Installing additional packages
+
+We provide a `install_packages` function for all included (build|init) scripts. Please make sure, that you are using it! It comes with the possibility to flag packages as "build" dependencies. Packages flagged as build-dependencies will be removed after the image build finishes and `DEV_TOOLS=off`. To flag packages as build dependencies just set `--build` as the first argument:
+
+```
+# remove "gcc" at the end of our image build
+install_packages --build gcc
+
+# keep "top" in the resulting image
+install_packages top
+```
+
+## Install modes
+
+* DEV_TOOLS
+* APPLICATION_ENV
+
+...
+
+## Not documented here?
+
+We are still in the early stages of this project, so documentation might be incomplete. If you want to learn more about features we are providing, please take a look at [the shell library](docker/common.inc.sh).
 
 # Inside the resulting container image
 

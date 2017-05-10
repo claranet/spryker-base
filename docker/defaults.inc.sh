@@ -1,5 +1,15 @@
 #!/bin/sh
 
+#
+#  General
+#
+
+APPLICATION_ENV="production"
+DEV_TOOLS="off"
+
+# build log location
+BUILD_LOG=/data/logs/build.log
+
 
 #
 #  NodeJS defaults
