@@ -10,7 +10,7 @@ else
   apk del .build_deps
   
   REMOVEABLE_LIST=`find $WORKDIR/vendor -type d -name 'node_modules'`
-  REMOVEABLE_LIST="/root/.npm $WORKDIR/node_modules $WORKDIR/package.json $WORKDIR/package.lock $REMOVEABLE_LIST"
+  REMOVEABLE_LIST="/root/.npm $WORKDIR/node_modules $WORKDIR/package.json $WORKDIR/package.lock /root/.composer /usr/bin/composer.phar $REMOVEABLE_LIST"
   for removeable in $REMOVEABLE_LIST; do
     if [ -e $removeable ]; then
       sectionNote "remove $removeable"
