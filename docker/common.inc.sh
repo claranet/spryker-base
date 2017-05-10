@@ -114,7 +114,9 @@ enable_services() {
     enable_phpfpm_app ${SERVICE}
     
     # if we are the ZED instance, init external services like the DBMS, ES and redis
-    [ "${SERVICE}" = "zed" ] && entrypoint.sh init
+    if [ "${SERVICE}" = "zed" ]; then
+      entrypoint.sh init
+    fi
   done
 }
 
