@@ -287,8 +287,4 @@ We are depending on the official alpinelinux basing [php-fpm docker images](http
 
 # Issues 
 
-## PHP Version 7.0.17
-
-We currently stick to 7.0.17 as 7.0.18 breaks spryker predis usage. See
-https://github.com/php/php-src/commit/bab0b99f376dac9170ac81382a5ed526938d595a
-for details and PHP bug report: https://bugs.php.net/bug.php?id=74429
+Please take a look at [/issues](/issues).
