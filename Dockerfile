@@ -1,5 +1,5 @@
 
-FROM php:7.0.17-fpm-alpine
+FROM php:7.0.19-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
