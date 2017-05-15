@@ -287,4 +287,4 @@ We are depending on the official alpinelinux basing [php-fpm docker images](http
 
 # Issues 
 
-Please take a look at [/issues](/issues).
+Please take a look at [/issues](https://github.com/claranet/spryker-base/issues).
