@@ -85,10 +85,16 @@ you can use the resulting image in different environments and the spryker config
 A dockerignore file ensures, we don't copy to much data into the docker image.
 
 ```sh
+# change these parameters
 YOUR_SHOP="/path/to/your/shops/repository"
+VENDOR="yourCompanyName"
+PROJECT="yourProjectName"
+
+# steps to prepare your shop
 cp -an shop/* "$YOUR_SHOP/"
 [ ! -e "$YOUR_SHOP/.dockerignore" ] && mv "$YOUR_SHOP/docker/dockerignore" "$YOUR_SHOP/.dockerignore"
 cd "$YOUR_SHOP"
+sed -i "" -e "s/@vendor@/$VENDOR/g" -e "s/@project@/$PROJECT/g" run.sh
 git add .dockerignore docker/ config/Shared/config_local.php
 echo -e "\nDONE\n"
 ```

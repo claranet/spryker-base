@@ -1,7 +1,7 @@
 #!/bin/sh
 
-VENDOR=claranet
-PROJECT=spryker-base
+VENDOR=@vendor@
+PROJECT=@project@
 
 WORKDIR=`dirname $0`
 PREVIOUS_DIR=`pwd`
