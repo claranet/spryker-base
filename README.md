@@ -76,7 +76,7 @@ start from scratch. For the latter you need to consider the following steps.
 
 ## Copy our prepared shop skeleton to your shops root
 
-In our [skel folder](/shop_skel) we have prepared all required files you need to get started.
+In our [skel folder](/shop) we have prepared all required files you need to get started.
 We add our best practices into those files.
 
 The code below creates a config_local.php which is using ENV vars to configure the shop, so
@@ -86,7 +86,7 @@ A dockerignore file ensures, we don't copy to much data into the docker image.
 
 ```sh
 YOUR_SHOP="/path/to/your/shops/repository"
-cp -an shop_skel/* "$YOUR_SHOP/"
+cp -an shop/* "$YOUR_SHOP/"
 [ ! -e "$YOUR_SHOP/.dockerignore" ] && mv "$YOUR_SHOP/docker/dockerignore" "$YOUR_SHOP/.dockerignore"
 cd "$YOUR_SHOP"
 git add .dockerignore docker/ config/Shared/config_local.php
