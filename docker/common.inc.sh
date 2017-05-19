@@ -12,16 +12,15 @@ source $WORKDIR/docker/defaults.inc.sh
 
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
-BLUE_BKG=';44m' # background blue
+BLUE_BKG='\e[44m' # background blue
 YELLOW_BKG=';43m' # background yellow
 MAGENTA_BKG=';45m' # background magenta
 
 INFO_TEXT='\033[33' # yellow text
-WHITE_TEXT='\033[37' # text white
+WHITE_TEXT='\e[97m' # text white
 BLACK_TEXT='\033[30' # text black
 RED_TEXT='\033[31' # text red
 NC='\033[0m' # reset
-
 
 errorText() {
   echo -e "\n${WHITE_TEXT}${ERROR_BKG}!!! ${1} !!!${NC}\n"
@@ -31,6 +30,11 @@ errorText() {
 successText() {
   echo -e "\n${BLACK_TEXT}${GREEN_BKG}=> ${1} <=${NC}\n"
   echo -e "SUCCESS: $1" >> $BUILD_LOG
+}
+
+chapterHead() {
+  echo -e "\n${BLUE_BKG}${WHITE_TEXT}::: ${1} :::${NC}\n"
+  echo -e "\n::: $1 :::\n" >> $BUILD_LOG
 }
 
 sectionHead() {
