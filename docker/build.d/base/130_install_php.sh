@@ -1,15 +1,11 @@
 #!/bin/sh
 
 #
-# This script installs the PHP extensions and is able to install PECL extensions as well
+# This script installs the PHP and PECL extensions 
 #
 
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
-
-# a list of common PHP extensions required to run a spryker shop... so you don't have to
-# specify them within every shop implementation.
-COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"
 
 #
 #  Install PHP extensions
@@ -26,6 +22,7 @@ php_install_simple_extension() {
   install_packages --build $DEPS
   docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
 }
+
 
 #
 #  3rd party PHP extensions
@@ -48,11 +45,10 @@ php_install_redis() {
   docker-php-ext-enable redis
 }
 
+
 #
 #  Core PHP extensions
 #
-
-
 php_install_gd() {
   install_packages --build freetype-dev \
         libjpeg-turbo-dev \
@@ -119,7 +115,6 @@ php_install_zip() {
   php_install_simple_extension $ext "zlib-dev"
 }
 
-
 # filters all modules in extensions list by checking, if those extensions are already build
 # you can use this function to read from stdin (e.g. in a pipe) or give it an argument
 # it will stdout all not prebuild modules
@@ -168,16 +163,13 @@ php_install_extensions
 #
 #   Composer
 #
-
 sectionText "Downloading PHP composer"
 curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer
 curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
 php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
 
-
 sectionText "Install PHP composer"
 php /tmp/composer-setup.php --install-dir=/usr/bin/
-
 
 # make the installation process of `composer install` faster by parallel downloads
 composer.phar global require hirak/prestissimo
@@ -186,7 +178,6 @@ composer.phar global require hirak/prestissimo
 #
 #  Clean up
 #
-
 sectionText "Clean up"
 rm -rf /tmp/composer-setup*
 

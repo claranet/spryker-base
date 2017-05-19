@@ -1,10 +1,5 @@
 #!/bin/sh
 
-#
-# This script installs the nginx webserver
-#
-
-
 # we are using more_clear_headers to remove client header
 # see: https://github.com/openresty/headers-more-nginx-module
 install_packages nginx nginx-mod-http-headers-more

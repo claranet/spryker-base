@@ -3,7 +3,7 @@ FROM php:7.0.19-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="0.4.0" \
+      org.label-schema.version="0.5.0" \
       org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce Framework based Shop" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \
@@ -46,7 +46,14 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD  [ "run_yves_and_zed" ]
 
-# Ensure providing a .dockerignore file in your shop repository!
-ONBUILD COPY . $WORKDIR
-ONBUILD RUN /entrypoint.sh build-base
-ONBUILD RUN /entrypoint.sh build-shop
+ONBUILD COPY docker/ $WORKDIR/docker/
+ONBUILD RUN /entrypoint.sh build_base
+
+ONBUILD COPY assets/ $WORKDIR/assets
+ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
+ONBUILD RUN /entrypoint.sh build_deps
+
+ONBUILD COPY src $WORKDIR/src
+ONBUILD COPY config $WORKDIR/config
+ONBUILD COPY public $WORKDIR/public
+ONBUILD RUN /entrypoint.sh build_shop

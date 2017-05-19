@@ -10,7 +10,6 @@ if [ ! -z "$NPM_DEPENDENCIES" ]; then
   install_packages --build $NPM_DEPENDENCIES
 fi
 
-
 # install dependencies for building asset
 # --with-dev is required to install spryker/oryx (works behind npm run x)
 sectionText "Installing required NPM dependencies"
@@ -20,7 +19,7 @@ $NPM install --with-dev
 # we also need to install possible assets-build dependencies from those
 # modules
 for i in `find vendor/ -name 'package.json' | egrep 'assets/(Zed|Yves)/package.json'`; do
-  sectionText "Handle $i"
+  sectionText "Resolving dependencies of $i"
   cd `dirname $i`
   $NPM install
   cd $WORKDIR

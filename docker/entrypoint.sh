@@ -5,8 +5,8 @@ ENABLED_SERVICES=""
 
 source $WORKDIR/docker/common.inc.sh
 
+mkdir -pv /data/logs
 cd $WORKDIR
-
 
 case $1 in 
     run_yves)
@@ -28,8 +28,28 @@ case $1 in
       ;;
     
     build)
-      mkdir -pv /data/logs
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/"
+      chapterHead "Building Base Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/base/"
+      chapterHead "Building Dependency Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
+      chapterHead "Building Shop Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/shop/"
+      successText "Setup initialization successfully FINISHED"
+      ;;
+
+    build_base)
+      chapterHead "Building Base Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/base/"
+      ;;
+
+    build_deps)
+      chapterHead "Building Dependency Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
+      ;;
+
+    build_shop)
+      chapterHead "Building Shop Layer"
+      execute_scripts_within_directory "$WORKDIR/docker/build.d/shop/"
       successText "Image build successfully FINISHED"
       ;;
     
