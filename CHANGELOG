@@ -1,7 +1,13 @@
 
 # Changelog
 
-## 0.4.0 (devel)
+## devel
+
+## 0.5.0 
+
+* [feature] split up the build process into 3 distinct stages/layers (#25ee646)
+
+## 0.4.0 
 
 * [feature] add build/versioning infrastructure
 * [fix] copyright in license
