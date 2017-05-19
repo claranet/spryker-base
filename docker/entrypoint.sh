@@ -30,7 +30,7 @@ case $1 in
     build)
       chapterHead "Building Base Layer"
       execute_scripts_within_directory "$WORKDIR/docker/build.d/base/"
-      chapterHead "Building Shop Dependency Layer"
+      chapterHead "Building Dependency Layer"
       execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
       chapterHead "Building Shop Layer"
       execute_scripts_within_directory "$WORKDIR/docker/build.d/shop/"
@@ -43,7 +43,7 @@ case $1 in
       ;;
 
     build_deps)
-      chapterHead "Building Shop Dependency Layer"
+      chapterHead "Building Dependency Layer"
       execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
       ;;
 

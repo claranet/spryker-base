@@ -46,8 +46,14 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD  [ "run_yves_and_zed" ]
 
-# Ensure providing a .dockerignore file in your shop repository!
-ONBUILD COPY . $WORKDIR
+ONBUILD COPY docker/ $WORKDIR/docker/
 ONBUILD RUN /entrypoint.sh build_base
+
+ONBUILD COPY assets/ $WORKDIR/assets
+ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
 ONBUILD RUN /entrypoint.sh build_deps
+
+ONBUILD COPY src $WORKDIR/src
+ONBUILD COPY config $WORKDIR/config
+ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build_shop

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+sectionText "Removing build depedencies"
+apk del .build_deps || true
+
 sectionText "Cleaning up /tmp folder"
 rm -rf /tmp/*
 
