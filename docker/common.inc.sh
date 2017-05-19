@@ -4,14 +4,11 @@
 set -eu -o pipefail
 export TERM=xterm
 
-
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
 
-
 # include custom build config on demand
 [ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
-
 
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
@@ -36,18 +33,15 @@ successText() {
   echo -e "SUCCESS: $1" >> $BUILD_LOG
 }
 
-# use this for section headlines; think of it like <h1></h1>
-sectionHeadline() {
+sectionHead() {
   echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}\n"
   echo -e "\n==> $1" >> $BUILD_LOG
 }
 
-# use this for information texts inside a section; like <p></p>
-sectionNote() {
-  echo -e "${INFO_TEXT}m... ${1}${NC}"
-  echo -e "\n... $1" >> $BUILD_LOG
+sectionText() {
+  echo -e "${INFO_TEXT}m-> ${1}${NC}"
+  echo -e "-> $1" >> $BUILD_LOG
 }
-
 
 writeErrorMessage() {
   if [[ $? != 0 ]]; then
@@ -56,7 +50,6 @@ writeErrorMessage() {
     exit 1
   fi
 }
-
 
 # arguments: $1 (build|run) $2...x packages to be installed
 install_packages() {
@@ -68,10 +61,9 @@ install_packages() {
     PKG_LIST=`echo "$PKG_LIST" | sed 's/--build //'` # just drop the first element, which is "build"
   fi
   
-  sectionNote "install package(s): $PKG_LIST"
+  sectionText "Installing package(s): $PKG_LIST"
   apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
 }
-
 
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
 enable_nginx_vhost() {
@@ -84,10 +76,9 @@ enable_nginx_vhost() {
     return
   fi
   
-  sectionNote "enable nginx vhost $VHOST"
+  sectionText "Enabling nginx vhost $VHOST"
   ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/${VHOST}.conf
 }
-
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 enable_phpfpm_app() {
@@ -100,32 +91,30 @@ enable_phpfpm_app() {
     return
   fi
   
-  sectionNote "enable php-fpm config for $1"
+  sectionText "Enabling php-fpm config for $1"
   ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
 }
-
 
 # activates zed and/or yves instance, based the value of $ENABLED_SERVICES
 enable_services() {
   for SERVICE in $ENABLED_SERVICES; do
-    sectionHeadline "Enable ${SERVICE} vHost and PHP-FPM app"
+    sectionHead "Enable ${SERVICE} vHost and PHP-FPM app"
     
     enable_nginx_vhost ${SERVICE}
     enable_phpfpm_app ${SERVICE}
     
     # if we are the ZED instance, init external services like the DBMS, ES and redis
     if [ "${SERVICE}" = "zed" ]; then
-      entrypoint.sh init
+      /entrypoint.sh init
     fi
   done
 }
-
 
 # launches an instance of nginx and php-fpm
 # nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
 # php-fpm starts unforked and remains in the forground
 start_services() {
-  sectionHeadline "Starting enabled services $ENABLED_SERVICES"
+  sectionHead "Starting enabled services $ENABLED_SERVICES"
   
   # starts nginx daemonized to be able to start php-fpm in background
   # TODO: report to the user if nginx configtest fails
@@ -134,7 +123,7 @@ start_services() {
 
 # short wrapper for projects "console" executeable
 execute_console_command() {
-  sectionNote "execute 'console $@'"
+  sectionText "Executing 'console $@'"
   vendor/bin/console $@
 }
 
@@ -153,7 +142,7 @@ execute_scripts_within_directory() {
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      sectionHeadline "Executing script ($scripts_counter of $scripts_count) : $script_name"
+      sectionHead "Executing script ($scripts_counter of $scripts_count) : $script_name"
       cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
@@ -163,16 +152,15 @@ execute_scripts_within_directory() {
   fi
 }
 
-
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_service() {
-  sectionHeadline "waiting for $1 to come up"
+  sectionHead "Waiting for $1 to come up"
   until nc -z $1 $2; do
-    sectionNote "still waiting for tcp://$1:$2..."
+    sectionText "Waiting for tcp://$1:$2..."
     sleep 1
   done
   
-  sectionNote "tcp://$1:$2 seems to be up, port is open"
+  sectionText "Success: tcp://$1:$2 seems to be up, port is open"
 }
 
 

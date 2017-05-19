@@ -22,20 +22,20 @@ if ! is_in_list "$NODEJS_VERSION" "$SUPPORTED_NODEJS_VERSIONS"; then
   errorText "NodeJS version '$NODEJS_VERSION' is not supported. Choose one of $SUPPORTED_NODEJS_VERSIONS. Abort!"
   exit 1
 fi
-sectionNote "NodeJS version $NODEJS_VERSION is supported"
+sectionText "NodeJS version $NODEJS_VERSION is supported"
 
 if ! is_in_list "$NPM" "$SUPPORTED_NODEJS_PACKAGE_MANAGER"; then
   errorText "NodeJS package manager '$NPM' is not supported. Choose one of $SUPPORTED_NODEJS_PACKAGE_MANAGER. Abort!"
   exit 1
 fi
-sectionNote "NodeJS package manager '$NPM' is supported"
+sectionText "NodeJS package manager '$NPM' is supported"
 
 
 #
 #  Install nodejs & package manager
 #
 
-sectionNote "install nodejs version $NODEJS_VERSION"
+sectionText "Install nodejs version $NODEJS_VERSION"
 if [ "$NODEJS_VERSION" = "7" ]; then
   install_packages --build nodejs-current
 else
@@ -45,6 +45,6 @@ fi
 
 # install yarn if requested as package manager
 if [ "$NPM" = 'yarn' ]; then
-  sectionNote "install $NPM"
+  sectionText "Install $NPM"
   install_packages --build yarn
 fi
