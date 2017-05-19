@@ -32,12 +32,12 @@ case $1 in
     build)
       mkdir -pv /data/logs
       execute_scripts_within_directory "$WORKDIR/docker/build.d/"
-      successText "building image tasks FINISHED"
+      successText "Image build successfully FINISHED
       ;;
     
     init)
       execute_scripts_within_directory "$WORKDIR/docker/init.d/"
-      successText "Setup initialization tasks FINISHED"
+      successText "Setup initialization successfully FINISHED"
     ;;
     
     *)
