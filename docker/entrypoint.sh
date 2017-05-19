@@ -1,7 +1,5 @@
 #!/bin/sh
 
-CONSOLE="execute_console_command"
-
 # services activated for this docker container instance will be added to this string
 ENABLED_SERVICES=""
 
@@ -32,7 +30,7 @@ case $1 in
     build)
       mkdir -pv /data/logs
       execute_scripts_within_directory "$WORKDIR/docker/build.d/"
-      successText "Image build successfully FINISHED
+      successText "Image build successfully FINISHED"
       ;;
     
     init)

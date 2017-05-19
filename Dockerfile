@@ -48,5 +48,5 @@ CMD  [ "run_yves_and_zed" ]
 
 # Ensure providing a .dockerignore file in your shop repository!
 ONBUILD COPY . $WORKDIR
-
-ONBUILD RUN /entrypoint.sh build
+ONBUILD RUN /entrypoint.sh build-base
+ONBUILD RUN /entrypoint.sh build-shop

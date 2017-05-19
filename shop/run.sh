@@ -1,13 +1,10 @@
 #!/bin/sh
 
-VENDOR=@vendor@
-PROJECT=@project@
-
 WORKDIR=`dirname $0`
-PREVIOUS_DIR=`pwd`
 
 cd $WORKDIR
 
+source docker/build.conf
 
 check_system_requirements() {
   if ! which docker-compose; then
@@ -20,7 +17,6 @@ check_system_requirements() {
     echo "Aborting execution"
   fi
   
-  cd $PREVIOUS_DIR
   exit 1
 }
 
@@ -28,10 +24,10 @@ check_system_requirements() {
 
 case $1 in
   build)
-    docker build --no-cache -t $VENDOR/$PROJECT .
+    docker build --no-cache --force-rm -t $IMAGE .
     ;;
   clear)
-    docker rmi $VENDOR/$PROJECT
+    docker rmi $IMAGE
     ;;
   *)
     echo "
@@ -47,5 +43,3 @@ case $1 in
     "
     ;;
 esac
-
-cd $PREVIOUS_DIR

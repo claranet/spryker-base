@@ -1,8 +1,4 @@
 
-# This file should be copied to your shops root
-# rename it to ".dockerignore"
-
-
 .git
 
 # ignore dependency installs

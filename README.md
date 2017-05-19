@@ -74,29 +74,30 @@ questions you might have.
 Either fork the [demoshop](https://github.com/claranet/spryker-demoshop) or
 start from scratch. For the latter you need to consider the following steps.
 
-## Copy our prepared shop skeleton to your shops root
+## Forking Demoshop
 
-In our [skel folder](/shop) we have prepared all required files you need to get started.
-We add our best practices into those files.
+## Starting from Scratch
 
-The code below creates a config_local.php which is using ENV vars to configure the shop, so
-you can use the resulting image in different environments and the spryker config should adapt.
+### Create directory hierarchy
+
+We have prepared some kind of a [skeleton](/shop) with all required files you
+need to get started in order to bootstrapp your custom shop instance. 
+
+The code below creates a `config_local.php` which is using ENV vars to configure
+the shop, so you can use the resulting image in different environments and the
+spryker config should adapt.
 
 A dockerignore file ensures, we don't copy to much data into the docker image.
 
 ```sh
 # change these parameters
 YOUR_SHOP="/path/to/your/shops/repository"
-VENDOR="yourCompanyName"
-PROJECT="yourProjectName"
 
 # steps to prepare your shop
-cp -an shop/* "$YOUR_SHOP/"
-[ ! -e "$YOUR_SHOP/.dockerignore" ] && mv "$YOUR_SHOP/docker/dockerignore" "$YOUR_SHOP/.dockerignore"
+mkdir -p $YOUR_SHOP && git init $YOUR_SHOP
+cp -an shop/* shop/.* "$YOUR_SHOP/"
 cd "$YOUR_SHOP"
-sed -i "" -e "s/@vendor@/$VENDOR/g" -e "s/@project@/$PROJECT/g" run.sh
-git add .dockerignore docker/ config/Shared/config_local.php
-echo -e "\nDONE\n"
+git add . && git commit -a -m "initial commit"
 ```
 
 With this skeleton, you are ready to customize your repository to your individual needs. The
