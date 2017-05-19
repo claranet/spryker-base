@@ -105,7 +105,7 @@ enable_services() {
     
     # if we are the ZED instance, init external services like the DBMS, ES and redis
     if [ "${SERVICE}" = "zed" ]; then
-      entrypoint.sh init
+      /entrypoint.sh init
     fi
   done
 }
