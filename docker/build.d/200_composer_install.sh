@@ -3,7 +3,7 @@
 
 COMPOSER_ARGUMENTS=""
 if [ "${APPLICATION_ENV}x" != "developmentx" ]; then
-  sectionNote "do composer install without dev dependencies"
+    sectionText "Composer install (no dev)"
   COMPOSER_ARGUMENTS="--no-dev"
 fi
 

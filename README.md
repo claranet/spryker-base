@@ -225,8 +225,8 @@ PHP_EXTENSIONS="imagick pdo_psql"
 ```
 errorText
 successText
-sectionHeadline
-sectionNote
+sectionHead
+sectionText
 ```
 
 ## Installing additional packages

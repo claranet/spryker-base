@@ -146,7 +146,7 @@ php_install_extensions() {
   local PHP_EXTENSIONS_COUNTER="1"
   
   for ext in $UNIQ_PHP_EXTENSION_LIST; do
-    sectionNote "installing PHP extension ($PHP_EXTENSIONS_COUNTER of $PHP_EXTENSIONS_COUNT) $ext"
+    sectionText "Installing PHP extension ($PHP_EXTENSIONS_COUNTER of $PHP_EXTENSIONS_COUNT) $ext"
     if type php_install_$ext; then
       php_install_$ext
     else
@@ -169,13 +169,13 @@ php_install_extensions
 #   Composer
 #
 
-sectionNote "download and verify download of PHP composer"
+sectionText "Downloading PHP composer"
 curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer
 curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
 php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
 
 
-sectionNote "install PHP composer to /usr/bin/"
+sectionText "Install PHP composer"
 php /tmp/composer-setup.php --install-dir=/usr/bin/
 
 
@@ -187,7 +187,7 @@ composer.phar global require hirak/prestissimo
 #  Clean up
 #
 
-sectionNote "clean up PHP and composer installation"
+sectionText "Clean up"
 rm -rf /tmp/composer-setup*
 
 # remove php-fpm configs as they are adding a "www" pool, which does not exist
