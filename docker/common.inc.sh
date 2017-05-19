@@ -59,9 +59,9 @@ writeErrorMessage() {
 install_packages() {
   local PKG_LIST="$*"
   
-  local INSTALL_FLAGS=""
+  local INSTALL_FLAGS="--no-cache"
   if [ "$1" = "--build" ]; then
-    INSTALL_FLAGS="--virtual .build_deps"
+    INSTALL_FLAGS="$INSTALL_FLAGS --virtual .build_deps"
     PKG_LIST=`echo "$PKG_LIST" | sed 's/--build //'` # just drop the first element, which is "build"
   fi
   
@@ -146,7 +146,7 @@ execute_scripts_within_directory() {
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      sectionHead "Executing script ($scripts_counter of $scripts_count) : $script_name"
+      sectionHead "Executing script ($scripts_counter of $scripts_count): $script_name"
       cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
