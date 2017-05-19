@@ -4,7 +4,7 @@ services:
   - docker
 
 env:
-  - VERSION=0.3.4 VARIANT=php70 LATEST=yes
+  - VERSION=0.4.0 VARIANT=php70 LATEST=yes
 
 before_script:
   - env | sort
