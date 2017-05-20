@@ -57,3 +57,6 @@ ONBUILD COPY src $WORKDIR/src
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build_shop
+
+ONBUILD ARG NETRC
+

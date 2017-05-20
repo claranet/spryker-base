@@ -283,6 +283,41 @@ Please take a look at [the deep dive documentation](docs/README.md)
 
 # FAQ
 
+## How to handle private repositories?
+
+In case your PHP or Node depdencies need to be pulled from a private
+repository, you just need to provide a `~/.netrc`. This file will be
+automatically detected and temporarily as docker build arg injected into the
+transient build container, used by git for cloning the appropriate
+repositories, and afterwards wiped off the resuilting layer right before the
+layer will be closed.
+
+The format for the `$HOME/.netrc` is as follows:
+
+    machine git.company.local
+    login my_user_name
+    password my_private_token
+
+The `docker/run.sh` script of the shop repository - as long its been generated
+from this `./shop` subdir or forked from the `claranet/spryker-demoshop` -
+takes care of the rest.
+
+In order to take effect all the given dependencies must be either given as HTTP
+url or they getting transformed via `git config --global
+"url.https://".insteadof "git://git@` which has been already prepared by this
+image. If you want to add more specific rule, create a build script in the
+dependency layer which gets executed prior to the dependency resolution
+process: 
+
+    vi docker/build.d/deps/300_private_repo_override.sh
+    #!/bin/sh
+    sectionText "Diverting git transport from SSH to HTTPS: https://git.company.local"
+    git config --global "url.https://git.company.local/".insteadof "git@git.company.local:"
+    git config --global "url.https://git.company.local".insteadof "ssh://git@git.company.local"
+
+Since git urls can be given in a arbitrary combination, this is in some
+circumstances necessary.
+
 ## Where to find logs
 
 In the yves/zed instance(s) you can find nginx, php-fpm and application logs within */data/logs/*
