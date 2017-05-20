@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # abort on first error
-set -eu -o pipefail
+set -e -o pipefail
 export TERM=xterm
 
 # import default variables
