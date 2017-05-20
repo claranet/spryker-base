@@ -3,6 +3,10 @@
 
 ## devel
 
+* [feature] Add possibility to temporarily inject credentials
+* [change] Git is configured to fetch all repos via https instead of ssh. This
+  behaviour - as all of the buidl steps - is overridable. 
+
 ## 0.5.0 
 
 * [feature] split up the build process into 3 distinct stages/layers (#25ee646)

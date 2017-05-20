@@ -283,6 +283,21 @@ Please take a look at [the deep dive documentation](docs/README.md)
 
 # FAQ
 
+## Why is the shop image artificially split up in 3 layers?
+
+There are a couple of reason for this. First, it should leverage the docker
+cache and speed up iterative rebuilds of the shop image. Since these layers are
+ordered from generic to concrete, the need for rebuilds of the whole stack
+while working on the code base of the actual shop implementation should be
+reduced. Second, different layers could be retrieved in parallel while pulling
+the image, which speeds up the container creation time. Furthermore, since
+generic layers do not change that often, the need not only for rebuilds but for
+refetching the whole image should be reduced as well.
+
+Unfortunately this comes not without cost, the effective image size will be
+higher than effective images which get build up by just one layer. Right now
+this seems to be a acceptable tradeoff.
+
 ## How to handle private repositories?
 
 In case your PHP or Node depdencies need to be pulled from a private
