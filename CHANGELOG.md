@@ -3,6 +3,8 @@
 
 ## devel
 
+* [feature] Add `run` script as shortcut to common tasks
+* [change] docker-compose setup in sekeleton folder 
 * [breaking change] Use one image for both production and development, which
   means that `APPLICATION_ENV` only controls behaviour of app during runtime. 
 * [feature] Add wait_for_http_services; refactor naming

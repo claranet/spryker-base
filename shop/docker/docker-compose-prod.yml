@@ -3,8 +3,32 @@
 version: '3'
 
 services:
+  init:
+    image: "${IMAGE}"
+    command: "init"
+    restart: "no"
+    depends_on:
+      - zed
+    links:
+      - elasticsearch
+      - database
+      - jenkins
+    env_file: ./docker-compose.env
+    environment:
+      - APPLICATION_ENV=production
+    volumes:
+      - ../config:/data/shop/config
+      - ../assets:/data/shop/assets
+      - ../src/Pyz:/data/shop/src/Pyz
+      - ../composer.json:/data/shop/composer.json
+      - ../package.json:/data/shop/package.json
+
   yves:
-    image: "custom/spryker-shop:latest"
+    image: "${IMAGE}"
+    build:
+      context: ..
+      args: 
+        - NETRC=$NETRC 
     command: "run-yves"
     restart: always
     depends_on:
@@ -16,9 +40,15 @@ services:
       - redis
       - elasticsearch
     env_file: ./docker-compose.env
+    environment:
+      - APPLICATION_ENV=production
 
   zed: 
-    image: "custom/spryker-shop:latest"
+    image: "${IMAGE}"
+    build:
+      context: ..
+      args: 
+        - NETRC=$NETRC 
     command: "run-zed"
     restart: always
     depends_on:
@@ -33,6 +63,8 @@ services:
       - database
       - jenkins
     env_file: ./docker-compose.env
+    environment:
+      - APPLICATION_ENV=production
 
   redis:
     image: "redis:3.2-alpine"

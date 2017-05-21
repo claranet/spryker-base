@@ -29,8 +29,10 @@
         * [Installing additional packages](#installing-additional-packages)
 * [Not documented here?](#not-documented-here)
 * [FAQ](#faq)
-    * [Where to find logs](#where-to-find-logs)
+    * [Where to find logs?](#where-to-find-logs)
     * [Which base image are you using?](#which-base-image-are-you-using)
+    * [Why using Alpine?](#why-using-alpine)
+    * [How to further speed up image build?](#how-to-further-speed-up-image-build)
 * [Issues](#issues)
 
 <!-- vim-markdown-toc -->
@@ -171,6 +173,12 @@ layer which gets executed prior to the dependency resolution process:
 Since git urls can be given in a arbitrary combination, this is in some
 circumstances necessary.
 
+This all is necessary because Docker refuses to implement [build time
+volumes](https://github.com/moby/moby/issues/12827) which would make this
+process way more easier. But they got striking reasons indeed, since suche a
+feature would risk reproducibility, because `Dockerfile` is not the sole source
+of build intructions. The is - like in any tech argument - no absolute truth,
+only tradeoffs.
 
 ### Spryker Configuration
 
@@ -318,9 +326,9 @@ If you either want to extend the build steps inherited from the base image or
 to disable them, you need to place your custom build script under
 `./docker/build.d/`. There you will find 3 directories reflecting each stage/layer:
 
-* `./base/` - Base os level installations
-* `./deps/` - Deal with shop specific PHP/Node dependencies
-* `./shop/` - Deal with code generation of the actual shop code base
+* `./docker/build.d/base/` - Base os level installations
+* `./docker/build.d/deps/` - Deal with shop specific PHP/Node dependencies
+* `./docker/build.d/shop/` - Deal with code generation of the actual shop code base
 
 Scripts of each subdir get lexically ordered executed (actuall sourced). 
 
@@ -418,7 +426,7 @@ take a look at [the shell library](docker/common.inc.sh).
 
 ## FAQ
 
-### Where to find logs
+### Where to find logs?
 
 In the yves/zed instance(s) you can find nginx, php-fpm and application logs within */data/logs/*
 
@@ -426,6 +434,21 @@ In the yves/zed instance(s) you can find nginx, php-fpm and application logs wit
 
 We are depending on the official alpinelinux basing [php-fpm docker images](https://hub.docker.com/_/php/)
 
+### Why using Alpine?
+
+Very good question indeed! It is more or less a proof-of-concept which should
+demonstrate, that even heavy lifting projects can be hosted on Alpine. The
+expected benefits are reduced image sizes and faster build time as well as
+faster run times.
+
+### How to further speed up image build?
+
+Two things comes to mind:
+
+* Using a local proxy which cached HTTP requests
+* Using the proposed [Docker Multistage Build](https://docs.docker.com/engine/userguide/eng-image/multistage-build/)
+
+More to come soon. :)
 
 ## Issues 
 
