@@ -2,7 +2,7 @@
 
 cd $WORKDIR
 
-wait_for_service $ZED_DB_HOST $ZED_DB_PORT
+wait_for_tcp_service $ZED_DB_HOST $ZED_DB_PORT
 
 sectionText "Propel - Insert PG compatibility ..."
 # Adjust Propel-XML schema files to work with PostgreSQL

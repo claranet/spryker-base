@@ -3,6 +3,8 @@
 
 ## devel
 
+* [feature] Add wait_for_http_services; refactor naming
+* [refactor] entrypoint arguments from underscores to dashes
 * [feature] Add possibility to temporarily inject credentials
 * [change] Git is configured to fetch all repos via https instead of ssh. This
   behaviour - as all of the buidl steps - is overridable. 

@@ -2,7 +2,7 @@
 
 cd $WORKDIR
 
-wait_for_service $JENKINS_HOST $JENKINS_PORT
+wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
 
 sectionText "Jenkins - Register setup wide cronjobs ..."
 # FIXME [bug01] until the code of the following cronsole command completely

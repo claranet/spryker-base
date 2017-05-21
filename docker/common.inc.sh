@@ -1,8 +1,12 @@
 #!/bin/sh
 
-# abort on first error
 set -e -o pipefail
 export TERM=xterm
+
+# Optionally set WORKDIR here for debugging purposes where no further
+# infrastucture has been loaded
+_wdir="$(cd `dirname $BASH_SOURCE` && cd .. &&  pwd)"
+WORKDIR="${WORKDIR-$_wdir}"
 
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
@@ -156,7 +160,7 @@ exec_scripts() {
 }
 
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
-wait_for_service() {
+wait_for_tcp_service() {
   sectionHead "Waiting for $1 to come up"
   until nc -z $1 $2; do
     sectionText "Waiting for tcp://$1:$2..."
@@ -164,6 +168,17 @@ wait_for_service() {
   done
   
   sectionText "Success: tcp://$1:$2 seems to be up, port is open"
+}
+
+# retries to connect to an remote address ($1) and port ($2) until the connection could be established
+wait_for_http_service() {
+  sectionHead "Waiting for $1 to come up"
+  until curl -s -k  $1 -o /dev/null -L --fail $*; do
+    sectionText "Waiting for $1 ..."
+    sleep 1
+  done
+  
+  sectionText "Success: $1 seems to be up and running"
 }
 
 
