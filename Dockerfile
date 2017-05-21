@@ -56,7 +56,7 @@ ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
 ONBUILD RUN /entrypoint.sh build-deps
 
-ONBUILD COPY src $WORKDIR/src
+ONBUILD COPY src/Pyz $WORKDIR/src/Pyz
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
