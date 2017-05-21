@@ -1,15 +1,15 @@
 
 [![build status badge](https://img.shields.io/travis/claranet/spryker-base/master.svg)](https://travis-ci.org/claranet/spryker-base/branches)
 
-This images serves the purpose of providing the base infrastructure of Yves and
+This image serves the purpose of providing the base infrastructure for Yves and
 Zed. Infrastructure in terms of build/init scripts and further tooling around
-the shop itself.  This image does not provide a ready to use shop! In order to
+the shop itself. This image does not provide a ready to use shop! In order to
 use the features implemented here, write your own `Dockerfile` - which uses
 this base image to inherit from - along your actual implementation of a Spryker
 shop. See directory hierarchy explained below in order to understand where to
 place the source code.
 
-**This project is in ALPHA stage and will eat your children!** 
+**This project is still in BETA and will undergo possible breaking changes!** 
 
 Thats why we are keen to get feedback from you! This is a work in progress
 effort which strives for making dockerizing a Spryker Shop as easy as possible.
@@ -34,15 +34,16 @@ those changes we use the demoshop in exactly the same way.
 # Overview
 
 You can think of this docker image `claranet/spryker-base` as some kind of a
-template/base image for a concrete spryker shop implementation.  So if you want
-to build a spryker shop container image, this image helps you with common tasks
-and is trying to make most of the common steps automatically for you.
+base image or a factory for a docker image of a specific spryker shop
+implementation. So if you want to build a spryker shop container image, this
+image helps you with common tasks and is trying to make most of the common
+steps automatically for you.
 
 Core traits are:
 
 * Uses dockers `ONBUILD` trigger feature to hook into and control the child image build process
 * Provide reasonable default FPM/nginx configuration
-* Its open for customization by providing hookable build and init routines
+* Its open for customization by providing hookable build and init steps
 * Expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
 * No further constraints, you are absolutely free to design you shop the way you want it to
 
@@ -53,7 +54,7 @@ In order to reuse the functionalities implemented here, the following aspects
 need to be aligned with the base image: 
 
 * Follow Spryker reference directory hierarchy
-    * `./src/` - Your shop implementation
+    * `./src/Pyz` - Your shop implementation
     * `./config` - Configuration
     * `./public/{Yves,Zed}` - Entrypoints to you application (document root)
 * Dependencies
@@ -208,6 +209,10 @@ docker exec -it your-shop-image_zed_1 /bin/sh
 Is essentially a shell script, but should only be used for defining variables!
 
 Location: `docker/`
+
+## Install additional Node dependencies
+
+Use `NPM_DEPENDENCIES` which holds a list of distribution packages to be installed prior to resolving npm depdencies.
 
 
 ## Install additional PHP extensions
