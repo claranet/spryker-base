@@ -106,10 +106,6 @@ enable_services() {
     enable_nginx_vhost ${SERVICE}
     enable_phpfpm_app ${SERVICE}
     
-    # if we are the ZED instance, init external services like the DBMS, ES and redis
-    if [ "${SERVICE}" = "zed" ]; then
-      /entrypoint.sh init
-    fi
   done
 }
 
