@@ -125,15 +125,14 @@ start_services() {
   nginx && php-fpm --nodaemonize
 }
 
-# short wrapper for projects "console" executeable
-execute_console_command() {
+exec_console() {
   sectionText "Executing 'console $@'"
   vendor/bin/console $@
 }
 
 # uses the find & sort to select scripts in lexical order (alpine doesn't support `find -s`)
-# sources those scripts to make library.sh and other vars available to them
-execute_scripts_within_directory() {
+# sources those scripts to make build.conf and defaults.inc.sh vars available to them
+exec_scripts() {
   local directory=$1
   
   if [ -d "$directory" ]; then

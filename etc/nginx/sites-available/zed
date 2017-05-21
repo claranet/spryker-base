@@ -3,7 +3,7 @@ server {
     listen 80;
 
     # 
-    # This vhost will be enabled by /entrypoint.sh with the 'run_zed' or 'run_both' argument
+    # This vhost will be enabled by /entrypoint.sh with the 'run-zed' or 'run-yves-and-zed' argument
     # 
 
     # listen to all domains which contains "zed"

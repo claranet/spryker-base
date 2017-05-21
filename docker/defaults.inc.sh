@@ -21,7 +21,7 @@ NPM=npm            # npm or yarn are supported
 PHP_EXTENSION_IMAGICK="3.4.3"
 PHP_EXTENSION_REDIS="3.1.2"
 
-CONSOLE="execute_console_command"
+CONSOLE="exec_console"
 
 # a list of common PHP extensions required to run a spryker shop
 COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"

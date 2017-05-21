@@ -9,19 +9,19 @@ mkdir -pv /data/logs
 cd $WORKDIR
 
 case $1 in 
-    run_yves)
+    run-yves)
       ENABLED_SERVICES="yves"
       enable_services
       start_services
       ;;
 
-    run_zed)
+    run-zed)
       ENABLED_SERVICES="zed"
       enable_services
       start_services
       ;;
 
-    run_yves_and_zed)
+    run-yves-and-zed)
       ENABLED_SERVICES="yves zed"
       enable_services
       start_services
@@ -29,32 +29,32 @@ case $1 in
     
     build)
       chapterHead "Building Base Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/base/"
+      exec_scripts "$WORKDIR/docker/build.d/base/"
       chapterHead "Building Dependency Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
+      exec_scripts "$WORKDIR/docker/build.d/deps/"
       chapterHead "Building Shop Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/shop/"
+      exec_scripts "$WORKDIR/docker/build.d/shop/"
       successText "Setup initialization successfully FINISHED"
       ;;
 
-    build_base)
+    build-base)
       chapterHead "Building Base Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/base/"
+      exec_scripts "$WORKDIR/docker/build.d/base/"
       ;;
 
-    build_deps)
+    build-deps)
       chapterHead "Building Dependency Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/deps/"
+      exec_scripts "$WORKDIR/docker/build.d/deps/"
       ;;
 
-    build_shop)
+    build-shop)
       chapterHead "Building Shop Layer"
-      execute_scripts_within_directory "$WORKDIR/docker/build.d/shop/"
+      exec_scripts "$WORKDIR/docker/build.d/shop/"
       successText "Image build successfully FINISHED"
       ;;
     
     init)
-      execute_scripts_within_directory "$WORKDIR/docker/init.d/"
+      exec_scripts "$WORKDIR/docker/init.d/"
       successText "Setup initialization successfully FINISHED"
     ;;
     

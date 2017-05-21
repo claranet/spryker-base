@@ -117,7 +117,7 @@ version: '3'
 services: 
   zed: 
     image: "your-shop-image:latest"
-    command: "run_zed"
+    command: "run-zed"
     restart: "no"
     depends_on:
       - database
@@ -135,7 +135,7 @@ services:
 
   yves: 
     image: "your-shop-image:latest"
-    command: "run_yves"
+    command: "run-yves"
     restart: "no"
     depends_on:
       - zed

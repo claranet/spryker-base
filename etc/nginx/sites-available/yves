@@ -3,7 +3,7 @@ server {
     listen 80 sndbuf=65535 rcvbuf=16384 default_server;
 
     # 
-    # This vhost will be enabled by /entrypoint.sh with the 'run_yves' or 'run_both' argument
+    # This vhost will be enabled by /entrypoint.sh with the 'run-yves' or 'run-yves-and-zed' argument
     # 
 
     server_name ~".*yves.*";

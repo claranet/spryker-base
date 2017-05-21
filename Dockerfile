@@ -44,19 +44,19 @@ EXPOSE 80
 WORKDIR $WORKDIR
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-CMD  [ "run_yves_and_zed" ]
+CMD  [ "run-yves-and-zed" ]
 
 ONBUILD COPY docker/ $WORKDIR/docker/
-ONBUILD RUN /entrypoint.sh build_base
+ONBUILD RUN /entrypoint.sh build-base
 
 ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
-ONBUILD RUN /entrypoint.sh build_deps
+ONBUILD RUN /entrypoint.sh build-deps
 
 ONBUILD COPY src $WORKDIR/src
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
-ONBUILD RUN /entrypoint.sh build_shop
+ONBUILD RUN /entrypoint.sh build-shop
 
 ONBUILD ARG NETRC
 

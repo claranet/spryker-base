@@ -5,7 +5,7 @@ version: '3'
 services:
   yves:
     image: "custom/spryker-shop:latest"
-    command: "run_yves"
+    command: "run-yves"
     restart: always
     depends_on:
       - zed
@@ -19,7 +19,7 @@ services:
 
   zed: 
     image: "custom/spryker-shop:latest"
-    command: "run_zed"
+    command: "run-zed"
     restart: always
     depends_on:
       - database
