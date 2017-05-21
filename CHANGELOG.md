@@ -1,7 +1,11 @@
 
 # Changelog
 
-## devel
+## master
+
+...
+
+## 0.6.1
 
 * [feature] Add `run` script as shortcut to common tasks
 * [change] docker-compose setup in sekeleton folder 

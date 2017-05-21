@@ -23,4 +23,4 @@ git commit -a -m "Bump version from $CURR to $NEXT"
 echo -e "\nTagging new version ..."
 git tag $NEXT
 
-echo "Don't forget to push changes: git push --follow-tags"
+echo "Don't forget to push changes: git push --tags"
