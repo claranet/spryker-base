@@ -46,6 +46,8 @@ ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD  [ "run-yves-and-zed" ]
 
+ONBUILD ARG NETRC
+
 ONBUILD COPY docker/ $WORKDIR/docker/
 ONBUILD RUN /entrypoint.sh build-base
 
@@ -58,5 +60,4 @@ ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
 
-ONBUILD ARG NETRC
 
