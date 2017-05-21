@@ -3,9 +3,7 @@
 #
 #  General
 #
-APPLICATION_ENV="production"
 DEV_TOOLS="off"
-
 BUILD_LOG=/data/logs/build.log
 
 #

@@ -3,11 +3,6 @@
 set -e -o pipefail
 export TERM=xterm
 
-# Optionally set WORKDIR here for debugging purposes where no further
-# infrastucture has been loaded
-_wdir="$(cd `dirname $BASH_SOURCE` && cd .. &&  pwd)"
-WORKDIR="${WORKDIR-$_wdir}"
-
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
 
@@ -149,7 +144,7 @@ exec_scripts() {
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      sectionHead "Executing script ($scripts_counter of $scripts_count): $script_name"
+      sectionHead "Executing build step ($scripts_counter/$scripts_count): $script_name"
       cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
@@ -172,9 +167,10 @@ wait_for_tcp_service() {
 
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_http_service() {
-  sectionHead "Waiting for $1 to come up"
-  until curl -s -k  $1 -o /dev/null -L --fail $*; do
-    sectionText "Waiting for $1 ..."
+  url=$1; shift
+  sectionHead "Waiting for $url to come up"
+  until curl -s -k  $url -o /dev/null -L --fail $*; do
+    sectionText "Waiting for $url ..."
     sleep 1
   done
   

@@ -245,7 +245,6 @@ install_packages top
 ## Install modes
 
 * DEV_TOOLS
-* APPLICATION_ENV
 
 ...
 
@@ -268,10 +267,6 @@ Please take a look at [the deep dive documentation](docs/README.md)
 * With `DEV_TOOLS=on`, we won't clean up the image from build tools and
   debugging tools.  Even further we will add tools like vim, tree and less.
   supported vaules are (on/off), defaults to "off"
-* `APPLICATION_ENV` decides in which mode the application is installed/runned.
-  so if you choose development here, e.g. composer and npm/yarn will also
-  install dev dependencies! There are more modifications, which depend on this
-  switch.  defaults to "production"
 
 ## Build Hooks
 

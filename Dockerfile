@@ -14,7 +14,8 @@ LABEL org.label-schema.name="spryker-base" \
 ENV WORKDIR=/data/shop
 
 # Reference of spryker config related ENV vars
-ENV SPRYKER_SHOP_CC="DE" \
+ENV APPLICATION_ENV="production" \
+    SPRYKER_SHOP_CC="DE" \
     ZED_HOST="zed" \
     YVES_HOST="yves" \
     ES_HOST="elasticsearch" \
@@ -59,5 +60,3 @@ ONBUILD COPY src $WORKDIR/src
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
-
-

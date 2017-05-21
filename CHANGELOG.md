@@ -3,6 +3,8 @@
 
 ## devel
 
+* [breaking change] Use one image for both production and development, which
+  means that `APPLICATION_ENV` only controls behaviour of app during runtime. 
 * [feature] Add wait_for_http_services; refactor naming
 * [refactor] entrypoint arguments from underscores to dashes
 * [feature] Add possibility to temporarily inject credentials
