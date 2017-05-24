@@ -25,6 +25,7 @@ fastcgi_param   REDIRECT_STATUS     200;
 
 # Are we using ssl? Backward compatibility env, to emulate Apache.
 # According to RFC, app should take a look at "X-Forwarded-Proto" header to deterimine if SSL is on.
+set $have_https off;
 if ($http_x_forwarded_proto = "https") {
   set $have_https on;
 }
