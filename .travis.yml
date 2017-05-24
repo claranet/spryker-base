@@ -4,7 +4,7 @@ services:
   - docker
 
 env:
-  - VERSION=0.3.4 VARIANT=php70 LATEST=yes
+  - VERSION=0.3.5 VARIANT=php70 LATEST=yes
 
 before_script:
   - env | sort
@@ -18,8 +18,4 @@ after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push $image:$tag;
-      if [ "$LATEST" == "yes" ]; then
-        docker tag $image:$tag $image:latest;
-        docker push $image:latest;
-      fi
     fi
