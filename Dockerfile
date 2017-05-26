@@ -52,6 +52,7 @@ ONBUILD ARG NETRC
 ONBUILD COPY docker/ $WORKDIR/docker/
 ONBUILD RUN /entrypoint.sh build-base
 
+ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
 ONBUILD RUN /entrypoint.sh build-deps
