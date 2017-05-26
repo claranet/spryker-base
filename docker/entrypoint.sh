@@ -34,7 +34,7 @@ case $1 in
       exec_scripts "$WORKDIR/docker/build.d/deps/"
       chapterHead "Building Shop Layer"
       exec_scripts "$WORKDIR/docker/build.d/shop/"
-      successText "Setup initialization successfully FINISHED"
+      successText "Image build successfully FINISHED"
       ;;
 
     build-base)

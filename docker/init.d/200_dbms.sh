@@ -4,6 +4,9 @@ cd $WORKDIR
 
 wait_for_tcp_service $ZED_DB_HOST $ZED_DB_PORT
 
+sectionText "Propel - Creating configuration ..."
+$CONSOLE propel:config:convert
+
 sectionText "Propel - Insert PG compatibility ..."
 $CONSOLE propel:pg-sql-compat
 
