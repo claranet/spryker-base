@@ -152,9 +152,8 @@ exec_scripts() {
 
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_tcp_service() {
-  sectionHead "Waiting for $1 to come up"
   until nc -z $1 $2; do
-    sectionText "Waiting for tcp://$1:$2..."
+    sectionText "Waiting for tcp://$1:$2 to come up ..."
     sleep 1
   done
   
@@ -164,9 +163,8 @@ wait_for_tcp_service() {
 # retries to connect to an remote address ($1) and port ($2) until the connection could be established
 wait_for_http_service() {
   url=$1; shift
-  sectionHead "Waiting for $url to come up"
   until curl -s -k  $url -o /dev/null -L --fail $*; do
-    sectionText "Waiting for $url ..."
+    sectionText "Waiting for $url to come up ..."
     sleep 1
   done
   
@@ -186,5 +184,25 @@ is_in_list() {
     fi
   done
   
+  return 1
+}
+
+
+is_true() {
+  local val="$1"
+  case $val in 
+    [yY][eE][sS]|[tT][rR][uU][eE]|1)
+      return 0
+      ;;
+  esac
+  return 0
+}
+
+
+skip_cleanup() {
+  if is_true $SKIP_CLEANUP; then
+    sectionText "WARNING: Skipping cleanup as requested by build.conf (!!!)"
+    return 0
+  fi
   return 1
 }

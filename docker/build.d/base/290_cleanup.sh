@@ -1,5 +1,7 @@
 #!/bin/sh
 
+skip_cleanup && return 0
+
 sectionText "Removing build depedencies"
 apk del .build_deps || true
 

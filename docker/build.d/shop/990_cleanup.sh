@@ -1,5 +1,7 @@
 #!/bin/sh
 
+skip_cleanup && return 0
+
 sectionText "Removing optional os packages"
 apk del .build_deps || true 
 
