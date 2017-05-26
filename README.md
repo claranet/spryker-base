@@ -8,31 +8,32 @@
 * [What?](#what)
 * [Why?](#why)
 * [Design](#design)
-    * [Docker Image](#docker-image)
-    * [Environments](#environments)
-    * [Build Layer](#build-layer)
-    * [Private Repositories](#private-repositories)
-    * [Spryker Configuration](#spryker-configuration)
-    * [Docker Volumes](#docker-volumes)
+  * [Docker Image](#docker-image)
+  * [Build Time Environment](#build-time-environment)
+  * [Runtime Environments](#runtime-environments)
+  * [Build Layer](#build-layer)
+  * [Private Repositories](#private-repositories)
+  * [Spryker Configuration](#spryker-configuration)
+  * [Docker Volumes](#docker-volumes)
 * [Conventions](#conventions)
 * [Create Custom Image](#create-custom-image)
-    * [Forking Demoshop](#forking-demoshop)
-    * [Starting from Scratch](#starting-from-scratch)
+  * [Forking Demoshop](#forking-demoshop)
+  * [Starting from Scratch](#starting-from-scratch)
 * [Build & Run](#build--run)
 * [Customization](#customization)
-    * [build.conf](#buildconf)
-    * [Build Steps](#build-steps)
-    * [Init](#init)
-    * [Custom Configurations](#custom-configurations)
-    * [Custom Build Steps](#custom-build-steps)
-        * [Logging](#logging)
-        * [Installing additional packages](#installing-additional-packages)
+  * [build.conf](#buildconf)
+  * [Build Steps](#build-steps)
+  * [Init](#init)
+  * [Custom Configurations](#custom-configurations)
+  * [Custom Build Steps](#custom-build-steps)
+    * [Logging](#logging)
+    * [Installing additional packages](#installing-additional-packages)
 * [Not documented here?](#not-documented-here)
 * [FAQ](#faq)
-    * [Where to find logs?](#where-to-find-logs)
-    * [Which base image are you using?](#which-base-image-are-you-using)
-    * [Why using Alpine?](#why-using-alpine)
-    * [How to further speed up image build?](#how-to-further-speed-up-image-build)
+  * [Where to find logs?](#where-to-find-logs)
+  * [Which base image are you using?](#which-base-image-are-you-using)
+  * [Why using Alpine?](#why-using-alpine)
+  * [How to further speed up image build?](#how-to-further-speed-up-image-build)
 * [Issues](#issues)
 
 <!-- vim-markdown-toc -->
@@ -88,23 +89,53 @@ image. The benefit is to always consistently upgrade the shared code base
 across a whole cluster. Tradeoff is slightly larger images, since requirements
 of both components need to be included.
 
-Second premise is to not only use a shared image between both Yves and Zed, but
-rather to use a single image for both production and development. This means
-that even the production containers will have dev dependencies included.
-Primary reason for this is the requirement for dev/test/prod parity to ensure
-the containers behave the same in all stages and in all environments. Tradeoff
-for this premise is again larger effective images. During runtime the behaviour
-of the Spryker Application can be controlled by setting `APPLICATION_ENV` which
-accepts either `development` or `production`. If you use the `./docker/run`
-script this variables will be set automatically. 
+### Build Time Environment
 
-### Environments 
+Another premise is - and this one is crucial for your understanding of this
+stack - to build one unified image across development and production
+environments. This affects the usage of `APPLICATION_ENV` which gets evaluated
+by the Spryker App itself. 
 
-The idea behind the scripts provided in this `./shop/docker` subfolder follow the
-basic distinction between `devel` and `prod` environments. The main difference
-between those environments is the employment of bind mounts in the devel mode,
-which enables the developer to edit the code base from the outside while
-running the code in the background in containers.
+This variable has the following impact:
+
+1. During Build Time:
+    1. Which packages are going to be installed via dependency resolution
+     (composer, npm)?
+    1. Differnt modes in assets building
+1. During Run Time:
+    1. Where does the application is about to find configuration files (propel config)?
+    1. Where are external resources to be found?
+    1. Shall the app enable symfony debug/devel behaviour?
+
+The location of local configuration files and external resources is nothing
+which needs extra consideration in containerized environment, since all those
+stacks are isolated anyways. ***So please ensure that no configuration
+statement under `./config/Shared/` will utilize `APPLICATION_ENV` for
+identifying their pathes!!!***
+
+We consider only point 1.1 worth a distinction. And since this could be
+achieved with injecting proper vars into the effective containers, we do not
+distinguish between environments while building the images. Since point 1.1
+requires typically more dependencies to be resolved, we always build the image
+with `APPLICATION_ENV` set to `development`. But in which mode the application
+will actually be run is independant from this build. 
+
+This means that even the production containers will have dev dependencies
+included. Primary reason for this is the requirement for dev/test/prod parity
+to ensure the containers behave exactly the same in all stages and in all
+environments. Tradeoff for this premise is again larger effective images.
+During runtime the behaviour of the Spryker Application can be controlled by
+setting `APPLICATION_ENV` which accepts either `development` or `production`.
+If you use the `./docker/run` script this variables will be set automatically. 
+
+### Runtime Environments 
+
+The idea behind the scripts provided in this `./shop/docker` subfolder follow
+the basic distinction between `devel` and `prod` environments. The main
+difference between those environments in terms of `docker-compose` is the
+employment of bind mounts in the devel mode, which enables the developer to
+edit the code base from the outside while running the code in the background
+within the containers.
 
 Since this setup strives for reducing manual efforts we prepared shell scripts
 which render the necessary logic and support you with shortcuts for the most
@@ -318,6 +349,7 @@ Reference:
 * `DEV_TOOLS` (default: off) -- Shall development tools installed and kept beyond the build?
 * `PHP_EXTENSIONS` -- Space seperated list of PHP extension to be installed
 * `NPM_DEPENDENCIES`-- Distribution packages which will be intalled prior to the NPM handling in the deps layer
+* `SKIP_CLEANUP` -- Skip cleanup step in each layer build stage. This helps in debugging issues. Be aware, that this skips wiping off the credentials as well! So never ever release such an image into the wild!!!
 
 
 ### Build Steps
