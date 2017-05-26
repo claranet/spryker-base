@@ -1,16 +1,11 @@
-
-.git
-
-# ignore dependency installs
-vendor
-bower_components
-node_modules
-
-# ignore vim swap files
-*.swp
-
-# ignore some spryker data
-./setup
-./setup_test
-./deploy
-
+# Ignore all, except the ones listed below
+**
+!docker/
+!assets/
+!public/
+!src/Pyz/
+!config/
+!package.*
+!composer.*
+!yarn.*
+!.stylelint*
