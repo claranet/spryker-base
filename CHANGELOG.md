@@ -3,7 +3,11 @@
 
 ## master
 
-...
+* [feature] Add `enter` action to `run` wrapper as shortcut for dropping the
+  user into the container.
+* [feature] Add build.conf var for additional `BASE_DEPENDENCIES`
+* [change] Minor change to `install_packages`
+* [feature] Add `SKIP_CLEANUP` build time option for debugging purposes.
 
 ## 0.6.1
 

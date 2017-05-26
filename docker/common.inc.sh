@@ -54,18 +54,19 @@ writeErrorMessage() {
   fi
 }
 
-# arguments: $1 (build|run) $2...x packages to be installed
+
 install_packages() {
-  local PKG_LIST="$*"
-  
   local INSTALL_FLAGS="--no-cache"
   if [ "$1" = "--build" ]; then
     INSTALL_FLAGS="$INSTALL_FLAGS --virtual .build_deps"
-    PKG_LIST=`echo "$PKG_LIST" | sed 's/--build //'` # just drop the first element, which is "build"
+    shift
   fi
-  
-  sectionText "Installing package(s): $PKG_LIST"
-  apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
+
+  local PKG_LIST="$*"
+  if [ -n "$PKG_LIST" ]; then
+    sectionText "Installing package(s): $PKG_LIST"
+    apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
+  fi
 }
 
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
