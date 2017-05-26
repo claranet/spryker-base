@@ -196,7 +196,7 @@ is_true() {
       return 0
       ;;
   esac
-  return 0
+  return 1
 }
 
 
