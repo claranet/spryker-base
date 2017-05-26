@@ -1,5 +1,11 @@
 #!/bin/sh
 
-sectionText "Propel - Copy schema files"
-# Copy schema files from packages to generated folder
+sectionText "Propel - Collect schema definitions ..."
 $CONSOLE propel:schema:copy
+
+sectionText "Propel - Converting configuration ..."
+$CONSOLE propel:config:convert
+
+sectionText "Propel - Build models ..."
+$CONSOLE propel:model:build
+

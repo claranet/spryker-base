@@ -141,7 +141,7 @@ php_install_extensions() {
   local PHP_EXTENSIONS_COUNTER="1"
   
   for ext in $UNIQ_PHP_EXTENSION_LIST; do
-    sectionText "Installing PHP extension ($PHP_EXTENSIONS_COUNTER of $PHP_EXTENSIONS_COUNT) $ext"
+    sectionText "Installing PHP extension ($PHP_EXTENSIONS_COUNTER/$PHP_EXTENSIONS_COUNT) $ext"
     if type php_install_$ext; then
       php_install_$ext
     else

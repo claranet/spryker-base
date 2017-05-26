@@ -1,7 +1,9 @@
 #!/bin/sh
 
-sectionText "Building assets for Yves/Zed"
+# FIXME: add zed:prod and yves:prod possibility
 
-# TODO: add zed:prod and yves:prod possibility
+sectionText "Building assets for Zed"
 $NPM run zed
+
+sectionText "Building assets for Yves"
 $NPM run yves
