@@ -33,7 +33,11 @@ ENV APPLICATION_ENV="production" \
     ZED_DB_HOST="database" \
     ZED_DB_PORT="5432" \
     JENKINS_HOST="jenkins" \
-    JENKINS_PORT="8080"
+    JENKINS_PORT="8080" \
+    RABBITMQ_HOST="rabbitmq" \
+    RABBITMQ_PORT="5672" \
+    RABBITMQ_USER="spryker" \
+    RABBITMQ_PASSWORD=""
 
 
 COPY etc/ /etc/
