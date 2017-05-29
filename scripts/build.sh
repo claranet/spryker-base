@@ -4,7 +4,7 @@ set -e -o pipefail
 
 ROOT="$(cd `dirname $0` && cd .. && pwd )"
 IMAGE="claranet/spryker-base"
-VERSION="$(cat $ROOT/version)"
+VERSION="$(cat $ROOT/VERSION)"
 
 [[ -n "$BUILD_NUMBER" ]] && VERSION="$VERSION.$BUILD_NUMBER"
 

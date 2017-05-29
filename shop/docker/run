@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 WORKDIR=`dirname $0`
 cd $WORKDIR
