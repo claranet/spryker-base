@@ -153,7 +153,7 @@ exec_scripts() {
   if [ -d "$directory" ]; then
     
     # provide script counting to inform the user about how many steps are available
-    local available_scripts=`find $directory -type f -name '*.sh' | sort`
+    local available_scripts=`find $directory -type f -name '*.sh' -or -name '*.php' | sort`
     local scripts_count=`echo "$available_scripts" | wc -l`
     local scripts_counter=1
     
