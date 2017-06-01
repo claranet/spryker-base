@@ -346,10 +346,10 @@ Reference:
 * `PROJECT` (mandatory) -- Controls the name prefix of the `docker-compose` created services
 * `IMAGE` (mandatory) -- What is the name of the resulting docker image?
 * `VERSION` (mandatory) -- Which version of the docker image are we working on?
-* `DEV_TOOLS` (default: off) -- Shall development tools installed and kept beyond the build?
 * `PHP_EXTENSIONS` -- Space seperated list of PHP extension to be installed
 * `NPM_DEPENDENCIES`-- Distribution packages which will be intalled prior to the NPM handling in the deps layer
-* `SKIP_CLEANUP` -- Skip cleanup step in each layer build stage. This helps in debugging issues. Be aware, that this skips wiping off the credentials as well! So never ever release such an image into the wild!!!
+* `KEEP_DEVEL_TOOLS` (default: false) -- Shall development tools be installed and kept beyond the build?
+* `SKIP_CLEANUP` (default: false) -- Skip cleanup step in each layer build stage. This helps in debugging issues. Be aware, that this skips wiping off the credentials as well! So never ever release such an image into the wild!!!
 
 
 ### Build Steps
@@ -439,7 +439,7 @@ Make your build step telling by using prepared output functions:
 We provide a `install_packages` function for all included build steps.
 Please make sure, that you are using it! It comes with the possibility to flag
 packages as "build" dependencies. Packages flagged as build-dependencies will
-be removed after the layer build finishes and `DEV_TOOLS=off`. To flag packages
+be removed after the layer build finishes. To flag packages
 as build dependencies just set `--build` as the first argument:
 
     # remove "gcc" at the end of our image build

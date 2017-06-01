@@ -3,6 +3,8 @@
 set -e -o pipefail
 export TERM=xterm
 
+WORKDIR="${WORKDIR:-$PWD}"
+
 # import default variables
 source $WORKDIR/docker/defaults.inc.sh
 
@@ -12,7 +14,7 @@ source $WORKDIR/docker/defaults.inc.sh
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
 BLUE_BKG='\e[44m' # background blue
-YELLOW_BKG=';43m' # background yellow
+YELLOW_BKG='\e[43m' # background yellow
 MAGENTA_BKG=';45m' # background magenta
 
 INFO_TEXT='\033[33' # yellow text
@@ -20,6 +22,11 @@ WHITE_TEXT='\e[97m' # text white
 BLACK_TEXT='\033[30' # text black
 RED_TEXT='\033[31' # text red
 NC='\033[0m' # reset
+
+warnText() {
+  echo -e "\n${BLACK_TEXT}${YELLOW_BKG}*** ${1} ***${NC}\n"
+  echo -e "\n*** $1 ***\n" >> $BUILD_LOG
+}
 
 errorText() {
   echo -e "\n${WHITE_TEXT}${ERROR_BKG}!!! ${1} !!!${NC}\n"
@@ -206,4 +213,32 @@ skip_cleanup() {
     return 0
   fi
   return 1
+}
+
+
+build_base_layer() {
+  chapterHead "Building Base Layer"
+  exec_scripts "$WORKDIR/docker/build.d/base/"
+}
+
+build_deps_layer() {
+  chapterHead "Building Dependency Layer"
+  exec_scripts "$WORKDIR/docker/build.d/deps/"
+}
+
+build_shop_layer() {
+  chapterHead "Building Shop Layer"
+  exec_scripts "$WORKDIR/docker/build.d/shop/"
+}
+
+build_end() {
+  skip_cleanup && warnText "Do not publish this image, since it might contain sensitive data due to SKIP_CLEANUP has been enabled"
+  successText "Image BUILD successfully FINISHED"
+}
+
+build_image() {
+  build_base_layer
+  build_deps_layer
+  build_shop_layer
+  build_end
 }
