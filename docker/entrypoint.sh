@@ -27,6 +27,11 @@ case $1 in
       start_services
       ;;
     
+    run-crond)
+      configure_crond
+      crond -f -L $CRON_LOG -l 0
+      ;;
+    
     build)
       chapterHead "Building Base Layer"
       exec_scripts "$WORKDIR/docker/build.d/base/"

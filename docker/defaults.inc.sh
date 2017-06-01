@@ -4,7 +4,10 @@
 #  General
 #
 DEV_TOOLS="off"
+
+# log destinations
 BUILD_LOG=/data/logs/build.log
+CRON_LOG=/data/logs/cron.log
 
 #
 #  NodeJS defaults
@@ -24,3 +27,5 @@ CONSOLE="exec_console"
 # a list of common PHP extensions required to run a spryker shop
 COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"
 
+# allowed cronjob handlers are jenkins or crond
+CRONJOB_HANDLER="crond"

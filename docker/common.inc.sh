@@ -54,6 +54,27 @@ writeErrorMessage() {
   fi
 }
 
+#
+#  INIT helper functions
+#
+configure_jenkins() {
+  wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
+
+  sectionText "Configure jenkins as the cronjob handler"
+  # FIXME [bug01] until the code of the following cronsole command completely
+  # relies on API calls, we need to workaround the issue with missing local
+  # jenkins job definitions.
+  mkdir -p /tmp/jenkins/jobs
+  # Generate Jenkins jobs configuration
+  $CONSOLE setup:jenkins:generate
+}
+
+configure_crond() {
+  sectionText "Configure crond as the cronjob handler"
+  php $WORKDIR/docker/cronjobs_to_crontab_converter.php
+}
+
+
 
 install_packages() {
   local INSTALL_FLAGS="--no-cache"
@@ -134,7 +155,7 @@ exec_scripts() {
   if [ -d "$directory" ]; then
     
     # provide script counting to inform the user about how many steps are available
-    local available_scripts=`find $directory -type f -name '*.sh' | sort`
+    local available_scripts=`find $directory -type f -name '*.sh' -or -name '*.php' | sort`
     local scripts_count=`echo "$available_scripts" | wc -l`
     local scripts_counter=1
     
