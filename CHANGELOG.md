@@ -14,6 +14,7 @@
 * [feature] Add `CRONJOB_HANDLER` build.conf var to support jenkins and crond
   switch
 * [feature] Add simple cronjob handler crond
+* [fix] create missing logs dir for ZED
 
 ## 0.6.1
 
