@@ -3,6 +3,9 @@
 
 ## master
 
+* [feature] Add hooks and entrypoint for deployment scripts (`./docker/deploy.d`)
+* [refactor] Move build stages to `common.inc.sh` script
+* [change] Rename DEV_TOOLS to KEEP_DEVEL_TOOLS
 * [feature] Add `enter` action to `run` wrapper as shortcut for dropping the
   user into the container.
 * [feature] Add build.conf var for additional `BASE_DEPENDENCIES`

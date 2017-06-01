@@ -28,34 +28,33 @@ case $1 in
       ;;
     
     build)
-      chapterHead "Building Base Layer"
-      exec_scripts "$WORKDIR/docker/build.d/base/"
-      chapterHead "Building Dependency Layer"
-      exec_scripts "$WORKDIR/docker/build.d/deps/"
-      chapterHead "Building Shop Layer"
-      exec_scripts "$WORKDIR/docker/build.d/shop/"
-      successText "Image build successfully FINISHED"
+        build_image
       ;;
 
     build-base)
-      chapterHead "Building Base Layer"
-      exec_scripts "$WORKDIR/docker/build.d/base/"
+        build_base_layer
       ;;
 
     build-deps)
-      chapterHead "Building Dependency Layer"
-      exec_scripts "$WORKDIR/docker/build.d/deps/"
+        build_deps_layer
       ;;
 
     build-shop)
-      chapterHead "Building Shop Layer"
-      exec_scripts "$WORKDIR/docker/build.d/shop/"
-      successText "Image build successfully FINISHED"
+        build_shop_layer
+      ;;
+
+    build-end)
+        build_end
       ;;
     
     init)
       exec_scripts "$WORKDIR/docker/init.d/"
-      successText "Setup initialization successfully FINISHED"
+      successText "Setup INITIALIZATION successfully FINISHED"
+    ;;
+
+    deploy)
+      exec_scripts "$WORKDIR/docker/deploy.d/"
+      successText "DEPLOYMENT successfully FINISHED"
     ;;
     
     *)

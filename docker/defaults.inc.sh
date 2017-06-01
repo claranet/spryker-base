@@ -3,7 +3,7 @@
 #
 #  General
 #
-DEV_TOOLS="off"
+KEEP_DEVEL_TOOLS="false"
 BUILD_LOG=/data/logs/build.log
 
 #

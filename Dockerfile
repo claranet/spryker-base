@@ -65,3 +65,4 @@ ONBUILD COPY src/Pyz $WORKDIR/src/Pyz
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
+ONBUILD RUN /entrypoint.sh build-end
