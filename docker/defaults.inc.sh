@@ -3,7 +3,10 @@
 #
 #  General
 #
+
 KEEP_DEVEL_TOOLS="false"
+
+# log destinations
 BUILD_LOG=/data/logs/build.log
 
 #
@@ -24,3 +27,5 @@ CONSOLE="exec_console"
 # a list of common PHP extensions required to run a spryker shop
 COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"
 
+# allowed cronjob handlers are jenkins or crond
+CRONJOB_HANDLER="crond"
