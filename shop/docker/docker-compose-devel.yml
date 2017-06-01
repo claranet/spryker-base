@@ -79,8 +79,6 @@ services:
         - NETRC=$NETRC 
     command: "run-crond"
     restart: always
-    ports:
-      - "2381:80"
     links:
       - redis
       - elasticsearch

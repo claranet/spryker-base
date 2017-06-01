@@ -29,7 +29,7 @@ case $1 in
     
     run-crond)
       configure_crond
-      crond -f -L $CRON_LOG -l 0
+      crond -f -L /dev/stdout
       ;;
     
     build)

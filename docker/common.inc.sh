@@ -77,9 +77,10 @@ writeErrorMessage() {
 #  INIT helper functions
 #
 configure_jenkins() {
+  sectionText "Configure jenkins as the cronjob handler"
+  
   wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
 
-  sectionText "Configure jenkins as the cronjob handler"
   # FIXME [bug01] until the code of the following cronsole command completely
   # relies on API calls, we need to workaround the issue with missing local
   # jenkins job definitions.
@@ -90,7 +91,7 @@ configure_jenkins() {
 
 configure_crond() {
   sectionText "Configure crond as the cronjob handler"
-  php $WORKDIR/docker/cronjobs_to_crontab_converter.php
+  php $WORKDIR/docker/contrib/gen_crontab.php
 }
 
 
