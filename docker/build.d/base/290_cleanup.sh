@@ -3,7 +3,7 @@
 skip_cleanup && return 0
 
 sectionText "Removing build depedencies"
-apk del .build_deps || true
+apk del .build_deps || true >> $BUILD_LOG
 
 sectionText "Cleaning up /tmp folder"
 rm -rf /tmp/*
