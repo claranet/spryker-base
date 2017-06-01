@@ -80,6 +80,7 @@ services:
     command: "run-crond"
     restart: always
     links:
+      - zed
       - redis
       - elasticsearch
       - database
