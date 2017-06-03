@@ -15,13 +15,25 @@ ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
 BLUE_BKG='\e[44m' # background blue
 YELLOW_BKG='\e[43m' # background yellow
-MAGENTA_BKG=';45m' # background magenta
+MAGENTA_BKG='\e[45m' # background magenta
 
 INFO_TEXT='\033[33' # yellow text
 WHITE_TEXT='\e[97m' # text white
 BLACK_TEXT='\033[30' # text black
 RED_TEXT='\033[31' # text red
+MAGENTA_TEXT='\e[35m'
 NC='\033[0m' # reset
+
+
+debugHead() {
+  echo -e "${WHITE_TEXT}${MAGENTA_BKG}$*${NC}\n"
+  echo -e "$*\n" >> $BUILD_LOG
+}
+
+debugText() {
+  echo -e "${MAGENTA_TEXT}$*${NC}\n"
+  echo -e "$*\n" >> $BUILD_LOG
+}
 
 warnText() {
   echo -e "\n${BLACK_TEXT}${YELLOW_BKG}*** ${1} ***${NC}\n"
@@ -216,27 +228,56 @@ skip_cleanup() {
 }
 
 
+start_timer() {
+  varname=${1:-'total'}
+  now=$(date +%s)
+  eval "export $varname=$now"
+  echo $now > "/var/cache/docker-build-timer-$varname-start"
+}
+
+stop_timer() {
+  varname=${1:-'total'}
+  start=$(cat "/var/cache/docker-build-timer-$varname-start")
+  end=${2:-$(date +%s)}
+  echo $end > "/var/cache/docker-build-timer-$varname-end"
+  let 'diff=end-start'
+  perl -e 'use Time::Piece; use Time::Seconds; print Time::Seconds->new($ARGV[0])->pretty;' $diff
+}
+
+
+build_start() {
+  start_timer
+}
+
 build_base_layer() {
+  start_timer timer_base
   chapterHead "Building Base Layer"
   exec_scripts "$WORKDIR/docker/build.d/base/"
+  debugText "\nBase Layer Build Time: $(stop_timer timer_base)"
 }
 
 build_deps_layer() {
+  start_timer timer_deps
   chapterHead "Building Dependency Layer"
   exec_scripts "$WORKDIR/docker/build.d/deps/"
+  debugText "\nDependencies Layer Build Time: $(stop_timer timer_deps)"
 }
 
 build_shop_layer() {
+  start_timer timer_shop
   chapterHead "Building Shop Layer"
   exec_scripts "$WORKDIR/docker/build.d/shop/"
+  debugText "\nShop Layer Build Time: $(stop_timer timer_shop)"
 }
 
 build_end() {
   skip_cleanup && warnText "Do not publish this image, since it might contain sensitive data due to SKIP_CLEANUP has been enabled"
+  debugText "\nTOTAL Build Time: $(stop_timer)"
   successText "Image BUILD successfully FINISHED"
 }
 
 build_image() {
+  build_start
   build_base_layer
   build_deps_layer
   build_shop_layer

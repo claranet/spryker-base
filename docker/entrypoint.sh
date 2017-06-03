@@ -32,6 +32,7 @@ case $1 in
       ;;
 
     build-base)
+        build_start
         build_base_layer
       ;;
 
