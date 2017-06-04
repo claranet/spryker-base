@@ -54,13 +54,11 @@ case $1 in
       ;;
 
     init)
-      exec_scripts "$WORKDIR/docker/init.d/"
-      successText "Setup INITIALIZATION successfully FINISHED"
+      init
     ;;
 
     deploy)
-      exec_scripts "$WORKDIR/docker/deploy.d/"
-      successText "DEPLOYMENT successfully FINISHED"
+      deploy
     ;;
 
     *)

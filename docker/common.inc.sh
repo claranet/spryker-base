@@ -271,24 +271,24 @@ build_start() {
 }
 
 build_base_layer() {
-  start_timer timer_base
+  start_timer base
   chapterHead "Building Base Layer"
   exec_scripts "$WORKDIR/docker/build.d/base/"
-  debugText "\nBase Layer Build Time: $(stop_timer timer_base)"
+  debugText "\nBase Layer Build Time: $(stop_timer base)"
 }
 
 build_deps_layer() {
-  start_timer timer_deps
+  start_timer deps
   chapterHead "Building Dependency Layer"
   exec_scripts "$WORKDIR/docker/build.d/deps/"
-  debugText "\nDependencies Layer Build Time: $(stop_timer timer_deps)"
+  debugText "\nDependencies Layer Build Time: $(stop_timer deps)"
 }
 
 build_shop_layer() {
-  start_timer timer_shop
+  start_timer shop
   chapterHead "Building Shop Layer"
   exec_scripts "$WORKDIR/docker/build.d/shop/"
-  debugText "\nShop Layer Build Time: $(stop_timer timer_shop)"
+  debugText "\nShop Layer Build Time: $(stop_timer shop)"
 }
 
 build_end() {
@@ -303,4 +303,20 @@ build_image() {
   build_deps_layer
   build_shop_layer
   build_end
+}
+
+
+init() {
+  start_timer init
+  exec_scripts "$WORKDIR/docker/init.d/"
+  debugText "\nInitialization Time: $(stop_timer init)"
+  successText "Setup INITIALIZATION successfully FINISHED"
+}
+
+
+deploy() {
+  start_timer deploy
+  exec_scripts "$WORKDIR/docker/deploy.d/"
+  debugText "\nDeployment Time: $(stop_timer deploy)"
+  successText "DEPLOYMENT successfully FINISHED"
 }
