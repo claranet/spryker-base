@@ -3,12 +3,17 @@
 
 ## master
 
+* ...
+
+## 0.7.0
+
+* [feature] Add time measurement to all stages
 * [feature] Add hooks and entrypoint for deployment scripts (`./docker/deploy.d`)
 * [refactor] Move build stages to `common.inc.sh` script
-* [change] Rename DEV_TOOLS to KEEP_DEVEL_TOOLS
+* [refactor] Rename `DEV_TOOLS` to `KEEP_DEVEL_TOOLS`
 * [feature] Add `enter` action to `run` wrapper as shortcut for dropping the
   user into the container.
-* [feature] Add build.conf var for additional `BASE_DEPENDENCIES`
+* [feature] Add `build.conf` var for additional `BASE_DEPENDENCIES`
 * [change] Minor change to `install_packages`
 * [feature] Add `SKIP_CLEANUP` build time option for debugging purposes.
 * [feature] Add `CRONJOB_HANDLER` build.conf var to support jenkins and crond
