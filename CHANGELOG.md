@@ -11,6 +11,10 @@
 * [feature] Add build.conf var for additional `BASE_DEPENDENCIES`
 * [change] Minor change to `install_packages`
 * [feature] Add `SKIP_CLEANUP` build time option for debugging purposes.
+* [feature] Add `CRONJOB_HANDLER` build.conf var to support jenkins and crond
+  switch
+* [feature] Add simple cronjob handler crond
+* [fix] create missing logs dir for ZED
 
 ## 0.6.1
 

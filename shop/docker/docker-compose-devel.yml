@@ -1,4 +1,4 @@
---- 
+---
 
 version: '3'
 
@@ -12,7 +12,7 @@ services:
     links:
       - elasticsearch
       - database
-      - jenkins
+      - redis
     env_file: ./docker-compose.env
     environment:
       - APPLICATION_ENV=development
@@ -27,9 +27,8 @@ services:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
+      args:
         - NETRC=$NETRC
-        - APPLICATION_ENV=development
     command: "run-yves"
     restart: always
     ports:
@@ -48,13 +47,12 @@ services:
       - ../composer.json:/data/shop/composer.json
       - ../package.json:/data/shop/package.json
 
-  zed: 
+  zed:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
-        - NETRC=$NETRC 
-        - APPLICATION_ENV=development
+      args:
+        - NETRC=$NETRC
     command: "run-zed"
     restart: always
     ports:
@@ -63,7 +61,29 @@ services:
       - redis
       - elasticsearch
       - database
-      - jenkins
+    env_file: ./docker-compose.env
+    environment:
+      - APPLICATION_ENV=development
+    volumes:
+      - ../config:/data/shop/config
+      - ../assets:/data/shop/assets
+      - ../src/Pyz:/data/shop/src/Pyz
+      - ../composer.json:/data/shop/composer.json
+      - ../package.json:/data/shop/package.json
+
+  cron:
+    image: "${IMAGE}"
+    build:
+      context: ..
+      args:
+        - NETRC=$NETRC
+    command: "run-crond"
+    restart: always
+    links:
+      - zed
+      - redis
+      - elasticsearch
+      - database
     env_file: ./docker-compose.env
     environment:
       - APPLICATION_ENV=development
@@ -87,14 +107,4 @@ services:
   database:
     image: "postgres:9.4.11-alpine"
     restart: always
-    env_file: ./docker-compose.env
-
-  jenkins:
-    image: "jenkins:alpine"
-    ports: 
-      - "10007:8080"
-    links:
-      - database
-      - elasticsearch
-      - redis
     env_file: ./docker-compose.env

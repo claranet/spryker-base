@@ -8,7 +8,7 @@ source $WORKDIR/docker/common.inc.sh
 mkdir -pv /data/logs
 cd $WORKDIR
 
-case $1 in 
+case $1 in
     run-yves)
       ENABLED_SERVICES="yves"
       enable_services
@@ -26,7 +26,12 @@ case $1 in
       enable_services
       start_services
       ;;
-    
+
+    run-crond)
+      configure_crond
+      crond -f -L /dev/stdout
+      ;;
+
     build)
         build_image
       ;;
@@ -47,7 +52,7 @@ case $1 in
     build-end)
         build_end
       ;;
-    
+
     init)
       exec_scripts "$WORKDIR/docker/init.d/"
       successText "Setup INITIALIZATION successfully FINISHED"
@@ -57,7 +62,7 @@ case $1 in
       exec_scripts "$WORKDIR/docker/deploy.d/"
       successText "DEPLOYMENT successfully FINISHED"
     ;;
-    
+
     *)
       sh -c "$*"
       ;;

@@ -1,4 +1,4 @@
---- 
+---
 
 version: '3'
 
@@ -16,19 +16,9 @@ services:
     env_file: ./docker-compose.env
     environment:
       - APPLICATION_ENV=production
-    volumes:
-      - ../config:/data/shop/config
-      - ../assets:/data/shop/assets
-      - ../src/Pyz:/data/shop/src/Pyz
-      - ../composer.json:/data/shop/composer.json
-      - ../package.json:/data/shop/package.json
 
   yves:
     image: "${IMAGE}"
-    build:
-      context: ..
-      args: 
-        - NETRC=$NETRC 
     command: "run-yves"
     restart: always
     depends_on:
@@ -43,12 +33,12 @@ services:
     environment:
       - APPLICATION_ENV=production
 
-  zed: 
+  zed:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
-        - NETRC=$NETRC 
+      args:
+        - NETRC=$NETRC
     command: "run-zed"
     restart: always
     depends_on:
@@ -62,6 +52,21 @@ services:
       - elasticsearch
       - database
       - jenkins
+    env_file: ./docker-compose.env
+    environment:
+      - APPLICATION_ENV=production
+
+  cron:
+    image: "${IMAGE}"
+    command: "run-crond"
+    restart: always
+    depends_on:
+      - zed
+    links:
+      - zed
+      - redis
+      - elasticsearch
+      - database
     env_file: ./docker-compose.env
     environment:
       - APPLICATION_ENV=production
@@ -83,7 +88,7 @@ services:
 
   jenkins:
     image: "jenkins:alpine"
-    ports: 
+    ports:
       - "10007:8080"
     links:
       - database
