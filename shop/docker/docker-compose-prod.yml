@@ -1,24 +1,15 @@
---- 
+---
 
 version: '3'
 
 services:
-  zed: 
+  init:
     image: "${IMAGE}"
-    build:
-      context: ..
-      args: 
-        - NETRC=$NETRC 
-    command: "run-zed"
-    restart: always
+    command: "init"
+    restart: "no"
     depends_on:
-      - database
-      - redis
-      - elasticsearch
-    ports:
-      - "2381:80"
+      - zed
     links:
-      - redis
       - elasticsearch
       - database
       - jenkins
@@ -27,7 +18,7 @@ services:
       - APPLICATION_ENV=production
 
   yves:
-    image: "${IMAGE}" 
+    image: "${IMAGE}"
     command: "run-yves"
     restart: always
     depends_on:
@@ -42,13 +33,22 @@ services:
     environment:
       - APPLICATION_ENV=production
 
-  init:
+  zed:
     image: "${IMAGE}"
-    command: "init"
-    restart: "no"
+    build:
+      context: ..
+      args:
+        - NETRC=$NETRC
+    command: "run-zed"
+    restart: always
     depends_on:
-      - zed
+      - database
+      - redis
+      - elasticsearch
+    ports:
+      - "2381:80"
     links:
+      - redis
       - elasticsearch
       - database
       - jenkins
@@ -88,7 +88,7 @@ services:
 
   jenkins:
     image: "jenkins:alpine"
-    ports: 
+    ports:
       - "10007:8080"
     links:
       - database

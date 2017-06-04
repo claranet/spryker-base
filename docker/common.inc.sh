@@ -77,7 +77,7 @@ writeErrorMessage() {
 #  INIT helper functions
 #
 configure_jenkins() {
-  sectionText "Configure jenkins as the cronjob handler"
+  sectionText "Configuring jenkins as the cronjob handler"
   
   wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
 
@@ -90,10 +90,9 @@ configure_jenkins() {
 }
 
 configure_crond() {
-  sectionText "Configure crond as the cronjob handler"
+  sectionText "Configuring crond as the cronjob handler"
   php $WORKDIR/docker/contrib/gen_crontab.php
 }
-
 
 
 install_packages() {

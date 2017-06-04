@@ -37,12 +37,12 @@ foreach($jobs as $job) {
     echo '[WARNING] dropping JOB as it does not match our requirements, got data: '.var_export($job, true);
     continue;
   }
-  
-  
+
+
   $tmp_job_description = ['#', $job['name']];
   $tmp_job_definition  = [];
-  
-  
+
+
   if($job['enable'] != true) {
     $tmp_job_description[] = 'DISABLED';
     $tmp_job_definition[] = '#';
@@ -50,7 +50,7 @@ foreach($jobs as $job) {
   $tmp_job_definition[] = $job['schedule'];
   $tmp_job_definition[] = 'cd '.$workdir.' && ';
   $tmp_job_definition[] = $job['command'];
-  
+
   $user = get_job_user($job);
   $crontab[$user][] = implode(' ', $tmp_job_description);
   $crontab[$user][] = implode(' ', $tmp_job_definition);

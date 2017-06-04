@@ -1,4 +1,4 @@
---- 
+---
 
 version: '3'
 
@@ -27,7 +27,7 @@ services:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
+      args:
         - NETRC=$NETRC
     command: "run-yves"
     restart: always
@@ -47,12 +47,12 @@ services:
       - ../composer.json:/data/shop/composer.json
       - ../package.json:/data/shop/package.json
 
-  zed: 
+  zed:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
-        - NETRC=$NETRC 
+      args:
+        - NETRC=$NETRC
     command: "run-zed"
     restart: always
     ports:
@@ -75,8 +75,8 @@ services:
     image: "${IMAGE}"
     build:
       context: ..
-      args: 
-        - NETRC=$NETRC 
+      args:
+        - NETRC=$NETRC
     command: "run-crond"
     restart: always
     links:
