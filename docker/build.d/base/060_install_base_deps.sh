@@ -1,4 +1,3 @@
 #!/bin/sh
 
-install_packages perl
-install_packages $BASE_DEPENDENCIES
+install_packages $COMMON_BASE_DEPENDENCIES $BASE_DEPENDENCIES
