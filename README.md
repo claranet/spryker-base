@@ -346,6 +346,8 @@ Reference:
 * `PROJECT` (mandatory) -- Controls the name prefix of the `docker-compose` created services
 * `IMAGE` (mandatory) -- What is the name of the resulting docker image?
 * `VERSION` (mandatory) -- Which version of the docker image are we working on?
+* `BUILD_DEPENDENCIES` -- Distribution (alpine) packages to be installed during build time
+* `BASE_DEPENDENCIES` -- Distribution (alpine) packages to be installed additionally
 * `PHP_EXTENSIONS` -- Space seperated list of PHP extension to be installed
 * `NPM_DEPENDENCIES`-- Distribution packages which will be intalled prior to the NPM handling in the deps layer
 * `KEEP_DEVEL_TOOLS` (default: false) -- Shall development tools be installed and kept beyond the build?
