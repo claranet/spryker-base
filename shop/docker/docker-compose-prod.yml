@@ -4,7 +4,7 @@ version: '3'
 
 services:
   init:
-    image: "${IMAGE}"
+    image: "${IMAGE}:${VERSION}"
     command: "init"
     restart: "no"
     depends_on:
@@ -18,7 +18,7 @@ services:
       - APPLICATION_ENV=production
 
   yves:
-    image: "${IMAGE}"
+    image: "${IMAGE}:${VERSION)"
     command: "run-yves"
     restart: always
     depends_on:
@@ -34,7 +34,7 @@ services:
       - APPLICATION_ENV=production
 
   zed:
-    image: "${IMAGE}"
+    image: "${IMAGE}:${VERSION)"
     build:
       context: ..
       args:
@@ -57,7 +57,7 @@ services:
       - APPLICATION_ENV=production
 
   cron:
-    image: "${IMAGE}"
+    image: "${IMAGE}:${VERSION)"
     command: "run-crond"
     restart: always
     depends_on:

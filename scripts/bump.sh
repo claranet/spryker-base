@@ -9,7 +9,7 @@ export CURR="$(cat $FILE)"
 export NEXT="$(`dirname $0`/semver.pl $CURR $BUMP)"
 
 echo "Bumping $BUMP version: $CURR --> $NEXT ..."
-for f in $FILE $ROOT/.travis.yml $ROOT/Dockerfile; do
+for f in $FILE $ROOT/.travis.yml $ROOT/Dockerfile $ROOT/shop/build.conf; do
     echo -n " - $f -> "
     perl -i -p -e 'BEGIN {$e=1}; s/$ENV{"CURR"}/$ENV{"NEXT"}/g && do {$e=0}; END {exit $e}' $f
     [[ $? == 0 ]] && echo "ok" || echo "failed"
