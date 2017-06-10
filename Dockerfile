@@ -21,9 +21,11 @@ ENV APPLICATION_ENV="production" \
     ES_HOST="elasticsearch" \
     ES_PROTOCOL="http" \
     ES_PORT="9200" \
+    REDIS_STORAGE_PROTOCOL="tcp" \
     REDIS_STORAGE_HOST="redis" \
     REDIS_STORAGE_PORT="6379" \
     REDIS_STORAGE_PASSWORD="" \
+    REDIS_SESSION_PROTOCOL="tcp" \
     REDIS_SESSION_HOST="redis" \
     REDIS_SESSION_PORT="6379" \
     REDIS_SESSION_PASSWORD="" \
@@ -37,7 +39,11 @@ ENV APPLICATION_ENV="production" \
     RABBITMQ_HOST="rabbitmq" \
     RABBITMQ_PORT="5672" \
     RABBITMQ_USER="spryker" \
-    RABBITMQ_PASSWORD=""
+    RABBITMQ_PASSWORD="" \
+    YVES_SSL_ENABLED="false" \
+    YVES_COMPLETE_SSL_ENABLED="false" \
+    ZED_SSL_ENABLED="false" \
+    ZED_API_SSL_ENABLED="false"
 
 
 COPY etc/ /etc/
