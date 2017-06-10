@@ -258,13 +258,20 @@ start_timer() {
 
 stop_timer() {
   varname=${1:-'total'}
-  start=$(cat "/var/cache/docker-build-timer-$varname-start")
+  start="$( (cat /var/cache/docker-build-timer-$varname-start || /bin/true) 2> /dev/null)"
+  [ -z $start ] && return 0
   end=${2:-$(date +%s)}
   echo $end > "/var/cache/docker-build-timer-$varname-end"
   let 'diff=end-start'
+  rm /var/cache/docker-build-timer-$varname-start /var/cache/docker-build-timer-$varname-end || /bin/true
   perl -e 'use Time::Piece; use Time::Seconds; print Time::Seconds->new($ARGV[0])->pretty;' $diff
 }
 
+print_timer() {
+    MSG="${1:-'Time taken'}"
+    DIFF=$(stop_timer $2)
+    [ -n "$DIFF" ] &&  debugText "$MSG: $DIFF"
+}
 
 build_start() {
   start_timer
@@ -274,26 +281,26 @@ build_base_layer() {
   start_timer base
   chapterHead "Building Base Layer"
   exec_scripts "$WORKDIR/docker/build.d/base/"
-  debugText "\nBase Layer Build Time: $(stop_timer base)"
+  print_timer "\nBase Layer Build Time" "base"
 }
 
 build_deps_layer() {
   start_timer deps
   chapterHead "Building Dependency Layer"
   exec_scripts "$WORKDIR/docker/build.d/deps/"
-  debugText "\nDependencies Layer Build Time: $(stop_timer deps)"
+  print_timer "\nDependencies Layer Build Time" "deps"
 }
 
 build_shop_layer() {
   start_timer shop
   chapterHead "Building Shop Layer"
   exec_scripts "$WORKDIR/docker/build.d/shop/"
-  debugText "\nShop Layer Build Time: $(stop_timer shop)"
+  print_timer "\nShop Layer Build Time" "shop"
 }
 
 build_end() {
   skip_cleanup && warnText "Do not publish this image, since it might contain sensitive data due to SKIP_CLEANUP has been enabled"
-  debugText "\nTOTAL Build Time: $(stop_timer)"
+  print_timer "\nTOTAL Build Time"
   successText "Image BUILD successfully FINISHED"
 }
 
@@ -309,7 +316,7 @@ build_image() {
 init() {
   start_timer init
   exec_scripts "$WORKDIR/docker/init.d/"
-  debugText "\nInitialization Time: $(stop_timer init)"
+  print_timer "\nInitialization Time" "init"
   successText "Setup INITIALIZATION successfully FINISHED"
 }
 
@@ -317,6 +324,6 @@ init() {
 deploy() {
   start_timer deploy
   exec_scripts "$WORKDIR/docker/deploy.d/"
-  debugText "\nDeployment Time: $(stop_timer deploy)"
+  print_timer "\nDeployment Time" "deploy"
   successText "DEPLOYMENT successfully FINISHED"
 }
