@@ -12,7 +12,7 @@ server {
 
     root /data/shop/public/Yves;
 
-    include "spryker/yves.conf";
+    include "spryker/yves.conf.d/*.conf";
 
     ###
     ### Rewrite rules

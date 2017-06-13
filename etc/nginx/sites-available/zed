@@ -14,5 +14,5 @@ server {
 
     root /data/shop/public/Zed;
 
-    include "spryker/zed.conf";
+    include "spryker/zed.conf.d/*.conf";
 }
