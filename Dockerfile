@@ -43,12 +43,17 @@ ENV APPLICATION_ENV="production" \
     YVES_SSL_ENABLED="false" \
     YVES_COMPLETE_SSL_ENABLED="false" \
     ZED_SSL_ENABLED="false" \
-    ZED_API_SSL_ENABLED="false"
+    ZED_API_SSL_ENABLED="false" \
+    ZED_ADMIN_PASSWORD=""
 
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
-RUN ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
+RUN apk add --no-cache \
+        perl \
+        bash \
+    && ln -vfs /bin/bash /bin/sh \
+    && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
 EXPOSE 80
 

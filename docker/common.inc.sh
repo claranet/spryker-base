@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e -o pipefail
 export TERM=xterm
@@ -172,22 +172,28 @@ exec_scripts() {
   local directory=$1
   
   if [ -d "$directory" ]; then
-    
+
     # provide script counting to inform the user about how many steps are available
     local available_scripts=`find $directory -type f -name '*.sh' -or -name '*.php' | sort`
     local scripts_count=`echo "$available_scripts" | wc -l`
     local scripts_counter=1
-    
-    for f in $available_scripts; do
-      local script_name=`basename $f`
-      
-      sectionHead "Executing build step ($scripts_counter/$scripts_count): $script_name"
-      cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
-      source $f
-      
-      let "scripts_counter += 1"
+
+    echo $available_scripts | \
+      tr ' ' '\n' | \
+      xargs -I file basename file | \
+      perl -n -e '/^(\d+)/ && do {$pfx=($1 ne $prev)?"\n":" "; $pfx="" unless $c; chomp($_); print "$pfx$_"; $prev=$1;$c++}; END { print "\n"}' | while read concurrent_scripts; do
+      PIDS=""
+      IFS=' ' read -r -a cscripts <<< "$concurrent_scripts"
+      [ "${#cscripts[*]}X" != "1X" ] && MSG="concurrent "
+      for f in ${cscripts[*]}; do
+        file="$directory/$f"
+        sectionHead "Executing ${MSG}build step ($scripts_counter/$scripts_count): $file"
+        source $file &
+        PIDS="$PIDS $!"
+        let "scripts_counter += 1"
+      done
+      wait $PIDS
     done
-    
   fi
 }
 

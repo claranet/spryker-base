@@ -33,7 +33,7 @@ php_install_imagick() {
   install_packages --build imagemagick-dev libtool
   install_packages imagemagick
 
-  pecl install imagick-$PHP_EXTENSION_IMAGICK
+  [ -z "$(php -m | grep imagick)" ] && pecl install imagick-$PHP_EXTENSION_IMAGICK
   docker-php-ext-enable imagick
 }
 
@@ -41,7 +41,7 @@ php_install_imagick() {
 php_install_redis() {
   install_packages --build redis
   
-  pecl install redis-$PHP_EXTENSION_REDIS
+  [ -z "$(php -m | grep redis)" ] && pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis
 }
 
@@ -115,7 +115,7 @@ php_install_zip() {
   php_install_simple_extension $ext "zlib-dev"
 }
 
-# filters all modules in extensions list by checking, if those extensions are already build
+# filters all modules in extensions list by checking, if those extensions are already built
 # you can use this function to read from stdin (e.g. in a pipe) or give it an argument
 # it will stdout all not prebuild modules
 php_filter_prebuild_extensions() {
@@ -156,28 +156,11 @@ php_install_extensions() {
   docker-php-source delete
 }
 
-php_install_composer() {
-  sectionText "Downloading PHP composer"
-  curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer
-  curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
-  php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
-
-  sectionText "Install PHP composer"
-  php /tmp/composer-setup.php --install-dir=/usr/bin/ >> $BUILD_LOG
-
-  # make the installation process of `composer install` faster by parallel downloads
-  composer.phar global require hirak/prestissimo >> $BUILD_LOG
-}
-
-
 php_install_extensions
-php_install_composer
 
 #
 #  Clean up
 #
-sectionText "Clean up"
-rm -rf /tmp/composer-setup*
 
 # remove php-fpm configs as they are adding a "www" pool, which does not exist
 rm /usr/local/etc/php-fpm.d/*
