@@ -12,6 +12,8 @@ source $WORKDIR/docker/defaults.inc.sh
 # include custom build config on demand
 [ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
 
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
@@ -55,6 +57,74 @@ writeErrorMessage() {
     errorText "Command FAILED"
     exit 1
   fi
+}
+
+
+set_nodejs_packages() {
+  NODEJS_PKG=nodejs
+  if [ "$NODEJS_VERSION" == "7" ]; then
+    NODEJS_PKG=nodejs-current
+  fi
+  
+  if ! is_in_list "$NODEJS_VERSION" "$SUPPORTED_NODEJS_VERSIONS"; then
+    errorText "NodeJS version '$NODEJS_VERSION' is not supported. Choose one of $SUPPORTED_NODEJS_VERSIONS. Abort!"
+    exit 1
+  fi
+  sectionNote "NodeJS version $NODEJS_VERSION is supported"
+
+  if ! is_in_list "$NPM" "$SUPPORTED_NODEJS_PACKAGE_MANAGER"; then
+    errorText "NodeJS package manager '$NPM' is not supported. Choose one of $SUPPORTED_NODEJS_PACKAGE_MANAGER. Abort!"
+    exit 1
+  fi
+  
+  if [ "$NPM" == "yarn" ]; then
+    BASE_PACKAGES="$BASE_PACKAGES yarn"
+  fi
+  
+  sectionNote "Installing $NODEJS_VERSION with packagemanager: $NPM"
+}
+
+add_stage_step() {
+  local STAGE=$1
+  local COMMAND=$2
+  case $STAGE in
+    ONE|one)
+      STAGE_ONE="$STAGE_ONE $COMMAND"
+      ;;
+    TWO|two)
+      STAGE_TWO="$STAGE_TWO $COMMAND"
+      ;;
+    THREE|three)
+      STAGE_THREE="$STAGE_THREE $COMMAND"
+      ;;
+    *)
+      errorText "unknown stage requested: $STAGE, command: $COMMAND Abort!"
+      ;;
+    esac
+}
+
+# will return after the requested step has finished
+wait_for_stage_step() {
+  if ! is_in_list $1 "$CURRENT_STAGE_LIST"; then
+    errorText "waiting for a step, not in our stage! Step: $1, available steps: $CURRENT_STAGE_LIST"
+  fi
+  
+  while ! test -e "/tmp/$1.task.finished"; do
+    sectionNote "checking /tmp/$1.task.finished"
+    sleep 1s
+  done
+  sectionNote "$1 finished"
+}
+
+
+execute_concurrent_tasks() {
+  CURRENT_STAGE_LIST="$1"
+  
+  for task in $CURRENT_STAGE_LIST; do
+    sectionNote "starting task $task"
+    $task &
+  done
+  wait
 }
 
 

@@ -32,6 +32,15 @@ case $1 in
     build)
       mkdir -pv /data/logs
       execute_scripts_within_directory "$WORKDIR/docker/build.d/"
+      
+      execute_concurrent_tasks "$STAGE_ONE"
+      execute_concurrent_tasks "$STAGE_TWO"
+      execute_concurrent_tasks "$STAGE_THREE"
+      
+      for task in $FINISHING_TASKS; do
+        $task
+      done
+      
       successText "building image tasks FINISHED"
       ;;
     

@@ -15,4 +15,4 @@ remove_iconv_translit_usage() {
   done
 }
 
-remove_iconv_translit_usage
+add_stage_step two remove_iconv_translit_usage

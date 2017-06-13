@@ -4,12 +4,8 @@
 # This script installs the PHP extensions and is able to install PECL extensions as well
 #
 
-#get amount of available prozessors * 2 for faster compiling of sources
-COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
-# a list of common PHP extensions required to run a spryker shop... so you don't have to
-# specify them within every shop implementation.
-COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"
+
 
 #
 #  Install PHP extensions
@@ -21,9 +17,6 @@ COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis"
 # arg1: extension name; arg2: list of dependencies
 php_install_simple_extension() {
   EXTENSION=$1
-  DEPS="$2"
-  
-  install_packages --build $DEPS
   docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
 }
 
@@ -42,8 +35,6 @@ php_install_imagick() {
 
 # see https://pecl.php.net/package/redis
 php_install_redis() {
-  install_packages --build redis
-  
   pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis
 }
@@ -54,76 +45,58 @@ php_install_redis() {
 
 
 php_install_gd() {
-  install_packages --build freetype-dev \
-        libjpeg-turbo-dev \
-        libmcrypt-dev \
-        libpng-dev
-  
   docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
   docker-php-ext-install -j$COMPILE_JOBS gd
-  
-  install_packages libpng libjpeg-turbo freetype
 }
 
 php_install_bz2() {
-  php_install_simple_extension $ext "bzip2-dev"
-  install_packages bzip2
+  php_install_simple_extension $ext
 }
 
 php_install_curl() {
-  php_install_simple_extension $ext "curl-dev"
-  install_packages libcurl
+  php_install_simple_extension $ext
 }
 
 php_install_mcrypt() {
-  php_install_simple_extension $ext "libmcrypt-dev"
-  install_packages libmcrypt
+  php_install_simple_extension $ext
 }
 
 php_install_gmp() {
-  php_install_simple_extension $ext "gmp-dev"
-  install_packages gmp
+  php_install_simple_extension $ext
 }
 
 php_install_intl() {
-  php_install_simple_extension $ext "icu-dev libintl"
-  install_packages libintl icu-libs
+  php_install_simple_extension $ext
 }
 
 php_install_pgsql() {
-  php_install_simple_extension $ext "postgresql-dev"
-  install_packages postgresql-dev
+  php_install_simple_extension $ext
 }
 
 php_install_pdo_pgsql() {
-  php_install_simple_extension $ext "postgresql-dev"
-  install_packages postgresql-dev
+  php_install_simple_extension $ext
 }
 
 php_install_readline() {
-  php_install_simple_extension $ext "readline-dev libedit-dev"
-  install_packages readline libedit
+  php_install_simple_extension $ext
 }
 
 php_install_dom() {
-  php_install_simple_extension $ext "libxml2-dev"
-  install_packages libxml2
+  php_install_simple_extension $ext
 }
 
 php_install_xml() {
-  php_install_simple_extension $ext "libxml2-dev"
-  install_packages libxml2
+  php_install_simple_extension $ext
 }
 
 php_install_zip() {
-  php_install_simple_extension $ext "zlib-dev"
+  php_install_simple_extension $ext
 }
 
 
 # installs PHP extensions listed in $COMMON_PHP_EXTENSIONS and $PHP_EXTENSIONS
 php_install_extensions() {
   docker-php-source extract
-  install_packages --build re2c
   
   # get a uniq list of extensions
   local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | tr "[[:space:]]" "\n" | sort | uniq`
@@ -147,33 +120,37 @@ php_install_extensions() {
 }
 
 
-php_install_extensions
+php_install_composer() {
+  #
+  #   Composer
+  #
+
+  sectionNote "download and verify download of PHP composer"
+  curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer
+  curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
+  php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
 
 
-#
-#   Composer
-#
-
-sectionNote "download and verify download of PHP composer"
-curl -sS -o /tmp/composer-setup.php https://getcomposer.org/installer
-curl -sS -o /tmp/composer-setup.sig https://composer.github.io/installer.sig
-php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
+  sectionNote "install PHP composer to /usr/bin/"
+  php /tmp/composer-setup.php --install-dir=/usr/bin/
 
 
-sectionNote "install PHP composer to /usr/bin/"
-php /tmp/composer-setup.php --install-dir=/usr/bin/
+  # make the installation process of `composer install` faster by parallel downloads
+  composer.phar global require hirak/prestissimo
+  
+  #
+  #  Clean up
+  #
+
+  sectionNote "clean up PHP and composer installation"
+  rm -rf /tmp/composer-setup*
+
+  # remove php-fpm configs as they are adding a "www" pool, which does not exist
+  rm /usr/local/etc/php-fpm.d/*
+  
+  touch /tmp/php_install_composer.task.finished
+}
 
 
-# make the installation process of `composer install` faster by parallel downloads
-composer.phar global require hirak/prestissimo
-
-
-#
-#  Clean up
-#
-
-sectionNote "clean up PHP and composer installation"
-rm -rf /tmp/composer-setup*
-
-# remove php-fpm configs as they are adding a "www" pool, which does not exist
-rm /usr/local/etc/php-fpm.d/*
+add_stage_step one php_install_extensions
+add_stage_step one php_install_composer
