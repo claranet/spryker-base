@@ -19,7 +19,7 @@ php_install_simple_extension() {
   EXTENSION=$1
   DEPS="$2"
   
-  install_packages --build $DEPS
+  [ -n "$DEPS" ] && install_packages --build $DEPS
   docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
 }
 
@@ -82,18 +82,18 @@ php_install_gmp() {
 }
 
 php_install_intl() {
-  php_install_simple_extension $ext "icu-dev libintl"
   install_packages libintl icu-libs
+  php_install_simple_extension $ext "icu-dev"
 }
 
 php_install_pgsql() {
   php_install_simple_extension $ext "postgresql-dev"
-  install_packages postgresql-dev
+  install_packages libpq
 }
 
 php_install_pdo_pgsql() {
   php_install_simple_extension $ext "postgresql-dev"
-  install_packages postgresql-dev
+  install_packages libpq
 }
 
 php_install_readline() {
