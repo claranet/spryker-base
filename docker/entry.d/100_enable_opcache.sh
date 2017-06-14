@@ -8,3 +8,4 @@ else
   file="/usr/local/etc/php/conf.d/docker-php-ext-opcache.ini"
   [ -e $file ] && rm $file
 fi
+return 0

@@ -1,5 +1,5 @@
 #!/bin/sh
-ext=$ext
+ext=xdebug
 if is_true $ENABLE_$ext; then
   sectionText "Enabling PHP extension $ext"
   docker-php-ext-enable $ext
@@ -10,3 +10,4 @@ else
   file="/usr/local/etc/php/conf.d/docker-php-ext-$ext.ini"
   [ -e $file ] && rm $file
 fi >> $BUILD_LOG 2>&1
+return 0
