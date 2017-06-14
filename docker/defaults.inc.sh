@@ -22,6 +22,7 @@ NPM=npm            # npm or yarn are supported
 # pecl extensions
 PHP_EXTENSION_IMAGICK="3.4.3"
 PHP_EXTENSION_REDIS="3.1.2"
+PHP_EXTENSION_XDEBUG="2.5.4"
 
 CONSOLE="exec_console"
 
