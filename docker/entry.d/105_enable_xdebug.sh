@@ -1,6 +1,6 @@
 #!/bin/sh
 ext=xdebug
-if is_true $ENABLE_$ext; then
+if is_true $ENABLE_XDEBUG; then
   sectionText "Enabling PHP extension $ext"
   docker-php-ext-enable $ext
   mkdir -pv /tmp/$ext
