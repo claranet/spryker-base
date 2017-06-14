@@ -49,7 +49,11 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
-RUN ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
+RUN apk add --no-cache \
+        perl \
+        bash \
+    && ln -vfs /bin/bash /bin/sh \
+    && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
 EXPOSE 80
 
