@@ -23,30 +23,49 @@ use Spryker\Shared\Log\LogConstants;
  * inform user and abort script execution. This should enforce,
  * that required fields are set via ENV!
 **/
-function getenvDefault($env_key, $default=null) {
-  $env_value = getenv($env_key);
+function getenvDefault($envKey, $default=null) {
+  $envValue = getenv($envKey);
   
   // print error if an required ENV var is not set
-  if($env_value === false && $default === null) {
-    echo "[ERROR] missing ENV var: ".$env_key." Abort here!\n";
+  if($envValue === false && $default === null) {
+    echo "[ERROR] missing ENV var: ".$envKey." Abort here!\n";
     exit(1);
   }
   
-  return ($env_value === false) ? $default : $env_value;
+  return ($envValue === false) ? $default : $envValue;
+}
+
+
+/**
+ * getenv() with default and converting to boolean
+ * This function enables the use of boolean-similar constructs within
+ * the given ENV var. That means, that you can specify a "1" (as string or number)
+ * to get a True (bool) back. And a "false" (as string) to get a
+ * False (bool). The same is for "0" (bool false)
+ * and "true" (bool true, case insensitive).
+**/
+function getenvBoolean($envKey, $default=false) {
+  $envValue = getenvDefault($envKey, $default);
+  return filter_var($envValue, FILTER_VALIDATE_BOOLEAN);
 }
 
 
 $redis_database_counter = 0;
 
 $config_local = [
-  LogConstants::LOG_FILE_PATH => '/data/logs/application.log',
+  LogConstants::LOG_FILE_PATH               => '/data/logs/application.log',
   
-  AC::ELASTICA_PARAMETER__HOST => getenvDefault('ES_HOST', 'elasticsearch'),
-  AC::ELASTICA_PARAMETER__TRANSPORT => getenvDefault('ES_PROTOCOL', 'http'),
-  AC::ELASTICA_PARAMETER__PORT => getenvDefault('ES_PORT', '9200'),
-  AC::ELASTICA_PARAMETER__AUTH_HEADER => '',
-  AC::ELASTICA_PARAMETER__INDEX_NAME => null, // Store related confi,
-  AC::ELASTICA_PARAMETER__DOCUMENT_TYPE => 'page',
+  AC::ELASTICA_PARAMETER__HOST              => getenvDefault('ES_HOST', 'elasticsearch'),
+  AC::ELASTICA_PARAMETER__TRANSPORT         => getenvDefault('ES_PROTOCOL', 'http'),
+  AC::ELASTICA_PARAMETER__PORT              => getenvDefault('ES_PORT', '9200'),
+  AC::ELASTICA_PARAMETER__AUTH_HEADER       => '',
+  AC::ELASTICA_PARAMETER__INDEX_NAME        => 'de_search',
+  AC::ELASTICA_PARAMETER__DOCUMENT_TYPE     => 'page',
+  AC::YVES_SSL_ENABLED                      => getenvBoolean('YVES_SSL_ENABLED', false),
+  AC::YVES_COMPLETE_SSL_ENABLED             => getenvBoolean('YVES_COMPLETE_SSL_ENABLED', false),
+  AC::ZED_SSL_ENABLED                       => getenvBoolean('ZED_SSL_ENABLED', false),
+  
+  ZedRequestConstants::ZED_API_SSL_ENABLED  => getenvBoolean('ZED_API_SSL_ENABLED', false),
   
   // REDIS databases
   StorageConstants::STORAGE_REDIS_DATABASE      => $redis_database_counter++,
@@ -72,23 +91,20 @@ $config_local = [
   SessionConstants::YVES_SESSION_FILE_PATH      => session_save_path(),
   SessionConstants::YVES_SESSION_PERSISTENT_CONNECTION => $config[StorageConstants::STORAGE_PERSISTENT_CONNECTION],
 
-  SetupConstants::JENKINS_BASE_URL => 'http://'.getenvDefault('JENKINS_HOST', 'jenkins').':'.getenvDefault('JENKINS_PORT', '8080').'/',
 # FIXME [bug01] jenkins console commands of spryker/setup do not relies
 # completely of calls to a remote jenkins call
   SetupConstants::JENKINS_DIRECTORY => '/tmp/jenkins/jobs',
+  SetupConstants::JENKINS_BASE_URL  => 'http://'.getenvDefault('JENKINS_HOST', 'jenkins').':'.getenvDefault('JENKINS_PORT', '8080').'/',
 
+  # Use commands to remote databases instead of local sudo commands. database
+  # specific client tools like psql for postgres are required nevertheless.
+  PropelConstants::USE_SUDO_TO_MANAGE_DATABASE => false,
   PropelConstants::ZED_DB_ENGINE   => $config[PropelConstants::ZED_DB_ENGINE_PGSQL],
   PropelConstants::ZED_DB_USERNAME => getenvDefault('ZED_DB_USERNAME'),
   PropelConstants::ZED_DB_PASSWORD => getenvDefault('ZED_DB_PASSWORD'),
   PropelConstants::ZED_DB_DATABASE => getenvDefault('ZED_DB_DATABASE', 'spryker'),
   PropelConstants::ZED_DB_HOST     => getenvDefault('ZED_DB_HOST', 'database'),
   PropelConstants::ZED_DB_PORT     => getenvDefault('ZED_DB_PORT', '5432'),
-
-  AC::ELASTICA_PARAMETER__INDEX_NAME => 'de_search',
-
-# Use commands to remote databases instead of local sudo commands. database
-# specific client tools like psql for postgres are required nevertheless.
-  PropelConstants::USE_SUDO_TO_MANAGE_DATABASE => false,
 ];
 foreach($config_local as $k => $v)
   $config[$k] = $v;
@@ -130,9 +146,6 @@ $config[AC::HOST_YVES]
     = $config[SessionConstants::YVES_SESSION_COOKIE_DOMAIN]
     = getYvesDomain();
 
-$config[AC::YVES_SSL_ENABLED] = (getenvDefault('YVES_SSL_ENABLED', false) === 'true');
-$config[AC::YVES_COMPLETE_SSL_ENABLED] = (getenvDefault('YVES_COMPLETE_SSL_ENABLED', false) === 'true');
-
 /**
  * Hostname(s) for Zed - Shop frontend
  * In production you probably use HTTPS for Zed
@@ -142,6 +155,3 @@ $config[AC::HOST_ZED_GUI]
     = $config[AC::HOST_SSL_ZED_GUI]
     = $config[AC::HOST_SSL_ZED_API]
     = getenvDefault('ZED_HOST', 'zed');
-
-$config[AC::ZED_SSL_ENABLED] = (getenvDefault('ZED_SSL_ENABLED', false) === 'true');
-$config[ZedRequestConstants::ZED_API_SSL_ENABLED] = (getenvDefault('ZED_API_SSL_ENABLED', false) === 'true');
