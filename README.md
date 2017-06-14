@@ -397,6 +397,7 @@ Those variables are to be provided via your project specific
 * `KEEP_DEVEL_TOOLS` (default: false) -- Shall development tools be installed and kept beyond the build?
 * `SKIP_CLEANUP` (default: false) -- Skip cleanup step in each layer build stage. This helps in debugging issues. Be aware, that this skips wiping off the credentials as well! So never ever release such an image into the wild!!!
 * `CRONJOB_HANDLER` -- defines where cronjobs should be registered. Currently jenkins and crond are supported.
+* `ENABLE_XDEBUG` (default: false) -- Install and configure `xdebug`
 
 
 ### Injecting Custom Configurations
