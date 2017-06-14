@@ -17,7 +17,7 @@ enable_nginx_vhost() {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 enable_phpfpm_app() {
-  local FPM_APPS_AVAILABLE="/etc/php/apps"
+  local FPM_APPS_AVAILABLE="/etc/php/fpm"
   local FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
   
   local APP="${1}.conf"

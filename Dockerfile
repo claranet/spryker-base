@@ -46,7 +46,6 @@ ENV APPLICATION_ENV="production" \
     ZED_SSL_ENABLED="false" \
     ZED_API_SSL_ENABLED="false"
 
-
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
 RUN apk add --no-cache \
