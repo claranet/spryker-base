@@ -12,6 +12,7 @@ LABEL org.label-schema.name="spryker-base" \
       author2="Tony Fahrion <tony.fahrion@de.clara.net>"
 
 ENV WORKDIR=/data/shop \
+    CONFIG_DIR=/mnt/configs \
     PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/etc/php/ini
 
 # Reference of spryker config related ENV vars

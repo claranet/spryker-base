@@ -8,39 +8,40 @@
 * [What?](#what)
 * [Why?](#why)
 * [Design](#design)
-    * [Docker Image](#docker-image)
-    * [Build Time Environment](#build-time-environment)
-    * [Runtime Environments](#runtime-environments)
-    * [Build Layer](#build-layer)
-    * [Private Repositories](#private-repositories)
-    * [Spryker Configuration](#spryker-configuration)
-    * [Docker Volumes](#docker-volumes)
+  * [Docker Image](#docker-image)
+  * [Build Time Environment](#build-time-environment)
+  * [Runtime Environments](#runtime-environments)
+  * [Build Layer](#build-layer)
+  * [Private Repositories](#private-repositories)
+  * [Spryker Configuration](#spryker-configuration)
+  * [Docker Volumes](#docker-volumes)
 * [Conventions](#conventions)
 * [Create Custom Image](#create-custom-image)
-    * [Forking Demoshop](#forking-demoshop)
-    * [Starting from Scratch](#starting-from-scratch)
+  * [Forking Demoshop](#forking-demoshop)
+  * [Starting from Scratch](#starting-from-scratch)
 * [Build & Run](#build--run)
-    * [Configurations](#configurations)
-        * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
-        * [Build Time Variable - Reference](#build-time-variable---reference)
-        * [Nginx](#nginx)
-        * [PHP FPM](#php-fpm)
+* [Configurations](#configurations)
+  * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
+  * [Build Time Variable - Reference](#build-time-variable---reference)
+  * [Injecting Custom Configurations](#injecting-custom-configurations)
+    * [External Volumes](#external-volumes)
+    * [Child Image Overwrites](#child-image-overwrites)
 * [Customization](#customization)
-    * [build.conf](#buildconf)
-    * [Build Steps](#build-steps)
-    * [Init](#init)
-        * [Container Level](#container-level)
-        * [Setup Wide](#setup-wide)
-    * [Deployment](#deployment)
-    * [Custom Build Steps](#custom-build-steps)
-        * [Logging](#logging)
-        * [Installing additional packages](#installing-additional-packages)
+  * [build.conf](#buildconf)
+  * [Build Steps](#build-steps)
+  * [Init](#init)
+    * [Container Level](#container-level)
+    * [Setup Wide](#setup-wide)
+  * [Deployment](#deployment)
+  * [Custom Build Steps](#custom-build-steps)
+    * [Logging](#logging)
+    * [Installing additional packages](#installing-additional-packages)
 * [Not documented here?](#not-documented-here)
 * [FAQ](#faq)
-    * [Where to find logs?](#where-to-find-logs)
-    * [Which base image are you using?](#which-base-image-are-you-using)
-    * [Why using Alpine?](#why-using-alpine)
-    * [How to further speed up image build?](#how-to-further-speed-up-image-build)
+  * [Where to find logs?](#where-to-find-logs)
+  * [Which base image are you using?](#which-base-image-are-you-using)
+  * [Why using Alpine?](#why-using-alpine)
+  * [How to further speed up image build?](#how-to-further-speed-up-image-build)
 * [Issues](#issues)
 
 <!-- vim-markdown-toc -->
@@ -334,9 +335,9 @@ details.
     ./docker/run devel down -v
 
 
-### Configurations
+## Configurations
 
-#### Runtime Environment Variables - Reference
+### Runtime Environment Variables - Reference
 
 Those variables are to be provided during container creation as environment
 variables.
@@ -381,7 +382,7 @@ Consumed by initialization hooks:
 * `ENABLE_XDEBUG` -- The php module `xdebug` will be activated and configured.
 * `ENABLE_OPCACHE` -- The php module `opcache` will be activated and configured.
 
-#### Build Time Variable - Reference
+### Build Time Variable - Reference
 
 Those variables are to be provided via your project specific
 `./docker/build.conf`
@@ -398,38 +399,62 @@ Those variables are to be provided via your project specific
 * `CRONJOB_HANDLER` -- defines where cronjobs should be registered. Currently jenkins and crond are supported.
 
 
-#### Nginx
+### Injecting Custom Configurations
 
-The nginx configuration as well is split up in multiple files of a hook
-directory which gets included by the main configuration.
+In order to control the behaviour of nginx, php-fpm or php you can either
+inject configuration from the outside of the container as bind mounts or via
+`Dockerfile` of child shop image. 
 
-    /etc/nginx/conf.d/allow-ip.conf
-    /etc/nginx/conf.d/fpm-backend.conf
-    /etc/nginx/conf.d/logformat.conf
-    /etc/nginx/conf.d/real-ip.conf
-    /etc/nginx/fastcgi.conf
-    /etc/nginx/fastcgi_params
-    /etc/nginx/proxy_params
-    /etc/nginx/sites-available/yves
-    /etc/nginx/sites-available/zed
-    /etc/nginx/snippets/fastcgi-php.conf
-    /etc/nginx/snippets/snakeoil.conf
-    /etc/nginx/spryker/static.conf
-    /etc/nginx/spryker/yves.conf
-    /etc/nginx/spryker/zed.conf
+#### External Volumes
 
+Configuration of services are prepared to include several files which
+constituted the effective configuration.
 
-#### PHP FPM
+All configurations are prepred to be expected under a specific directory where
+all relevant files will
 
-FPM Configuration Hook: FIXME
+The expected locations are: 
 
-FIXME
+* Nginx
+    * `/etc/nginx/spryker/yves.conf.d/*.conf` 
+    * `/etc/nginx/spryker/zed.conf.d/*.conf`
+* PHP FPM
+    * `/etc/php/fpm/yves.conf.d/*.conf`
+    * `/etc/php/fpm/zed.conf.d/*.conf`
+* PHP INI
+    * `/etc/php/ini/*.ini`.
+
+The default configuration is to be found under:
+
+    /etc/php/fpm/zed.conf.d/100_base.conf
+    /etc/php/fpm/zed.conf.d/200_pm.conf
+    /etc/php/fpm/zed.conf.d/300_php.conf
+    /etc/php/fpm/yves.conf.d/100_base.conf
+    /etc/php/fpm/yves.conf.d/200_pm.conf
+    /etc/php/fpm/yves.conf.d/300_php.conf
+    /etc/php/ini/xdebug.ini
+    /etc/php/ini/opcache.ini
+    /etc/nginx/spryker/zed.conf.d/500-default.conf
+    /etc/nginx/spryker/yves.conf.d/500_default.conf
+
+In environments where you can only mount complete directories into the
+container, we have prepared a mechanism which expects a directory hierarchy under `/mnt/configs` and on container creation it symlinks all files under
+this location to their corresponding location under `/etc/`.
+
+    # For example: 
+    /mnt/configs/nginx/zed.conf.d/600-custom-headers.conf      -->  /etc/nginx/zed.conf.d/600-custom-headers.conf
+    /mnt/configs/php/fpm/yves.conf.d/500-raise-processes.conf  -->  /etc/php/fpm/yves.conf.d/500-raise-processes.conf
+
+#### Child Image Overwrites
+
+Due to the nature of layered file systems the child image inheriting from this
+base image can simpley overwrites configurations in order to achieve the
+desired behaviour of those services. 
 
 Those can easily be customized by supplying configuration files by yourself via the `Dockerfile`:
 
     FROM claranet/spryker-base:latest
-
-    COPY etc/nginx/spryker/zed.conf /etc/nginx/spryker/zed.conf
+    COPY my_custom_zed.conf /etc/nginx/spryker/zed.conf.d/custom.conf
 
 Since the ONBUILD trigger will be the first directives of the child
 `Dockerfile` to be executed, these overridden files will be first available
