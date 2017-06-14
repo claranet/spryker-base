@@ -33,8 +33,6 @@ enable_phpfpm_app() {
 # activates zed and/or yves instance, based the value of $ENABLED_SERVICES
 enable_services() {
   for SERVICE in $(echo $ENABLED_SERVICES | egrep 'yves|zed'); do
-    sectionHead "Enable ${SERVICE} vHost and PHP-FPM app"
-    
     enable_nginx_vhost ${SERVICE}
     enable_phpfpm_app ${SERVICE}
     

@@ -6,7 +6,7 @@
 start_services() {
   sectionHead "Starting enabled services $ENABLED_SERVICES"
 
-  if is_in_list "yves" "$ENABLED_SERVICES" || is_in_list "yves" "$ENABLED_SERVICES"; then
+  if is_in_list "yves" "$ENABLED_SERVICES" || is_in_list "zed" "$ENABLED_SERVICES"; then
     # starts nginx daemonized to be able to start php-fpm in background
     # TODO: report to the user if nginx configtest fails
     nginx && php-fpm --nodaemonize
