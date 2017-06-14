@@ -11,46 +11,43 @@ cd $WORKDIR
 case $1 in
     run-yves)
       ENABLED_SERVICES="yves"
-      enable_services
-      start_services
+      run
       ;;
 
     run-zed)
       ENABLED_SERVICES="zed"
-      enable_services
-      start_services
+      run
       ;;
 
     run-yves-and-zed)
       ENABLED_SERVICES="yves zed"
-      enable_services
-      start_services
+      run
       ;;
 
     run-crond)
-      configure_crond
-      crond -f -L /dev/stdout
+      ENABLED_SERVICES="crond"
+      run
       ;;
 
     build)
-        build_image
+      build_image
       ;;
 
     build-base)
-        build_start
-        build_base_layer
+      build_start
+      build_base_layer
       ;;
 
     build-deps)
-        build_deps_layer
+      build_deps_layer
       ;;
 
     build-shop)
-        build_shop_layer
+      build_shop_layer
       ;;
 
     build-end)
-        build_end
+      build_end
       ;;
 
     init)
