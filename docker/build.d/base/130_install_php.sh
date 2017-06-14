@@ -61,6 +61,14 @@ php_install_gd() {
   install_packages libpng libjpeg-turbo freetype
 }
 
+php_install_xdebug() {
+  pecl install xdebug
+}
+
+php_install_opcache() {
+  php_install_simple_extension opcache
+}
+
 php_install_bz2() {
   php_install_simple_extension $ext "bzip2-dev"
   install_packages bzip2

@@ -20,11 +20,18 @@
     * [Forking Demoshop](#forking-demoshop)
     * [Starting from Scratch](#starting-from-scratch)
 * [Build & Run](#build--run)
+    * [Configurations](#configurations)
+        * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
+        * [Build Time Variable - Reference](#build-time-variable---reference)
+        * [Nginx](#nginx)
+        * [PHP FPM](#php-fpm)
 * [Customization](#customization)
     * [build.conf](#buildconf)
     * [Build Steps](#build-steps)
     * [Init](#init)
-    * [Custom Configurations](#custom-configurations)
+        * [Container Level](#container-level)
+        * [Setup Wide](#setup-wide)
+    * [Deployment](#deployment)
     * [Custom Build Steps](#custom-build-steps)
         * [Logging](#logging)
         * [Installing additional packages](#installing-additional-packages)
@@ -47,19 +54,19 @@ use the features implemented here, write your own `Dockerfile` - which uses
 this base image to inherit from - along your actual implementation of a Spryker
 shop.
 
-**This project is still in BETA and will undergo possible breaking changes!** 
+**This project is still in BETA and will undergo possible breaking changes!**
 
 Thats why we are keen to get feedback from you! This is a work in progress
 effort which strives for making dockerizing a Spryker Shop as easy as possible.
 In order to successfully achieve this goal, we need to identify common steps
 worth to be generalized and put into this base image. So tell us about your
-needs and your experiences. 
+needs and your experiences.
 
 If you want to see this image in action and how its gonna be used check out the
 containerized [Spryker Demoshop](https://github.com/claranet/spryker-demoshop).
 This demoshop serves as reference implementation for the base image. The same
 way as Spryker is progressing their bundles and making the demoshop reflecting
-those changes we use the demoshop in exactly the same way. 
+those changes we use the demoshop in exactly the same way.
 
 Core traits are:
 
@@ -82,7 +89,7 @@ Benefits of containerization:
 
 ## Design
 
-### Docker Image 
+### Docker Image
 
 First premise is, that we decided to serve the Yves and Zed container from one
 image. The benefit is to always consistently upgrade the shared code base
@@ -94,7 +101,7 @@ of both components need to be included.
 Another premise is - and this one is crucial for your understanding of this
 stack - to build one unified image across development and production
 environments. This affects the usage of `APPLICATION_ENV` which gets evaluated
-by the Spryker App itself. 
+by the Spryker App itself.
 
 This variable has the following impact:
 
@@ -118,7 +125,7 @@ achieved with injecting proper vars into the effective containers, we do not
 distinguish between environments while building the images. Since point 1.1
 requires typically more dependencies to be resolved, we always build the image
 with `APPLICATION_ENV` set to `development`. But in which mode the application
-will actually be run is independant from this build. 
+will actually be run is independant from this build.
 
 This means that even the production containers will have dev dependencies
 included. Primary reason for this is the requirement for dev/test/prod parity
@@ -126,9 +133,9 @@ to ensure the containers behave exactly the same in all stages and in all
 environments. Tradeoff for this premise is again larger effective images.
 During runtime the behaviour of the Spryker Application can be controlled by
 setting `APPLICATION_ENV` which accepts either `development` or `production`.
-If you use the `./docker/run` script this variables will be set automatically. 
+If you use the `./docker/run` script this variables will be set automatically.
 
-### Runtime Environments 
+### Runtime Environments
 
 The idea behind the scripts provided in this `./shop/docker` subfolder follow
 the basic distinction between `devel` and `prod` environments. The main
@@ -166,7 +173,7 @@ Unfortunately this comes not without cost, the effective image size will be
 slightly higher than the one which gets build up by just one layer. Right now
 this seems to be a acceptable tradeoff.
 
-What are those layers? 
+What are those layers?
 
 * Base - Install all the os level base infrastructure
 * Dependencies - Resolve all the shop specific PHP/Node dependencies
@@ -193,7 +200,7 @@ url or they getting transformed via `git config --global
 image.
 
 If you want to add more specific rules, create a build script in the dependency
-layer which gets executed prior to the dependency resolution process: 
+layer which gets executed prior to the dependency resolution process:
 
     vi docker/build.d/deps/300_private_repo_override.sh
     #!/bin/sh
@@ -221,7 +228,7 @@ local configuration file `config/Shared/config_local.php`. Since this file is
 the one which overrides all the others.
 
 Configuration order is as the following:
-* `config_default.php` - Base configuration 
+* `config_default.php` - Base configuration
 * `config_default-development.php` - Configuration relevant for development mode (see `APPLICATION_ENV`)
 * `config_local.php` - site local configuration; in this case its the configuration for containerized environment.
 
@@ -239,13 +246,13 @@ Currently both environments `devel` and `prod` using unnamed volumes which is
 due to the assumption of a transient environment. This means, the whole stack
 gets create for the sole purpose of checking your code base aginst it. **Its is
 under no circumstance meant as some production grade setup, where data needs to
-persisted over recreations of containers!!!** 
+persisted over recreations of containers!!!**
 
 The assumed workflow could be described as:
 
-1. Create environment 
-1. Initialize with dummy data 
-1. Evolve code base 
+1. Create environment
+1. Initialize with dummy data
+1. Evolve code base
 1. Iterate: rebuild -> run -> init -> evolve
 1. Destroy environment
 
@@ -253,7 +260,7 @@ The assumed workflow could be described as:
 ## Conventions
 
 In order to reuse the functionalities implemented here, the following aspects
-need to be aligned with the base image: 
+need to be aligned with the base image:
 
 * Follow Spryker reference directory hierarchy
     * `./src/Pyz` - Your shop implementation
@@ -281,12 +288,12 @@ start from scratch. For the latter you need to consider the following options.
 
 Since the the reference implementation is the
 [demoshop](https://github.com/claranet/spryker-demoshop) which is maintained by
-us, this would be a pretty good starter. 
+us, this would be a pretty good starter.
 
 ### Starting from Scratch
 
 We have prepared some kind of a [skeleton](/shop) with all required files you
-need to get started in order to bootstrapp your custom shop instance. 
+need to get started in order to bootstrapp your custom shop instance.
 
 ```sh
 # change these parameters
@@ -303,7 +310,7 @@ With this skeleton, you are ready to populate your repository with your code
 and customize it to your individual needs. The skeleton can be used untouched,
 if you want to use it for the demoshop.
 
-Mind the `Dockerfile` which looks as clean as this: 
+Mind the `Dockerfile` which looks as clean as this:
 
     FROM claranet/spryker-base:latest
 
@@ -317,7 +324,7 @@ The shop skeleton and the demoshop as well got a shell script under
 Checkout out the [README.md](./shop/docker/README.md) there for further
 details.
 
-    # Build the image 
+    # Build the image
     ./docker/run build
 
     # Run the demoshop in development mode
@@ -327,21 +334,57 @@ details.
     ./docker/run devel down -v
 
 
-## Customization
+### Configurations
 
-Most of the design decisions made in the base image are governed by the idea of
-customizability and extensibility. A base image which could be used only once for
-a individual shop image is pretty useless and far away from something called base. 
+#### Runtime Environment Variables - Reference
 
-### build.conf
+Those variables are to be provided during container creation as environment
+variables.
 
-The build process is pretty much as the name suggests the process which
-produces the image which get shared by all derived containers during runtime
-later on. 
+Most of the variables getting consumed by the `config/Shared/config_local.php`
+file:
 
-Some build scripts consider parameters you can set in `./docker/build.conf`
+* `APPLICATION_ENV="production"`
+* `SPRYKER_SHOP_CC="DE"`
+* `ZED_HOST="zed"`
+* `YVES_HOST="yves"`
+* `ES_HOST="elasticsearch"`
+* `ES_PROTOCOL="http"`
+* `ES_PORT="9200"`
+* `REDIS_STORAGE_PROTOCOL="tcp"`
+* `REDIS_STORAGE_HOST="redis"`
+* `REDIS_STORAGE_PORT="6379"`
+* `REDIS_STORAGE_PASSWORD=""`
+* `REDIS_SESSION_PROTOCOL="tcp"`
+* `REDIS_SESSION_HOST="redis"`
+* `REDIS_SESSION_PORT="6379"`
+* `REDIS_SESSION_PASSWORD=""`
+* `ZED_DB_USERNAME="postgres"`
+* `ZED_DB_PASSWORD=""`
+* `ZED_DB_DATABASE="spryker"`
+* `ZED_DB_HOST="database"`
+* `ZED_DB_PORT="5432"`
+* `JENKINS_HOST="jenkins"`
+* `JENKINS_PORT="8080"`
+* `RABBITMQ_HOST="rabbitmq"`
+* `RABBITMQ_PORT="5672"`
+* `RABBITMQ_USER="spryker"`
+* `RABBITMQ_PASSWORD=""`
+* `YVES_SSL_ENABLED="false"`
+* `YVES_COMPLETE_SSL_ENABLED="false"`
+* `ZED_SSL_ENABLED="false"`
+* `ZED_API_SSL_ENABLED="false"`
 
-Reference:
+Consumed by initialization hooks:
+
+* `ZED_ADMIN_PASSWORD` --  If set the default password of the admin@spryker.com user will be reset
+* `ENABLE_XDEBUG` -- The php module `xdebug` will be activated and configured.
+* `ENABLE_OPCACHE` -- The php module `opcache` will be activated and configured.
+
+#### Build Time Variable - Reference
+
+Those variables are to be provided via your project specific
+`./docker/build.conf`
 
 * `PROJECT` (mandatory) -- Controls the name prefix of the `docker-compose` created services
 * `IMAGE` (mandatory) -- What is the name of the resulting docker image?
@@ -355,44 +398,10 @@ Reference:
 * `CRONJOB_HANDLER` -- defines where cronjobs should be registered. Currently jenkins and crond are supported.
 
 
-### Build Steps
+#### Nginx
 
-If you either want to extend the build steps inherited from the base image or
-to disable them, you need to place your custom build script under
-`./docker/build.d/`. There you will find 3 directories reflecting each stage/layer:
-
-* `./docker/build.d/base/` - Base os level installations
-* `./docker/build.d/deps/` - Deal with shop specific PHP/Node dependencies
-* `./docker/build.d/shop/` - Deal with code generation of the actual shop code base
-
-Scripts of each subdir get lexically ordered executed (actuall sourced). 
-
-For example, if you want to change the way the navigation cache gets built by
-the base image, you must supply a script at the very same location it is
-provided by the base image under
-`./docker/build.d/shop/650_build_navigation_cache.sh`. Since the resulting
-image as well as the container will utilize union file systems, the files
-provided by the shop image get precedence over the ones provided by the bas
-image. By this mechanism you can either disable a functionality simply by
-supplying a script which does nothing or you can alter the behaviour by adding
-a script which does something differently or additionally. 
-
-
-### Init
-
-The very same mechanism described above could be employed for altering the way
-the initialization of the spryker setup shall executed. The base image comes
-with meaningful defaults valid for common environments, but could be overridden
-by placing custom scripts at appropriate locations. 
-
-During initialization all of the shell scripts under `./docker/init.d` get
-executed. For example to initialize the database with dummy data like the
-demoshop does place script under `./docker/init.d/500_import_demo_data.sh`. 
-
-
-### Custom Configurations
-
-The base image comes with meaningful defaults for both the nginx and the PHP FPM:
+The nginx configuration as well is split up in multiple files of a hook
+directory which gets included by the main configuration.
 
     /etc/nginx/conf.d/allow-ip.conf
     /etc/nginx/conf.d/fpm-backend.conf
@@ -408,11 +417,15 @@ The base image comes with meaningful defaults for both the nginx and the PHP FPM
     /etc/nginx/spryker/static.conf
     /etc/nginx/spryker/yves.conf
     /etc/nginx/spryker/zed.conf
-    /etc/php/apps/README.md
-    /etc/php/apps/yves.conf
-    /etc/php/apps/zed.conf
 
-Those can easily be customized by supplying configuration files by yourself via the `Dockerfile`: 
+
+#### PHP FPM
+
+FPM Configuration Hook: FIXME
+
+FIXME
+
+Those can easily be customized by supplying configuration files by yourself via the `Dockerfile`:
 
     FROM claranet/spryker-base:latest
 
@@ -422,18 +435,110 @@ Since the ONBUILD trigger will be the first directives of the child
 `Dockerfile` to be executed, these overridden files will be first available
 during runtime of the container.
 
+## Customization
+
+Most of the design decisions made in the base image are governed by the idea of
+customizability and extensibility. A base image which could be used only once for
+a individual shop image is pretty useless and far away from something called base.
+
+### build.conf
+
+The build process is pretty much as the name suggests the process which
+produces the image which get shared by all derived containers during runtime
+later on.
+
+Some build scripts consider parameters you can set in `./docker/build.conf`
+
+See reference above..
+
+### Build Steps
+
+Hook dir: `./docker/build.d/`
+
+If you either want to extend the build steps inherited from the base image or
+to disable them, you need to place your custom build script under
+`./docker/build.d/`. There you will find 3 directories reflecting each stage/layer:
+
+* `./docker/build.d/base/` - Base os level installations
+* `./docker/build.d/deps/` - Deal with shop specific PHP/Node dependencies
+* `./docker/build.d/shop/` - Deal with code generation of the actual shop code base
+
+Scripts of each subdir get lexically ordered executed (actuall sourced).
+
+For example, if you want to change the way the navigation cache gets built by
+the base image, you must supply a script at the very same location it is
+provided by the base image under
+`./docker/build.d/shop/650_build_navigation_cache.sh`. Since the resulting
+image as well as the container will utilize union file systems, the files
+provided by the shop image get precedence over the ones provided by the bas
+image. By this mechanism you can either disable a functionality simply by
+supplying a script which does nothing or you can alter the behaviour by adding
+a script which does something differently or additionally.
+
+
+### Init
+
+The very same mechanism described above could be employed for altering the way
+the initialization of the spryker container and the whole setup shall be
+executed. The base image comes with meaningful defaults valid for common
+environments, but could be overridden by placing custom scripts at appropriate
+locations.
+
+The base image provides hooks for both, initialization of each of the
+container, and for the initialization of the whole setup.
+
+#### Container Level
+
+Hook dir: `./docker/entry.d/`
+
+The runtime entrypoint arguments (`run-yves`, `run-zed`, `run-yves-and-zed`,
+`run-cron`) governing which role this actual container is having, all source
+the files listed in this hook directory. Via variables the scripts decide which
+services to enable and to start during runtime.
+
+A common task would be to enable `xdebug` as requested via env var
+`ENABLE_XDEBUG` on container creation.
+
+Due to the nature all the hooks will be executed on each container start.
+
+#### Setup Wide
+
+Hook dir: `./docker/init.d/`
+
+Commonly each shop instance needs to carry out initial steps to initialize such
+a shop.  During this setup wide initialization all of the shell scripts under
+the hook dir getting executed. For example to initialize the database with
+dummy data like the demoshop does place script under
+`./docker/init.d/500_import_demo_data.sh`.
+
+This is not done implicitely, a seperate container must be spawned with the
+entrypoint arg `init`.
+
+
+### Deployment
+
+Hook dir: `./docker/deploy.d/`
+
+Same as the init procedure is the deployment procedure. This procedure will be
+carried out during deployments. The lifecycle concept consists of those 2
+hooks: init will be called on the first time, and deployment each time a new
+version of the image will be carried out.
+
+This is not done implicitely, a seperate container must be spawned with the
+entrypoint arg `deploy`.
+
 ### Custom Build Steps
 
 As already mentioned you are free to add your very custom build and init steps.
 The `./docker/common.inc.sh` script will help you with some useful functions.
-Check it out by yourself. 
+Check it out by yourself.
 
 #### Logging
 
-Make your build step telling by using prepared output functions: 
+Make your build step telling by using prepared output functions:
 
 * `errorText` - Raise an error
-* `successText` - Send back success 
+* `successText` - Send back success
 * `sectionHead` - Print headline for a group of tasks
 * `sectionText` - Print intermediate build step information
 
@@ -447,7 +552,7 @@ as build dependencies just set `--build` as the first argument:
 
     # remove "gcc" at the end of our image build
     install_packages --build gcc
-    
+     
     # keep "top" in the resulting image
     install_packages top
 
@@ -485,6 +590,6 @@ Two things comes to mind:
 
 More to come soon. :)
 
-## Issues 
+## Issues
 
 Please take a look at [/issues](https://github.com/claranet/spryker-base/issues).

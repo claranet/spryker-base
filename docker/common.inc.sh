@@ -56,7 +56,7 @@ chapterHead() {
 }
 
 sectionHead() {
-  echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}\n"
+  echo -e "\n${INFO_TEXT}m===> ${1} <===${NC}"
   echo -e "\n==> $1" >> $BUILD_LOG
 }
 
@@ -71,27 +71,6 @@ writeErrorMessage() {
     errorText "Command FAILED"
     exit 1
   fi
-}
-
-#
-#  INIT helper functions
-#
-configure_jenkins() {
-  sectionText "Configuring jenkins as the cronjob handler"
-  
-  wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
-
-  # FIXME [bug01] until the code of the following cronsole command completely
-  # relies on API calls, we need to workaround the issue with missing local
-  # jenkins job definitions.
-  mkdir -p /tmp/jenkins/jobs
-  # Generate Jenkins jobs configuration
-  $CONSOLE setup:jenkins:generate
-}
-
-configure_crond() {
-  sectionText "Configuring crond as the cronjob handler"
-  php $WORKDIR/docker/contrib/gen_crontab.php
 }
 
 
@@ -109,58 +88,6 @@ install_packages() {
   fi
 }
 
-# force setting a symlink from sites-available to sites-enabled if vhost file exists
-enable_nginx_vhost() {
-  NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
-  NGINX_SITES_ENABLED='/etc/nginx/conf.d'
-  VHOST=$1
-  
-  if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
-    errorText "\t nginx vhost '$VHOST' not found! Can't enable vhost!"
-    return
-  fi
-  
-  sectionText "Enabling nginx vhost $VHOST"
-  ln -fs $NGINX_SITES_AVAILABLE/$VHOST $NGINX_SITES_ENABLED/${VHOST}.conf
-}
-
-# force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
-enable_phpfpm_app() {
-  local FPM_APPS_AVAILABLE="/etc/php/apps"
-  local FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
-  
-  local APP="${1}.conf"
-  if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
-    errorText "\t php-fpm app '$APP' not found! Can't enable app!"
-    return
-  fi
-  
-  sectionText "Enabling php-fpm config for $1"
-  ln -fs $FPM_APPS_AVAILABLE/$APP $FPM_APPS_ENABLED/$APP
-}
-
-# activates zed and/or yves instance, based the value of $ENABLED_SERVICES
-enable_services() {
-  for SERVICE in $ENABLED_SERVICES; do
-    sectionHead "Enable ${SERVICE} vHost and PHP-FPM app"
-    
-    enable_nginx_vhost ${SERVICE}
-    enable_phpfpm_app ${SERVICE}
-    
-  done
-}
-
-# launches an instance of nginx and php-fpm
-# nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
-# php-fpm starts unforked and remains in the forground
-start_services() {
-  sectionHead "Starting enabled services $ENABLED_SERVICES"
-  
-  # starts nginx daemonized to be able to start php-fpm in background
-  # TODO: report to the user if nginx configtest fails
-  nginx && php-fpm --nodaemonize
-}
-
 exec_console() {
   sectionText "Executing 'console $@'"
   vendor/bin/console $@
@@ -170,6 +97,7 @@ exec_console() {
 # sources those scripts to make build.conf and defaults.inc.sh vars available to them
 exec_scripts() {
   local directory=$1
+  local context=${2-"build"}
   
   if [ -d "$directory" ]; then
     
@@ -181,7 +109,7 @@ exec_scripts() {
     for f in $available_scripts; do
       local script_name=`basename $f`
       
-      sectionHead "Executing build step ($scripts_counter/$scripts_count): $script_name"
+      sectionHead "Executing $context step ($scripts_counter/$scripts_count): $script_name"
       cd $WORKDIR # ensure we are starting within $WORKDIR for all scripts
       source $f
       
@@ -213,8 +141,8 @@ wait_for_http_service() {
 }
 
 
-# checks if the given value exists in the list (space separated string recommended)
-# parameter $1 => value, $2 => string, used in "for in do done"
+# checks if the given value exists in the list (space separated string
+# recommended) parameter $1 => value, $2 => stringified list to search in
 is_in_list() {
   local VALUE="$1"
   local LIST="$2"
@@ -326,4 +254,9 @@ deploy() {
   exec_scripts "$WORKDIR/docker/deploy.d/"
   print_timer "\nDeployment Time" "deploy"
   successText "DEPLOYMENT successfully FINISHED"
+}
+
+
+run() {
+  exec_scripts "$WORKDIR/docker/entry.d/" "container bootstrap"
 }
