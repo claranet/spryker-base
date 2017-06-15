@@ -7,10 +7,10 @@ php_install_composer() {
   php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
 
   sectionText "Install PHP composer"
-  php /tmp/composer-setup.php --install-dir=/usr/bin/ >> $BUILD_LOG
+  php /tmp/composer-setup.php --install-dir=/usr/bin/ 
 
   # make the installation process of `composer install` faster by parallel downloads
-  composer.phar global require hirak/prestissimo >> $BUILD_LOG
+  composer.phar global require hirak/prestissimo
 }
 
-php_install_composer
+php_install_composer >> $BUILD_LOG 2>&1

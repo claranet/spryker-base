@@ -1,5 +1,4 @@
 #!/bin/sh
-
 set -e -o pipefail
 export TERM=xterm
 
@@ -75,7 +74,12 @@ writeErrorMessage() {
 
 
 install_packages() {
-  local INSTALL_FLAGS="--no-cache"
+  local INSTALL_FLAGS=""
+  if [ -z "${APK_CACHE_REFRESHED}" ]; then
+    sectionText "Refreshing apk cache initially"
+    apk update >> $BUILD_LOG
+    export APK_CACHE_REFRESHED=yes
+  fi
   if [ "$1" = "--build" ]; then
     INSTALL_FLAGS="$INSTALL_FLAGS --virtual .build_deps"
     shift
@@ -140,6 +144,39 @@ wait_for_http_service() {
   sectionText "Success: $1 seems to be up and running"
 }
 
+fail() {
+  exit=$1; shift
+  for line in "$@"; do
+    errorText $line
+  done
+  exit $exit
+}
+
+retry() {
+  if [ $# -lt 2 ] ; then
+    fail 1 "Error: wrong number of arguments!" \
+           "Usage: retry <max_retries> <command> [<param1> [<param2> [...] ] ]"
+  fi
+
+  retries=$1
+  shift
+  command=$@
+
+  set +e
+  echo "Running \`$command\` with $retries retries"
+  n=0
+  while true; do
+    $command && break
+    n=$(expr $n + 1)
+    if [ $n -le $retries ] ; then
+      echo "Retry # $n"
+    else
+      fail 2 "ERROR: Max retries. Unable to \`$command\`"
+    fi
+    sleep 2
+  done
+  set -e
+}
 
 # checks if the given value exists in the list (space separated string
 # recommended) parameter $1 => value, $2 => stringified list to search in
@@ -201,11 +238,24 @@ print_timer() {
     [ -n "$DIFF" ] &&  debugText "$MSG: $DIFF"
 }
 
+
+build_exit() {
+  rc=$?
+  if [ "$rc" != "0" ]; then
+    echo "BUILD LOG:"
+    tail -n 20 $BUILD_LOG
+    echo "BUILD FAILED!!!"
+  fi
+  exit $rc
+}
+
+
 build_start() {
   start_timer
 }
 
 build_base_layer() {
+  trap build_exit EXIT
   start_timer base
   chapterHead "Building Base Layer"
   exec_scripts "$WORKDIR/docker/build.d/base/"
@@ -213,6 +263,7 @@ build_base_layer() {
 }
 
 build_deps_layer() {
+  trap build_exit EXIT
   start_timer deps
   chapterHead "Building Dependency Layer"
   exec_scripts "$WORKDIR/docker/build.d/deps/"
@@ -220,6 +271,7 @@ build_deps_layer() {
 }
 
 build_shop_layer() {
+  trap build_exit EXIT
   start_timer shop
   chapterHead "Building Shop Layer"
   exec_scripts "$WORKDIR/docker/build.d/shop/"

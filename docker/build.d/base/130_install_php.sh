@@ -7,26 +7,14 @@
 #get amount of available prozessors * 2 for faster compiling of sources
 COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 
-#
-#  Install PHP extensions
-#
-
-# helper to deduplicate common code
-# installs special php extension dependencies before "install" is called
-# removes those dependencies after "install" finishes
 # arg1: extension name; arg2: list of dependencies
-php_install_simple_extension() {
+php_ext_install() {
   EXTENSION=$1
   DEPS="$2"
   
   [ -n "$DEPS" ] && install_packages --build $DEPS
-  docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
+  retry 3 docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
 }
-
-
-#
-#  3rd party PHP extensions
-#
 
 # see https://pecl.php.net/package/imagick
 php_install_imagick() {
@@ -66,61 +54,61 @@ php_install_xdebug() {
 }
 
 php_install_opcache() {
-  php_install_simple_extension opcache
+  php_ext_install opcache
 }
 
 php_install_bz2() {
-  php_install_simple_extension $ext "bzip2-dev"
+  php_ext_install $ext "bzip2-dev"
   install_packages bzip2
 }
 
 php_install_curl() {
-  php_install_simple_extension $ext "curl-dev"
+  php_ext_install $ext "curl-dev"
   install_packages libcurl
 }
 
 php_install_mcrypt() {
-  php_install_simple_extension $ext "libmcrypt-dev"
+  php_ext_install $ext "libmcrypt-dev"
   install_packages libmcrypt
 }
 
 php_install_gmp() {
-  php_install_simple_extension $ext "gmp-dev"
+  php_ext_install $ext "gmp-dev"
   install_packages gmp
 }
 
 php_install_intl() {
   install_packages libintl icu-libs
-  php_install_simple_extension $ext "icu-dev"
+  php_ext_install $ext "icu-dev"
 }
 
 php_install_pgsql() {
-  php_install_simple_extension $ext "postgresql-dev"
+  php_ext_install $ext "postgresql-dev"
   install_packages libpq
 }
 
 php_install_pdo_pgsql() {
-  php_install_simple_extension $ext "postgresql-dev"
+  php_ext_install $ext "postgresql-dev"
   install_packages libpq
 }
 
 php_install_readline() {
-  php_install_simple_extension $ext "readline-dev libedit-dev"
+  php_ext_install $ext "readline-dev libedit-dev"
   install_packages readline libedit
 }
 
 php_install_dom() {
-  php_install_simple_extension $ext "libxml2-dev"
+  php_ext_install $ext "libxml2-dev"
   install_packages libxml2
 }
 
 php_install_xml() {
-  php_install_simple_extension $ext "libxml2-dev"
+  php_ext_install $ext "libxml2-dev"
   install_packages libxml2
 }
 
 php_install_zip() {
-  php_install_simple_extension $ext "zlib-dev"
+  php_ext_install $ext "zlib-dev"
 }
 
 # filters all modules in extensions list by checking, if those extensions are already build
@@ -139,7 +127,7 @@ php_filter_prebuild_extensions() {
 
 
 # installs PHP extensions listed in $COMMON_PHP_EXTENSIONS and $PHP_EXTENSIONS
-php_install_extensions() {
+php_install_all_extensions() {
   docker-php-source extract
   install_packages --build re2c
   
@@ -155,7 +143,7 @@ php_install_extensions() {
     else
       # try to install unknown extensions as it is possible, that they are part of the core
       # TODO: check, if the ext is part of the core
-      docker-php-ext-install -j$COMPILE_JOBS $ext
+      php_ext_install $ext
     fi >> $BUILD_LOG 2>&1
     
     let 'PHP_EXTENSIONS_COUNTER += 1'
@@ -164,7 +152,7 @@ php_install_extensions() {
   docker-php-source delete
 }
 
-php_install_extensions
+php_install_all_extensions
 
 # remove php-fpm configs as they are adding a "www" pool, which does not exist
 rm /usr/local/etc/php-fpm.d/*
