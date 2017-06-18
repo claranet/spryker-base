@@ -2,6 +2,7 @@
 # Docker Image claranet/spryker-base
 
 [![build status badge](https://img.shields.io/travis/claranet/spryker-base/master.svg)](https://travis-ci.org/claranet/spryker-base/branches)
+[![docker pull badge](https://img.shields.io/docker/pulls/claranet/spryker-base.svg)](https://hub.docker.com/r/claranet/spryker-base/)
 
 
 <!-- vim-markdown-toc GFM -->
