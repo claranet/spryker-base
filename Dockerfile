@@ -3,7 +3,7 @@ FROM php:7.0.19-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="0.7.2" \
+      org.label-schema.version="0.8.0" \
       org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce Framework based Shop" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \

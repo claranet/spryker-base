@@ -3,7 +3,22 @@
 
 ## master
 
-* ...
+...
+
+## 0.8.0
+
+* [fix] Detection of yves/zed domain 
+* [fix] Create data dirs during runtime (possiblity to place those dirs onto
+        external storage)
+* [feature] Make php installation more robust: add retry mechanism
+* [change] Made build steps less verbose
+* [feature] Add error handler to tail the build log in case of errors
+* [feature] Apply conf.d strategy to php, fpm and nginx
+* [feature] Make configurations (php, fpm, nginx) overridable via to be mounted
+            files which getting symlinked into the appropriate config directories
+* [change] Move php composer installation into deps layer
+* [change] Make perl and bash fixed dependencies of the base image
+* [feature] Provide method for reading boolean values from env
 
 ## 0.7.0
 
