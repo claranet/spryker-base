@@ -52,11 +52,19 @@ case $1 in
 
     init)
       init
-    ;;
+      ;;
 
     deploy)
       deploy
-    ;;
+      ;;
+
+    codeception)
+      run_codeception $*
+      ;;
+
+    --help|help)
+      help
+      ;;
 
     *)
       sh -c "$*"

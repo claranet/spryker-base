@@ -10,3 +10,5 @@ config/Zed/propel*.yml
 !composer.*
 !yarn.*
 !.stylelint*
+!*test*
+!codeception.yml
