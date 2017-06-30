@@ -312,3 +312,20 @@ deploy() {
 run() {
   exec_scripts "$WORKDIR/docker/entry.d/" "container bootstrap"
 }
+
+run_codeception() {
+  CODECEPTION_ARGS=$*
+  exec_scripts "$WORKDIR/docker/test.d/codeception/"
+}
+
+help() {
+  local ENTRYPOINT="$0"
+
+  echo "
+USAGE: $ENTRYPOINT COMMAND
+
+COMMANDS:
+  codeception [SUITE,...]     Runs the specified codeception test suite(s); or all suites, if nothing is specified.
+
+"
+}
