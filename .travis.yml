@@ -28,4 +28,7 @@ jobs:
       script:
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         - docker push $image:$tag
-        - [ "$TRAVIS_TAG" == "$LATEST" ] && docker tag $image:$tag $image:latest && docker push $image:latest
+        - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
+            docker tag $image:$tag $image:latest;
+            docker push $image:latest;
+          fi
