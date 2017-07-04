@@ -11,7 +11,7 @@ start_services() {
     # TODO: report to the user if nginx configtest fails
     nginx && php-fpm --nodaemonize
 
-  elif is_in_list "cron" "$ENABLED_SERVICES"; then
+  elif is_in_list "crond" "$ENABLED_SERVICES"; then
       crond -f -L /dev/stdout
   fi
 }
