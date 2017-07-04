@@ -1,12 +1,13 @@
 sudo: false
+dist: trusty
 language: bash
 services:
   - docker
 
 branches:
   only:
-  - master
-  - /^\d+\.\d+\.\d+$/
+    - master
+    - /^\d+\.\d+\.\d+$/
 
 env:
   - VARIANT=php70 LATEST=0.8.0
@@ -15,18 +16,23 @@ before_script:
   - env | sort
   - image="claranet/spryker-base"
   - tag="${TRAVIS_BRANCH:-${TRAVIS_TAG}}${VARIANT:+-$VARIANT}"
+  - tagci="ci"
 
 jobs:
   include:
     - stage: Build
       script:
-        - docker build -t $image:$tag .
+        - docker build -t $image:$tagci .
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker push $image:$tagci
     - stage: Test
       script:
-      - docker run --rm -t $image:$tag /entrypoint.sh build-base
+      - docker run --rm -t $image:$tagci /entrypoint.sh build-base
     - stage: Publish
       script:
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker pull $image:$tagci
+        - docker tag $image:$tagci $image:$tag;
         - docker push $image:$tag
         - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
             docker tag $image:$tag $image:latest;
