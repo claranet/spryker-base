@@ -3,23 +3,29 @@ language: bash
 services:
   - docker
 
+branches:
+  only:
+  - master
+  - /^\d+\.\d+\.\d+$/
+
 env:
-  - VERSION=0.8.0 VARIANT=php70 LATEST=yes
+  - VARIANT=php70 LATEST=0.8.0
 
 before_script:
   - env | sort
   - image="claranet/spryker-base"
-  - tag="${VERSION}${VARIANT:+-$VARIANT}"
+  - tag="${TRAVIS_BRANCH:-${TRAVIS_TAG}}${VARIANT:+-$VARIANT}"
 
-script:
-  - docker build -t $image:$tag .
-
-after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-      docker push $image:$tag;
-      if [ "$LATEST" == "yes" ]; then
-        docker tag $image:$tag $image:latest;
-        docker push $image:latest;
-      fi
-    fi
+jobs:
+  include:
+    - stage: Build
+      script:
+        - docker build -t $image:$tag .
+    - stage: Test
+      script:
+      - docker run --rm -t $image:$tag /entrypoint.sh build-base
+    - stage: Publish
+      script:
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker push $image:$tag
+        - [ "$TRAVIS_TAG" == "$LATEST" ] && docker tag $image:$tag $image:latest && docker push $image:latest
