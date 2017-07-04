@@ -5,6 +5,8 @@
 
 ...
 
+* [fix] add config/Zed/propel\*.yml to dockerignore
+
 ## 0.8.0
 
 * [fix] Detection of yves/zed domain 
