@@ -16,7 +16,7 @@ before_script:
   - env | sort
   - image="claranet/spryker-base"
   - tag="${TRAVIS_BRANCH:-${TRAVIS_TAG}}${VARIANT:+-$VARIANT}"
-  - tagci="ci"
+  - tagci="ci${VARIANT:+-$VARIANT}"
 
 jobs:
   include:
