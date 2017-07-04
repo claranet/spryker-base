@@ -1,5 +1,6 @@
 # Ignore all, except the ones listed below
 **
+config/Zed/propel*.yml
 !docker/
 !assets/
 !public/
