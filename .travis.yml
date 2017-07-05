@@ -20,7 +20,7 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT=php70 LATEST=0.8.0
+  - VARIANT=php70 LATEST=0.8.1
 
 before_script:
   - env | sort
