@@ -39,14 +39,16 @@ jobs:
       script:
       - docker run --rm -t $image:$tagci /entrypoint.sh build-base
     - stage: Publish
-      on:
-        condition: $TRAVIS_PULL_REQUEST = false 
-      script:
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        - docker pull $image:$tagci
-        - docker tag $image:$tagci $image:$tag;
-        - docker push $image:$tag
-        - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
-            docker tag $image:$tag $image:latest;
-            docker push $image:latest;
-          fi
+      deploy:
+        provider: script
+        on:
+          condition: $TRAVIS_PULL_REQUEST = false 
+        script:
+          - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+          - docker pull $image:$tagci
+          - docker tag $image:$tagci $image:$tag;
+          - docker push $image:$tag
+          - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
+              docker tag $image:$tag $image:latest;
+              docker push $image:latest;
+            fi
