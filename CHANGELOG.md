@@ -5,7 +5,9 @@
 
 ...
 
-* [fix] add config/Zed/propel\*.yml to dockerignore
+* [feature] Add mechanism to prevent parallel execution of cron jobs
+* [fix] Add config/Zed/propel\*.yml to dockerignore
+* [fix] Cron handling got typos that crept in
 
 ## 0.8.0
 
