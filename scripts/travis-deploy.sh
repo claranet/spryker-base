@@ -1,7 +1,8 @@
 #!/bin/bash
+set -e -o pipefail
 docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
 docker pull $image:$tagci
-docker tag $image:$tagci $image:$tag;
+docker tag $image:$tagci $image:$tag
 echo "Pushing image to docker hub: $image:$tag"
 docker push $image:$tag
 if [ "$TRAVIS_TAG" == "$LATEST" ]; then
