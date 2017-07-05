@@ -9,7 +9,7 @@
 #   - To share image between stages the intermediate product will be taged with
 #     `:ci-$variant` and pushed to docker hub
 sudo: false
-dist: trusty
+#dist: trusty
 language: bash
 services:
   - docker
