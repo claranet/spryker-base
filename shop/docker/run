@@ -132,7 +132,7 @@ COMMANDS:
     prod|devel build                  -- Build docker image via docker-compose
     prod|devel rebuild                -- Rebuild image and recreates running services 
     prod|devel reinit                 -- Reinitializes the setup by recreating the init container
-    prod|devel recreate [yves|zed]    -- Just recreates running services
+    prod|devel recreate [<svc>]       -- Just recreates running services
     prod|devel update-deps [yves|zed] -- Update dependency in running containers
     prod|devel gen-code [yves|zed]    -- Generate code in running containers
     prod|devel enter <svc>            -- Exec into svc container and start /bin/sh
