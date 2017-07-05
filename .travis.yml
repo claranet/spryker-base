@@ -39,7 +39,8 @@ jobs:
       script:
       - docker run --rm -t $image:$tagci /entrypoint.sh build-base
     - stage: Publish
-      condition: "$TRAVIS_PULL_REQUEST" == "false" 
+      on:
+        condition: $TRAVIS_PULL_REQUEST = false 
       script:
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         - docker pull $image:$tagci
