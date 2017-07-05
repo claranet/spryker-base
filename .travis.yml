@@ -1,5 +1,15 @@
+# Rationale:
+#   - Build only master and tags
+#   - Master is the most current not yet released state
+#   - Tags are the only mean to release a version
+#   - If tag matches the latest version configured here, the floating tag
+#     `:latest` will be conferred to this particular image.
+#   - PR are being built and tested, but not published
+#   - Concurrency is disabled; Newer jobs superseding older ones
+#   - To share image between stages the intermediate product will be taged with
+#     `:ci-$variant` and pushed to docker hub
 sudo: false
-dist: trusty
+#dist: trusty
 language: bash
 services:
   - docker
@@ -29,12 +39,16 @@ jobs:
       script:
       - docker run --rm -t $image:$tagci /entrypoint.sh build-base
     - stage: Publish
-      script:
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        - docker pull $image:$tagci
-        - docker tag $image:$tagci $image:$tag;
-        - docker push $image:$tag
-        - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
-            docker tag $image:$tag $image:latest;
-            docker push $image:latest;
-          fi
+      deploy:
+        provider: script
+        on:
+          condition: $TRAVIS_PULL_REQUEST = false 
+        script:
+          - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+          - docker pull $image:$tagci
+          - docker tag $image:$tagci $image:$tag;
+          - docker push $image:$tag
+          - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
+              docker tag $image:$tag $image:latest;
+              docker push $image:latest;
+            fi
