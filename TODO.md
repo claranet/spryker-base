@@ -6,46 +6,19 @@
   * 404 page / destination
   * maintenance.html (which might be exported to be delivered externally by the LB)
   * error page for 5xx
-* clean up alpine linux container for sleeker images
-  * remove apk caches / index files
 * clean up nginx config and make it more robust
 * secure php installation (disable functions/classes, set open_basedir, ...)
-* clean up commit history
-* write user documentation
 
-
-* docs for users
-* local dev testing
-* clean up git history
 * clean up $\_ENV and $\_SERVER at the bottom of config\_local.php
-* [x] report to https://github.com/spryker/support
-  * //TRANSLIT issue with muslc
-    * used in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
-    * https://github.com/docker-library/php/issues/240
-    * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
-    * http://wiki.musl-libc.org/wiki/Functional_differences_from_glibc#iconv
-    * https://github.com/spryker/support/issues/116
-  * report composer.json issue with external repositories
-    * https://github.com/spryker/support/issues/117
-  * ask about the link generators for Login/Cart/Checkout
-    * see slack channel (spryker: #claranet-partner 2017-05-02 12:44)
 * [ ] migrate to docker stack, as docker-compose is about to be deprecated in the near future
   * see https://github.com/docker/compose/issues/4305#issuecomment-276527457
   * and https://docs.docker.com/docker-cloud/apps/stack-yaml-reference/
   * advantage: no docker-compose needed, so 3rd party dependency is gone!
-* [x] use spryker/oryx to replace antelope
-* [ ] make git clone to use https for github.com
-  * `git config --global url."https://github.com/".insteadOf "git@github.com:" && git config --global url.https://.insteadOf git://`
-
 
 
 
 ## Open discussion 
 
-* We need to maintain two branches of this docker image, one for PHP5.6 and one
-  for PHP7 environments. The customer should be able to chose between those two
-  runtime environments. Questions is, how do we keep the required maintenance
-  effort low?
 * How to implement shops for different countries? Do we need separated VHosts
   for this? Will this be achied by env settings of the nginx vhost? 
 * Do we need to split up the components shop wise? One database for DE another for US? 
@@ -72,31 +45,12 @@
         the customer wants to run independent shops for each country instance,
         they just need to bootstrap different container pools for this and
         therefore running completely different setups. 
-* How do we implement a rolling upgrade? This questions falls apart in two categories:
-    * How do handle the infrastructure part on k8s and via docker-compose as well 
-    * What about the application part? Imagine a running cluster and you wanna
-      push a new shop image. This includes code as well as static assets. The
-      challenge starts if go even further and consider shop upgrade which have
-      some impact on the database schema or the something similiar on the
-      Redis/ES side. How do we cope with this scenario? 
 
 
 ## Open action items
 
 * Prepare Jenkins to be incorporated
-* Update images to rely on recently version 2.4 of the demoshop which runs on
-  PHP 7.1.
-* Scan all config files for external resource definitions and consider moving
-  them into the config_local.php. Rationale behind these decisions must be the
-  weighing up whether the configuration option in question better fits into the
-  generic layer or into the shop layer.
-* Make some of the nginx configuration configurable from the outside of the
-  container. Think of something comparable like the build trigger, but rather
-  for the nginx to be included.
 * Spryker: Remove auth token off configuration (AuthConstants::AUTH_DEFAULT_CREDENTIALS)
-* Implement mail solution different to local maildrop. Newsletter are commonly
-  sent via a mail provider reachable via API, but locally emitted notifications
-  like user registration expects a running mail setup. 
 * Find different solution for cronjobs than simply running them in one single
   container? Either use kubernetes scheduled cron jobs or use dkron.  Replace
   the cronjobs under `./config/Zed/cronjobs`. In order to stay infrastructure
@@ -108,28 +62,7 @@
   to the outside world (docker).
 * Utilize the HEALTHCHECK directive of the Dockerfile format - even if its not
   evaluated in k8s deployment contexts. 
-* [Optimization] Try to find some potential in reducing the size of the docker
-  images. Right now the base image is of 400MB weight. Plus the demoshop we
-  reach 700MB. Thats for now acceptable but tends to grow. Therefore check what
-  effectively is included in the image and if its necessary. Antelope alone
-  needs 94MB (`/usr/lib/node_modeules/antelope`). 
-    * Do we need antelope after we've built the artifacts during the child image build?
-        * Yes, unfortunately, since search setup involves (a) creating the
-          indizes at elasticsearch, and (b) creating code which represents the
-          mapping as class. 
-        * But since the assets are moved off the container into external
-          volumes which are shared across the cluster, we might create a second
-          image including all the dependencies for initializing the cluster and
-          remove these deps from the shop image which needs to be distributed
-          across the docker cluster. 
-        * Think of something like a tooling docker image. 
 * [Optimization] Same applies to image layers. Optimize were feasible and reasonable.
-* [Optimization] Identify the places within the docker image where data gets
-  written. This might pose a threat to either performance or storage usage -
-  possibly both. Watch and check if these places need housekeeping efforts like
-  cleaning jobs.
-    * `/data/shop/data/`
-    * `/data/logs/`
 
 ## Resolved
 
@@ -174,3 +107,64 @@
   shops. Which console jobs are reasonbly placed at the generic base image? For
   example, is the navigation cache for zed to be expected to be used for all or
   most of the shops out there? 
+* clean up alpine linux container for sleeker images
+  * remove apk caches / index files
+* clean up git history
+* [x] report to https://github.com/spryker/support
+  * //TRANSLIT issue with muslc
+    * used in /data/shop/vendor/spryker/util-text/src/Spryker/Service/UtilText/Model/Slug.php
+    * https://github.com/docker-library/php/issues/240
+    * https://github.com/akrennmair/newsbeuter/issues/364#issuecomment-250208235
+    * http://wiki.musl-libc.org/wiki/Functional_differences_from_glibc#iconv
+    * https://github.com/spryker/support/issues/116
+  * report composer.json issue with external repositories
+    * https://github.com/spryker/support/issues/117
+  * ask about the link generators for Login/Cart/Checkout
+    * see slack channel (spryker: #claranet-partner 2017-05-02 12:44)
+* [x] use spryker/oryx to replace antelope
+* [x] make git clone to use https for github.com
+  * `git config --global url."https://github.com/".insteadOf "git@github.com:" && git config --global url.https://.insteadOf git://`
+* We need to maintain two branches of this docker image, one for PHP5.6 and one
+  for PHP7 environments. The customer should be able to chose between those two
+  runtime environments. Questions is, how do we keep the required maintenance
+  effort low?
+* How do we implement a rolling upgrade? This questions falls apart in two categories:
+    * How do handle the infrastructure part on k8s and via docker-compose as well 
+    * What about the application part? Imagine a running cluster and you wanna
+      push a new shop image. This includes code as well as static assets. The
+      challenge starts if go even further and consider shop upgrade which have
+      some impact on the database schema or the something similiar on the
+      Redis/ES side. How do we cope with this scenario? 
+* Update images to rely on recently version 2.4 of the demoshop which runs on
+  PHP 7.1.
+* Scan all config files for external resource definitions and consider moving
+  them into the config_local.php. Rationale behind these decisions must be the
+  weighing up whether the configuration option in question better fits into the
+  generic layer or into the shop layer.
+* Make some of the nginx configuration configurable from the outside of the
+  container. Think of something comparable like the build trigger, but rather
+  for the nginx to be included.
+* Implement mail solution different to local maildrop. Newsletter are commonly
+  sent via a mail provider reachable via API, but locally emitted notifications
+  like user registration expects a running mail setup. 
+* [Optimization] Try to find some potential in reducing the size of the docker
+  images. Right now the base image is of 400MB weight. Plus the demoshop we
+  reach 700MB. Thats for now acceptable but tends to grow. Therefore check what
+  effectively is included in the image and if its necessary. Antelope alone
+  needs 94MB (`/usr/lib/node_modeules/antelope`). 
+    * Do we need antelope after we've built the artifacts during the child image build?
+        * Yes, unfortunately, since search setup involves (a) creating the
+          indizes at elasticsearch, and (b) creating code which represents the
+          mapping as class. 
+        * But since the assets are moved off the container into external
+          volumes which are shared across the cluster, we might create a second
+          image including all the dependencies for initializing the cluster and
+          remove these deps from the shop image which needs to be distributed
+          across the docker cluster. 
+        * Think of something like a tooling docker image. 
+* [Optimization] Identify the places within the docker image where data gets
+  written. This might pose a threat to either performance or storage usage -
+  possibly both. Watch and check if these places need housekeeping efforts like
+  cleaning jobs.
+    * `/data/shop/data/`
+    * `/data/logs/`
