@@ -1,9 +1,13 @@
 #!/bin/sh
 
+NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
+NGINX_SITES_ENABLED='/etc/nginx/sites-enabled'
+FPM_APPS_AVAILABLE="/etc/php/fpm"
+FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
+
+
 # force setting a symlink from sites-available to sites-enabled if vhost file exists
 enable_nginx_vhost() {
-  NGINX_SITES_AVAILABLE='/etc/nginx/sites-available'
-  NGINX_SITES_ENABLED='/etc/nginx/conf.d'
   VHOST=$1
   
   if [ ! -e $NGINX_SITES_AVAILABLE/$VHOST ]; then
@@ -17,9 +21,6 @@ enable_nginx_vhost() {
 
 # force setting a symlink from php-fpm/apps-available to php-fpm/pool.d if app file exists
 enable_phpfpm_app() {
-  local FPM_APPS_AVAILABLE="/etc/php/fpm"
-  local FPM_APPS_ENABLED="/usr/local/etc/php-fpm.d"
-  
   local APP="${1}.conf"
   if [ ! -e $FPM_APPS_AVAILABLE/$APP ]; then
     errorText "\t php-fpm app '$APP' not found! Can't enable app!"
@@ -40,6 +41,12 @@ enable_services() {
 }
 
 
+clean_service_dirs() {
+    rm -f $NGINX_SITES_ENABLED/*
+    rm -f $FPM_APPS_ENABLED/*
+}
+
+clean_service_dirs
 enable_services
 
 return 0

@@ -72,8 +72,32 @@ writeErrorMessage() {
   fi
 }
 
-
 install_packages() {
+    install_packages_ubuntu $*
+}
+
+install_packages_ubuntu() {
+  local APT_CACHE_REFRESHED="/var/tmp/apt-cache-refreshed"
+  local INSTALL_FLAGS="-y -o Dpkg::Options::=--force-confdef"
+  if [ ! -e "$APT_CACHE_REFRESHED" ]; then
+    sectionText "Refreshing apt cache initially"
+    #apt-get update >> $BUILD_LOG
+    apt-get update
+    touch $APT_CACHE_REFRESHED
+  fi
+  if [ "$1" = "--build" ]; then
+    shift
+    echo "$*" | tr ' ' '\n' >> /var/tmp/build-deps.list
+  fi
+  local PKG_LIST="$*"
+  if [ -n "$PKG_LIST" ]; then
+    sectionText "Installing package(s): $PKG_LIST"
+    #DEBIAN_FRONTEND=noninteractive apt-get install $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
+    DEBIAN_FRONTEND=noninteractive apt-get install $INSTALL_FLAGS $PKG_LIST
+  fi
+}
+
+install_apk_packages() {
   local INSTALL_FLAGS=""
   if [ -z "${APK_CACHE_REFRESHED}" ]; then
     sectionText "Refreshing apk cache initially"

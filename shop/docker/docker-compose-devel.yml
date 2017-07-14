@@ -24,7 +24,8 @@ services:
       - ../package.json:/data/shop/package.json
 
   yves:
-    image: "${IMAGE}:${VERSION}"
+    #image: "${IMAGE}:${VERSION}"
+    image: "php:7.0.21"
     build:
       context: ..
       args:

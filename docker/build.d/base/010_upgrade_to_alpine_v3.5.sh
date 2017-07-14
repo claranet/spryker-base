@@ -1,5 +1,7 @@
 #!/bin/sh
 
+return 0
+
 # upgrade to alpine 3.5 as we need some nginx packages which are only available in alpine >3.5
 
 sectionText "Update repositories to alpine 3.5"
