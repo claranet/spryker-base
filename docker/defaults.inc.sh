@@ -33,3 +33,11 @@ PHP_EXTENSIONS=""
 # crond is the only allowed cronjob handler until we got a solution for jenkins too
 # crond might be dropped then, so please don't rely on "crond" in your shop flavour!
 CRONJOB_HANDLER="crond"
+
+#  Codeception tests
+CODECEPTION_RUN_CMD="vendor/bin/codecept run"
+
+# This is for test groups to be ignored by codeception
+# To mark a test to be ignored, add '-x TEST_GROUP'.
+# This command allows multiple ignores, adding a '-x TEST_GROUP' for each test group to be ignored
+CODECEPTION_IGNORED_GROUPS=""
