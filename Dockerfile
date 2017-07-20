@@ -79,7 +79,8 @@ ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
 
 ONBUILD COPY codeception* $WORKDIR/
-ONBUILD COPY setup_test $WORKDIR/
 ONBUILD COPY tests $WORKDIR/tests
 
+ONBUILD RUN touch setup_test && \
+            chmod +x setup_test
 ONBUILD RUN /entrypoint.sh build-end
