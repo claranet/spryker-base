@@ -59,6 +59,7 @@ case $1 in
       ;;
 
     codeception)
+      shift
       run_codeception $*
       ;;
 

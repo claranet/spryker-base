@@ -314,7 +314,6 @@ run() {
 }
 
 run_codeception() {
-  shift
   CODECEPTION_ARGS=$*
   exec_scripts "$WORKDIR/docker/test.d/codeception/"
 }
