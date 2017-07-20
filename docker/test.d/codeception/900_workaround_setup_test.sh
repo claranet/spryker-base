@@ -6,7 +6,7 @@
 # does nothing
 
 
-echo "#!/bin/sh" >> $WORKDIR/setup_test
+echo "#!/bin/sh" > $WORKDIR/setup_test
 chmod +x $WORKDIR/setup_test
 
 
