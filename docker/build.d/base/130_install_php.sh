@@ -18,17 +18,13 @@ php_ext_install() {
 
 # see https://pecl.php.net/package/imagick
 php_install_imagick() {
-  install_packages --build imagemagick-dev libtool
-  install_packages imagemagick
-
+  install_packages --build libmagickwand-dev
   [ -z "$(php -m | grep imagick)" ] && pecl install imagick-$PHP_EXTENSION_IMAGICK
   docker-php-ext-enable imagick
 }
 
 # see https://pecl.php.net/package/redis
 php_install_redis() {
-  install_packages --build redis
-  
   [ -z "$(php -m | grep redis)" ] && pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis
 }
@@ -38,15 +34,15 @@ php_install_redis() {
 #  Core PHP extensions
 #
 php_install_gd() {
-  install_packages --build freetype-dev \
-        libjpeg-turbo-dev \
+  install_packages --build libfreetype6-dev\
+        libjpeg62-turbo-dev \
         libmcrypt-dev \
-        libpng-dev
+        libpng12-dev
   
   docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
   docker-php-ext-install -j$COMPILE_JOBS gd
   
-  install_packages libpng libjpeg-turbo freetype
+  install_packages libpng12-0 libjpeg62-turbo libfreetype6
 }
 
 php_install_xdebug() {
@@ -58,57 +54,52 @@ php_install_opcache() {
 }
 
 php_install_bz2() {
-  php_ext_install $ext "bzip2-dev"
   install_packages bzip2
+  php_ext_install $ext "libbz2-dev"
 }
 
 php_install_curl() {
-  php_ext_install $ext "curl-dev"
-  install_packages libcurl
+  php_ext_install $ext "libcurl4-openssl-dev"
 }
 
 php_install_mcrypt() {
   php_ext_install $ext "libmcrypt-dev"
-  install_packages libmcrypt
+  install_packages libmcrypt-dev
 }
 
 php_install_gmp() {
-  php_ext_install $ext "gmp-dev"
-  install_packages gmp
+  php_ext_install $ext "libgmp-dev"
 }
 
 php_install_intl() {
-  install_packages libintl icu-libs
-  php_ext_install $ext "icu-dev"
+  php_ext_install $ext "libicu-dev"
 }
 
 php_install_pgsql() {
-  php_ext_install $ext "postgresql-dev"
-  install_packages libpq
+  php_ext_install $ext "libpq-dev"
+  install_packages libpq5
 }
 
 php_install_pdo_pgsql() {
-  php_ext_install $ext "postgresql-dev"
-  install_packages libpq
+  install_packages libpq5
+  php_ext_install $ext "libpq-dev"
 }
 
 php_install_readline() {
   php_ext_install $ext "readline-dev libedit-dev"
-  install_packages readline libedit
 }
 
 php_install_dom() {
   php_ext_install $ext "libxml2-dev"
-  install_packages libxml2
 }
 
 php_install_xml() {
   php_ext_install $ext "libxml2-dev"
-  install_packages libxml2
 }
 
 php_install_zip() {
-  php_ext_install $ext "zlib-dev"
+  install_packages libzip2
+  php_ext_install $ext "libzip-dev"
 }
 
 # filters all modules in extensions list by checking, if those extensions are already build

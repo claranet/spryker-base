@@ -7,6 +7,12 @@
 # NOTE: it will install the latest minor version of the selected major version!
 #
 
+
+curl -sL https://deb.nodesource.com/setup_6.x | bash -
+apt-get install -y nodejs
+
+return 0
+
 SUPPORTED_NODEJS_VERSIONS='6 7'
 SUPPORTED_NODEJS_PACKAGE_MANAGER='npm yarn'
 

@@ -1,5 +1,5 @@
 
-FROM php:7.0.21-fpm
+FROM php:7.0.19-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
@@ -49,10 +49,9 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
-RUN apt-get install -y  --no-install-recommends \
+RUN apk add --no-cache \
         perl \
         bash \
-    && rm -r /var/lib/apt/lists/* \
     && mkdir -p /data/logs \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
@@ -78,9 +77,4 @@ ONBUILD COPY src/Pyz $WORKDIR/src/Pyz
 ONBUILD COPY config $WORKDIR/config
 ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
-
-ONBUILD COPY codeception* $WORKDIR/
-ONBUILD COPY tests $WORKDIR/tests
-
 ONBUILD RUN /entrypoint.sh build-end
-
