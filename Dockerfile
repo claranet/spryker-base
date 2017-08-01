@@ -1,5 +1,5 @@
 
-FROM php:7.0.19-fpm-alpine
+FROM php:7.0.21-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
@@ -82,4 +82,3 @@ ONBUILD COPY codeception* $WORKDIR/
 ONBUILD COPY tests $WORKDIR/tests
 
 ONBUILD RUN /entrypoint.sh build-end
-
