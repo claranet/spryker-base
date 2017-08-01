@@ -319,13 +319,28 @@ run_codeception() {
 }
 
 help() {
-  local ENTRYPOINT="$0"
+  cat - <<EOH
+USAGE
 
-  echo "
-USAGE: $ENTRYPOINT COMMAND
+  $0 COMMAND [args ...]
 
-COMMANDS:
-  codeception [SUITE,...]     Runs the specified codeception test suite(s); or all suites, if nothing is specified.
+RUN COMMANDS
 
-"
+  run-yves                    Run all Yves related services this container (nginx, fpm) 
+  run-zed                     Run all Zed related services in this container (nginx, fpm)
+  run-yves-and-zed            Run both Yves and Zed related services
+  run-crond                   Run crond in this container
+  init                        Execute steps to initialize the whole setup
+  deploy                      Execute steps necessary for deployment (schema migration, etc.)
+  codeception [SUITE,...]     Run the specified codeception test suite(s); or all suites, if nothing is specified.
+
+
+BUILD COMMANDS
+
+  build                       Build all the layers of the shop image
+  build-base                  Build only the base layer
+  build-deps                  Build dependencies layer: php composer and node js deps will be resolved
+  build-shop                  Generate shop code artifacts
+
+EOH
 }
