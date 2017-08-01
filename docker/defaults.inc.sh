@@ -11,7 +11,7 @@ COMMON_BUILD_DEPENDENCIES="ccache autoconf file g++ gcc libc-dev make pkgconf ba
 BUILD_DEPENDENCIES=""
 
 # Base dependencies to be installed
-COMMON_BASE_DEPENDENCIES="perl graphviz"
+COMMON_BASE_DEPENDENCIES="perl graphviz redis"
 BASE_DEPENDENCIES=""
 
 #  NodeJS defaults

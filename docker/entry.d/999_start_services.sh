@@ -1,8 +1,17 @@
 #!/bin/sh
 
-# launches an instance of nginx and php-fpm
-# nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
-# php-fpm starts unforked and remains in the forground
+# launches an instance of nginx, php-fpm or crond
+#   * nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
+#   * php-fpm starts unforked and remains in the forground
+#   * crond will start only if init has been done (synchronized via redis)
+
+is_init_done() {
+  [ -n "$REDIS_STORAGE_PASSWORD" ] && export PASS="-a $REDIS_STORAGE_PASSWORD "
+  T=`redis-cli -h $REDIS_STORAGE_HOST -p $REDIS_STORAGE_PORT $PASS GET init`
+  [ "$T" = "done" ] && return 0
+  return 1
+}
+
 start_services() {
   sectionHead "Starting enabled services $ENABLED_SERVICES"
 
@@ -12,6 +21,8 @@ start_services() {
     nginx && php-fpm --nodaemonize
 
   elif is_in_list "crond" "$ENABLED_SERVICES"; then
+      sectionText "Waiting for init to finish ..."
+      retry 600 is_init_done
       crond -f -L /dev/stdout
   fi
 }

@@ -3,7 +3,16 @@
 
 ## master
 
-...
+## 0.8.4
+
+* [feature] Add synchronization between crond and init container via redis
+* [change] Upgrade to 7.0.21 of upstream php image
+* [feature] Add infrastructure for executing the codeception tests via entrypoint
+* [feature] Add help output to entrypoint
+
+## 0.8.3
+
+* [fix] CI pipeline
 
 ## 0.8.2
 
