@@ -26,7 +26,7 @@ ENV APPLICATION_ENV="production" \
     REDIS_STORAGE_PROTOCOL="tcp" \
     REDIS_STORAGE_HOST="redis" \
     REDIS_STORAGE_PORT="6379" \
-    REDIS_STORAGE_PASSWORD="" \
+    # REDIS_STORAGE_PASSWORD="" \
     REDIS_SESSION_PROTOCOL="tcp" \
     REDIS_SESSION_HOST="redis" \
     REDIS_SESSION_PORT="6379" \
@@ -80,5 +80,6 @@ ONBUILD RUN /entrypoint.sh build-shop
 
 ONBUILD COPY codeception* $WORKDIR/
 ONBUILD COPY tests $WORKDIR/tests
+ONBUILD COPY data $WORKDIR/data
 
 ONBUILD RUN /entrypoint.sh build-end
