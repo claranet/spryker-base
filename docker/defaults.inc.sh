@@ -1,7 +1,7 @@
 #!/bin/sh
 
-KEEP_DEVEL_TOOLS=true
-SKIP_CLEANUP=true
+KEEP_DEVEL_TOOLS=false
+SKIP_CLEANUP=false
 
 # log destinations
 BUILD_LOG=/data/logs/build.log
