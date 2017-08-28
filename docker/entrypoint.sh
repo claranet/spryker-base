@@ -33,9 +33,9 @@ case $1 in
       build_image
       ;;
 
-    build-base)
+    build-core)
       build_start
-      build_base_layer
+      build_core_layer
       ;;
 
     build-deps)

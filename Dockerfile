@@ -131,4 +131,4 @@ ONBUILD RUN /entrypoint.sh build-shop
 ONBUILD COPY codeception* $WORKDIR/
 ONBUILD COPY tests $WORKDIR/tests
 
-# ONBUILD RUN /entrypoint.sh build-end
+ONBUILD RUN /entrypoint.sh build-end

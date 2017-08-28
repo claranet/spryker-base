@@ -1,0 +1,3 @@
+#!/bin/sh
+
+install_packages $COMMON_BASE_DEPENDENCIES $BASE_DEPENDENCIES
