@@ -27,7 +27,7 @@ PHP_EXTENSION_XDEBUG="2.5.4"
 CONSOLE="exec_console"
 
 # a list of common PHP extensions required to run a spryker shop
-COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis xdebug opcache"
+COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis xdebug opcache pdo_pgsql pgsql"
 PHP_EXTENSIONS=""
 
 # crond is the only allowed cronjob handler until we got a solution for jenkins too

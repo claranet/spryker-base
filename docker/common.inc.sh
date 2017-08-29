@@ -254,12 +254,12 @@ build_start() {
   start_timer
 }
 
-build_core_layer() {
+build_base_layer() {
   trap build_exit EXIT
-  start_timer core
-  chapterHead "Building Core Layer"
-  exec_scripts "$WORKDIR/docker/build.d/core/"
-  print_timer "\nCore Layer Build Time" "core"
+  start_timer base
+  chapterHead "Building Base Layer"
+  exec_scripts "$WORKDIR/docker/build.d/base/"
+  print_timer "\nBase Layer Build Time" "base"
 }
 
 build_deps_layer() {
@@ -285,7 +285,7 @@ build_end() {
 
 build_image() {
   build_start
-  build_core_layer
+  build_base_layer
   build_deps_layer
   build_shop_layer
   build_end
@@ -337,7 +337,7 @@ RUN COMMANDS
 BUILD COMMANDS
 
   build                       Build all the layers of the shop image
-  build-core                  Build only the core layer
+  build-base                  Build only the base layer
   build-deps                  Build dependencies layer: php composer and node js deps will be resolved
   build-shop                  Generate shop code artifacts
 

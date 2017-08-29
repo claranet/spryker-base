@@ -37,14 +37,13 @@ sectionText "NodeJS package manager '$NPM' is supported"
 
 sectionText "Install nodejs version $NODEJS_VERSION"
 if [ "$NODEJS_VERSION" = "7" ]; then
-  install_packages --build nodejs-current
+  install_packages nodejs-current
 else
-  install_packages --build nodejs
+  install_packages nodejs
 fi
-
 
 # install yarn if requested as package manager
 if [ "$NPM" = 'yarn' ]; then
   sectionText "Install $NPM"
-  install_packages --build yarn
+  install_packages yarn
 fi
