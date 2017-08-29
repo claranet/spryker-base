@@ -118,6 +118,7 @@ CMD  [ "run-yves-and-zed" ]
 ONBUILD ARG NETRC
 
 ONBUILD COPY docker/ $WORKDIR/docker/
+
 ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
