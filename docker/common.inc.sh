@@ -280,6 +280,7 @@ build_shop_layer() {
 
 build_end() {
   skip_cleanup && warnText "Do not publish this image, since it might contain sensitive data due to SKIP_CLEANUP has been enabled"
+  print_timer "\nTOTAL Build Time"
   successText "Image BUILD successfully FINISHED"
 }
 

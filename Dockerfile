@@ -57,7 +57,9 @@ RUN apk add --no-cache \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
-# Run base scripts
+# Install spryker's core requirements in the base image to reduce the build time
+# of a specific shop.
+# This makes the image slightly larger.
 RUN /entrypoint.sh build-base
 
 EXPOSE 80
