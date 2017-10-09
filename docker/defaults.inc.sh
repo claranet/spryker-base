@@ -3,6 +3,10 @@
 KEEP_DEVEL_TOOLS=false
 SKIP_CLEANUP=false
 
+# Rebuild the base layer in the downstream shop image to override
+# claranet/spryker-base
+REBUILD_BASE_LAYER=false
+
 # log destinations
 BUILD_LOG=/data/logs/build.log
 

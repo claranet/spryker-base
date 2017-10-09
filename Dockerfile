@@ -73,6 +73,9 @@ CMD  [ "run-yves-and-zed" ]
 ONBUILD ARG NETRC
 
 ONBUILD COPY docker/ $WORKDIR/docker/
+ONBUILD RUN /entrypoint.sh rebuild-base
+
+
 ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* *.php $WORKDIR/

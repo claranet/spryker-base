@@ -38,6 +38,11 @@ case $1 in
       build_base_layer
       ;;
 
+    rebuild-base)
+      build_start
+      is_true $REBUILD_BASE_LAYER && rebuild_base_layer
+      ;;
+
     build-deps)
       build_deps_layer
       ;;

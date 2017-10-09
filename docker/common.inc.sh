@@ -254,6 +254,14 @@ build_start() {
   start_timer
 }
 
+rebuild_base_layer() {
+  trap build_exit EXIT
+  start_timer rebase
+  chapterHead "Rebuilding Base Layer"
+  exec_scripts "$WORKDIR/docker/build.d/base/"
+  print_timer "\nBase Layer Rebuild Time" "rebase"
+}
+
 build_base_layer() {
   trap build_exit EXIT
   start_timer base
