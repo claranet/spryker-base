@@ -26,22 +26,75 @@ env:
 before_script:
   - env | sort
   - export image="claranet/spryker-base"
-  - export tag="${TRAVIS_BRANCH:-${TRAVIS_TAG}}${VARIANT:+-$VARIANT}"
-  - export tagci="ci${VARIANT:+-$VARIANT}"
+  - export tag="${TRAVIS_BRANCH:-${TRAVIS_TAG}}${VARIANT:+-$VARIANT}${FLAVOR:+-$FLAVOR}"
+  - export tagci="ci${VARIANT:+-$VARIANT}${FLAVOR:+-$FLAVOR}"
 
-jobs:
-  include:
-    - stage: Build
-      script:
-        - docker build -t $image:$tagci .
-        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        - docker push $image:$tagci
-    - stage: Test
-      script:
-        - docker run --rm -t $image:$tagci /entrypoint.sh build-base
-    - stage: Publish
-      deploy:
-        provider: script
-        script: ./scripts/travis-deploy.sh
-        on: 
-          tags: true
+script:
+  - echo "Building image $image:$tag ..."
+  - docker build --no-cache --force-rm -t $image:$tag .
+  - echo "Testing image $image:$tag ..."
+  - docker run -it --rm $image:$tag php -i 
+
+
+deploy: 
+  skip_cleanup: true
+  provider: script
+  script: ./scripts/travis-publish.sh
+  on: 
+    tags: true
+
+#  - echo "Publishing image $image:$tag ..."
+#  - echo "Authenticating to docker hub ..."
+#  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#  - docker push $image:$tag
+#  - if [ "$TRAVIS_TAG" == "$LATEST" ]; then
+#      echo "Setting floating tag `latest` for this image"; 
+#      docker tag $image:$tag $image:latest; 
+#      docker push $image:latest; 
+#    fi
+
+# FIXME 
+#
+# Travis CI limitation: Matrix expansion does not work with build stages. 
+# See: 
+#   * https://github.com/travis-ci/travis-ci/issues/8293
+#   * https://docs.travis-ci.com/user/build-stages/#Build-Stages-and-Build-Matrix-Expansion
+#
+#stages:
+#  - Build
+#  - Test
+#  - Publish
+#
+#jobs:
+#  include:
+#    - &build
+#      stage: Build
+#      script:
+#        - docker build -t $image:$tagci .
+#        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+#        - docker push $image:$tagci
+#    - <<: *build
+#      env: FLAVOR=alpine VARIANT=php71 LATEST=0.9.0
+#    - <<: *build
+#      env: FLAVOR=alpine VARIANT=php70 
+#
+#    - &test
+#      stage: Test
+#      script:
+#        - docker run --rm -t $image:$tagci /entrypoint.sh build-base
+#    - <<: *test
+#      env: FLAVOR=alpine VARIANT=php71 LATEST=0.9.0
+#    - <<: *test
+#      env: FLAVOR=alpine VARIANT=php70 
+#
+#    - &publish
+#      stage: Publish
+#      deploy:
+#        provider: script
+#        script: ./scripts/travis-publish.sh
+#        on: 
+#          tags: true
+#    - <<: *publish
+#      env: FLAVOR=alpine VARIANT=php71 LATEST=0.9.0
+#    - <<: *publish
+#      env: FLAVOR=alpine VARIANT=php70 
