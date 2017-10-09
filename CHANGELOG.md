@@ -3,6 +3,13 @@
 
 ## master
 
+## 0.9.0
+
+* [change] Build PHP and modules in the base image instead of each downstream
+  shop image build. Its nevertheless still be possible to rebuild this base
+  layer via onbuild trigger in the shop image. See docs for further infos on
+  that. 
+
 ## 0.8.4
 
 * [feature] Add synchronization between crond and init container via redis

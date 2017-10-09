@@ -3,6 +3,10 @@
 KEEP_DEVEL_TOOLS=false
 SKIP_CLEANUP=false
 
+# Rebuild the base layer in the downstream shop image to override
+# claranet/spryker-base
+REBUILD_BASE_LAYER=false
+
 # log destinations
 BUILD_LOG=/data/logs/build.log
 
@@ -27,7 +31,7 @@ PHP_EXTENSION_XDEBUG="2.5.4"
 CONSOLE="exec_console"
 
 # a list of common PHP extensions required to run a spryker shop
-COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis xdebug opcache"
+COMMON_PHP_EXTENSIONS="bcmath bz2 gd gmp intl mcrypt redis xdebug opcache pdo_pgsql pgsql"
 PHP_EXTENSIONS=""
 
 # crond is the only allowed cronjob handler until we got a solution for jenkins too

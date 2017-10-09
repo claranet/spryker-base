@@ -9,40 +9,40 @@
 * [What?](#what)
 * [Why?](#why)
 * [Design](#design)
-  * [Docker Image](#docker-image)
-  * [Build Time Environment](#build-time-environment)
-  * [Runtime Environments](#runtime-environments)
-  * [Build Layer](#build-layer)
-  * [Private Repositories](#private-repositories)
-  * [Spryker Configuration](#spryker-configuration)
-  * [Docker Volumes](#docker-volumes)
+    * [Docker Image](#docker-image)
+    * [Build Time Environment](#build-time-environment)
+    * [Runtime Environments](#runtime-environments)
+    * [Build Layer](#build-layer)
+    * [Private Repositories](#private-repositories)
+    * [Spryker Configuration](#spryker-configuration)
+    * [Docker Volumes](#docker-volumes)
 * [Conventions](#conventions)
 * [Create Custom Image](#create-custom-image)
-  * [Forking Demoshop](#forking-demoshop)
-  * [Starting from Scratch](#starting-from-scratch)
+    * [Forking Demoshop](#forking-demoshop)
+    * [Starting from Scratch](#starting-from-scratch)
 * [Build & Run](#build--run)
 * [Configurations](#configurations)
-  * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
-  * [Build Time Variable - Reference](#build-time-variable---reference)
-  * [Injecting Custom Configurations](#injecting-custom-configurations)
-    * [External Volumes](#external-volumes)
-    * [Child Image Overwrites](#child-image-overwrites)
+    * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
+    * [Build Time Variable - Reference](#build-time-variable---reference)
+    * [Injecting Custom Configurations](#injecting-custom-configurations)
+        * [External Volumes](#external-volumes)
+        * [Child Image Overwrites](#child-image-overwrites)
 * [Customization](#customization)
-  * [build.conf](#buildconf)
-  * [Build Steps](#build-steps)
-  * [Init](#init)
-    * [Container Level](#container-level)
-    * [Setup Wide](#setup-wide)
-  * [Deployment](#deployment)
-  * [Custom Build Steps](#custom-build-steps)
-    * [Logging](#logging)
-    * [Installing additional packages](#installing-additional-packages)
+    * [build.conf](#buildconf)
+    * [Build Steps](#build-steps)
+    * [Init](#init)
+        * [Container Level](#container-level)
+        * [Setup Wide](#setup-wide)
+    * [Deployment](#deployment)
+    * [Custom Build Steps](#custom-build-steps)
+        * [Logging](#logging)
+        * [Installing additional packages](#installing-additional-packages)
 * [Not documented here?](#not-documented-here)
 * [FAQ](#faq)
-  * [Where to find logs?](#where-to-find-logs)
-  * [Which base image are you using?](#which-base-image-are-you-using)
-  * [Why using Alpine?](#why-using-alpine)
-  * [How to further speed up image build?](#how-to-further-speed-up-image-build)
+    * [Where to find logs?](#where-to-find-logs)
+    * [Which base image are you using?](#which-base-image-are-you-using)
+    * [Why using Alpine?](#why-using-alpine)
+    * [How to further speed up image build?](#how-to-further-speed-up-image-build)
 * [Issues](#issues)
 
 <!-- vim-markdown-toc -->
@@ -72,9 +72,10 @@ those changes we use the demoshop in exactly the same way.
 
 Core traits are:
 
+* Provide PHP runtime environment with most common PHP modules
 * Uses dockers `ONBUILD` trigger feature to hook into and control the child image build process
 * Provide reasonable default FPM/nginx configuration
-* Its open for customization by providing hookable build and init steps
+* Its open for customization by providing hookable build, init and configuration steps
 * Expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
 * No further constraints, you are absolutely free to design you shop the way you want it to
 
@@ -127,7 +128,7 @@ achieved with injecting proper vars into the effective containers, we do not
 distinguish between environments while building the images. Since point 1.1
 requires typically more dependencies to be resolved, we always build the image
 with `APPLICATION_ENV` set to `development`. But in which mode the application
-will actually be run is independant from this build.
+will actually be run is independant from the build.
 
 This means that even the production containers will have dev dependencies
 included. Primary reason for this is the requirement for dev/test/prod parity
@@ -160,26 +161,35 @@ specific extensions.
 ### Build Layer
 
 The concept introduced by this base image is to split up the resulting shop
-image into 3 distinct layers. There are a couple of reason for this. First, it
-should leverage the docker cache and speed up iterative rebuilds of the shop
-image. Since these layers are ordered from generic to specific, the need for
-rebuilds of the whole stack while working iteratively on the code base of the
-actual shop implementation should be reduced. Second, different layers could be
-retrieved in parallel while pulling the image, which speeds up the container
-creation time which is relevant not only for local development, but rather for
-deployments of the production setup. Furthermore, since generic layers do not
-change that often, the need not only for rebuilds but for refetching the whole
-image should be reduced as well.
+image into 3 distinct layers (effectively there are more than only 3 layers,
+since each statement in the `Dockerfile` results in a new layer; but the idea
+of 3 distinct layers abstracts the onbuild trigger logic more easily and
+understandable). There are a couple of reason for this:
+
+* First, it should leverage the docker cache and speed up iterative rebuilds of
+  the shop image. Since these layers are ordered from generic to specific, the
+  need for rebuilds of the whole stack while working iteratively on the code
+  base of the actual shop implementation should be reduced.
+
+* Second, different layers could be retrieved in parallel while pulling the
+  image, which speeds up the container creation time which is relevant not only
+  for local development, but rather for deployments of the production setup.
+  Furthermore, since generic layers do not change that often, the need not only
+  for rebuilds but for refetching the whole image should be reduced as well.
 
 Unfortunately this comes not without cost, the effective image size will be
 slightly higher than the one which gets build up by just one layer. Right now
-this seems to be a acceptable tradeoff.
+this seems to be an acceptable tradeoff.
 
-What are those layers?
+What are the responsibilities of those layers and where are they located and
+when are they going to be built?
 
-* Base - Install all the os level base infrastructure
-* Dependencies - Resolve all the shop specific PHP/Node dependencies
-* Code - Build shop specific code like ORM, tranfer objects
+* `claranet/spryker-base` (this image):
+    * Base Layer - Install all the os level base infrastructure, PHP and the most common modules. 
+* `claranet/spryker-demoshop` (the downstream shop image, e.g. the demoshop): 
+    * Base Layer - Install additional PHP modules and/or override the base layer from the `spryker-base` image (mind the `$REBUILD_BASE_LAYER` build variable)
+    * Dependency Layer - Resolve all the shop specific PHP/Node dependencies
+    * Code Layer - Build shop specific code like ORM, tranfer objects
 
 ### Private Repositories
 
@@ -398,6 +408,7 @@ Those variables are to be provided via your project specific
 * `KEEP_DEVEL_TOOLS` (default: false) -- Shall development tools be installed and kept beyond the build?
 * `SKIP_CLEANUP` (default: false) -- Skip cleanup step in each layer build stage. This helps in debugging issues. Be aware, that this skips wiping off the credentials as well! So never ever release such an image into the wild!!!
 * `CRONJOB_HANDLER` -- defines where cronjobs should be registered. Currently jenkins and crond are supported.
+* `REBUILD_BASE_LAYER` -- If this build var is given, the base layer will be rebuilt during downstream shop image build
 
 
 ### Injecting Custom Configurations

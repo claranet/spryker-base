@@ -3,13 +3,14 @@ FROM php:7.0.21-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="0.8.4" \
-      org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce Framework based Shop" \
+      org.label-schema.version="0.9.0" \
+      org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce OS based Shop" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-url="https://github.com/claranet/spryker-base" \
       author1="Fabian Dörk <fabian.doerk@de.clara.net>" \
-      author2="Tony Fahrion <tony.fahrion@de.clara.net>"
+      author2="Tony Fahrion <tony.fahrion@de.clara.net>" \
+      author3="Felipe Santos <felipe.santos@de.clara.net>"
 
 ENV WORKDIR=/data/shop \
     CONFIG_DIR=/mnt/configs \
@@ -49,12 +50,18 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
+
 RUN apk add --no-cache \
         perl \
         bash \
     && mkdir -p /data/logs \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
+
+# Prepare base layer of image which includes base dependencies and php and all
+# the common modules. In prior versions this has been the task of the
+# particular downstream image.
+RUN /entrypoint.sh build-base
 
 EXPOSE 80
 
@@ -66,11 +73,12 @@ CMD  [ "run-yves-and-zed" ]
 ONBUILD ARG NETRC
 
 ONBUILD COPY docker/ $WORKDIR/docker/
-ONBUILD RUN /entrypoint.sh build-base
+ONBUILD RUN /entrypoint.sh rebuild-base
+
 
 ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
-ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
+ONBUILD COPY package.* composer.* yarn.* *.php $WORKDIR/
 ONBUILD RUN /entrypoint.sh build-deps
 
 ONBUILD COPY src/Pyz $WORKDIR/src/Pyz
