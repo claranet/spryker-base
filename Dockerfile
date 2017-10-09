@@ -3,8 +3,8 @@ FROM php:7.0.21-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="0.9" \
-      org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce Framework based Shop" \
+      org.label-schema.version="0.9.0" \
+      org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce OS based Shop" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-url="https://github.com/claranet/spryker-base" \
@@ -50,6 +50,7 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
+
 RUN apk add --no-cache \
         perl \
         bash \
@@ -57,9 +58,9 @@ RUN apk add --no-cache \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
-# Install spryker's core requirements in the base image to reduce the build time
-# of a specific shop.
-# This makes the image slightly larger.
+# Prepare base layer of image which includes base dependencies and php and all
+# the common modules. In prior versions this has been the task of the
+# particular downstream image.
 RUN /entrypoint.sh build-base
 
 EXPOSE 80
@@ -72,10 +73,9 @@ CMD  [ "run-yves-and-zed" ]
 ONBUILD ARG NETRC
 
 ONBUILD COPY docker/ $WORKDIR/docker/
-
 ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
-ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
+ONBUILD COPY package.* composer.* yarn.* *.php $WORKDIR/
 ONBUILD RUN /entrypoint.sh build-deps
 
 ONBUILD COPY src/Pyz $WORKDIR/src/Pyz

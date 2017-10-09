@@ -1,7 +1,7 @@
 # Rationale:
 #   - Build only master and tags
 #   - Master is the most current not yet released state
-#   - Tags are the only mean to release a version
+#   - Tags are the only way to release a version
 #   - If tag matches the latest version configured here, the floating tag
 #     `:latest` will be conferred to this particular image.
 #   - PR are being built and tested, but not published
@@ -20,7 +20,8 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT=php70 LATEST=0.8.4
+  - FLAVOR=alpine VARIANT=php71 LATEST=0.9.0
+  - FLAVOR=alpine VARIANT=php70 
 
 before_script:
   - env | sort
