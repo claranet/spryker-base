@@ -40,7 +40,9 @@ case $1 in
 
     rebuild-base)
       build_start
-      is_true $REBUILD_BASE_LAYER && rebuild_base_layer
+      if is_true $REBUILD_BASE_LAYER;  then
+          rebuild_base_layer
+      fi
       ;;
 
     build-deps)

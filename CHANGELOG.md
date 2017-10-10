@@ -3,6 +3,11 @@
 
 ## master
 
+## 0.9.1
+
+* [fix] The rebase condition which decides whether the downstream shop image is
+  gonna be build was broken.
+
 ## 0.9.0
 
 * [change] Build PHP and modules in the base image instead of each downstream
