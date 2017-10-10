@@ -3,6 +3,10 @@
 
 ## master
 
+## 0.9.2
+
+* [fix] Fix bump script
+
 ## 0.9.1
 
 * [fix] The rebase condition which decides whether the downstream shop image is

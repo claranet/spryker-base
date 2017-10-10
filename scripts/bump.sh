@@ -12,7 +12,7 @@ NEXT="$(`dirname $0`/semver.pl $CURR $BUMP)"
 FILES="
     $FILE
     $ROOT/.travis.yml
-    $ROOT/Dockerfile
+    $ROOT/Dockerfiles/Dockerfile-common.inc.sh
 "
 
 echo "Bumping $BUMP version: $CURR --> $NEXT ..."

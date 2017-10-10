@@ -20,7 +20,7 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT=php71 OS=alpine LATEST=0.9.1
+  - VARIANT=php71 OS=alpine LATEST=0.9.2
   - VARIANT=php70 OS=alpine 
 
 before_script:
@@ -76,7 +76,7 @@ script:
 #        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
 #        - docker push $IMAGE:$tagci
 #    - <<: *build
-#      env: OS=alpine VARIANT=php71 LATEST=0.9.1
+#      env: OS=alpine VARIANT=php71 LATEST=0.9.2
 #    - <<: *build
 #      env: OS=alpine VARIANT=php70 
 #
@@ -85,7 +85,7 @@ script:
 #      script:
 #        - docker run --rm -t $IMAGE:$tagci /entrypoint.sh build-base
 #    - <<: *test
-#      env: OS=alpine VARIANT=php71 LATEST=0.9.1
+#      env: OS=alpine VARIANT=php71 LATEST=0.9.2
 #    - <<: *test
 #      env: OS=alpine VARIANT=php70 
 #
@@ -97,6 +97,6 @@ script:
 #        on: 
 #          tags: true
 #    - <<: *publish
-#      env: OS=alpine VARIANT=php71 LATEST=0.9.1
+#      env: OS=alpine VARIANT=php71 LATEST=0.9.2
 #    - <<: *publish
 #      env: OS=alpine VARIANT=php70 
