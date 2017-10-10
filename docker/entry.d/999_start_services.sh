@@ -4,6 +4,7 @@
 #   * nginx starts forked - if configtest fails, it will exit != 0 and therefor php-fpm won't start
 #   * php-fpm starts unforked and remains in the forground
 #   * crond will start only if init has been done (synchronized via redis)
+#   * jenkins slave will start only if init has been done (synchronized via redis)
 
 is_init_done() {
   [ -n "$REDIS_STORAGE_PASSWORD" ] && export PASS="-a $REDIS_STORAGE_PASSWORD "
@@ -21,9 +22,17 @@ start_services() {
     nginx && php-fpm --nodaemonize
 
   elif is_in_list "crond" "$ENABLED_SERVICES"; then
-      sectionText "Waiting for init to finish ..."
-      retry 600 is_init_done
-      crond -f -L /dev/stdout
+    sectionText "Waiting for init to finish ..."
+    retry 600 is_init_done
+    crond -f -L /dev/stdout
+
+  elif is_in_list "jenkins" "$ENABLED_SERVICES"; then
+    sectionText "Waiting for init to finish ..."
+    retry 600 is_init_done
+    java -jar /usr/local/bin/jenkins-cli.jar -s $JENKINS_URL offline-node ""
+    java -jar /usr/local/bin/jenkins-slave.jar -jnlpUrl $JENKINS_URL/computer/$JENKINS_SLAVE_NAME/slave-agent.jnlp &
+    $CONSOLE setup:jenkins:generate
+    wait
   fi
 }
 
