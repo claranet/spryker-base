@@ -9,6 +9,11 @@
   shop image build. Its nevertheless still be possible to rebuild this base
   layer via onbuild trigger in the shop image. See docs for further infos on
   that. 
+* [feature] Starting with this version we ship multiple flavors of this base
+  image. This spans a matrix comprising of the dimensions PHP version and linux
+  distribution. For the time being we provide PHP 7.0 and 7.1 based images on
+  alpine. In the near future we will reach out to support ubuntu based images as
+  well.
 
 ## 0.8.4
 

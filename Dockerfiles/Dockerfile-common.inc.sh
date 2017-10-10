@@ -1,6 +1,18 @@
+#!/bin/bash
+#
+# Order of variable substitution is as follows:
+#   - FROM
+#   - HEADER
+#   - PREPARE
+#   - FOOTER
+#
+set -a
 
-FROM php:7.0.21-fpm-alpine
+ELEMENTS=(FROM HEADER PREPARE FOOTER)
 
+FROM=""
+
+HEADER=$(cat <<'EOF'
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="0.9.0" \
@@ -50,14 +62,12 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
+EOF
+)
 
-RUN apk add --no-cache \
-        perl \
-        bash \
-    && mkdir -p /data/logs \
-    && ln -vfs /bin/bash /bin/sh \
-    && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
+PREPARE=""
 
+FOOTER=$(cat <<'EOF'
 # Prepare base layer of image which includes base dependencies and php and all
 # the common modules. In prior versions this has been the task of the
 # particular downstream image.
@@ -90,3 +100,5 @@ ONBUILD COPY codeception* $WORKDIR/
 ONBUILD COPY tests $WORKDIR/tests
 
 ONBUILD RUN /entrypoint.sh build-end
+EOF
+)
