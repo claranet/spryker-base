@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#get amount of available prozessors * 2 for faster compiling of sources
+COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
+
 KEEP_DEVEL_TOOLS=false
 SKIP_CLEANUP=false
 
@@ -10,12 +13,12 @@ REBUILD_BASE_LAYER=false
 # log destinations
 BUILD_LOG=/data/logs/build.log
 
-# Packages installed temporary during build time (base and deps layer)
+# Packages installed temporarily during build time (base and deps layer)
 COMMON_BUILD_DEPENDENCIES="ccache autoconf file g++ gcc libc-dev make pkgconf bash"
 BUILD_DEPENDENCIES=""
 
 # Base dependencies to be installed
-COMMON_BASE_DEPENDENCIES="perl graphviz redis"
+COMMON_BASE_DEPENDENCIES="perl graphviz"
 BASE_DEPENDENCIES=""
 
 #  NodeJS defaults

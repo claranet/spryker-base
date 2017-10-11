@@ -21,7 +21,9 @@ branches:
 
 env:
   - VARIANT=php71 OS=alpine LATEST=0.9.2
+  - VARIANT=php71 OS=debian
   - VARIANT=php70 OS=alpine 
+  - VARIANT=php70 OS=debian
 
 before_script:
   - env | sort
