@@ -29,6 +29,11 @@ case $1 in
       run
       ;;
 
+    run-jenkins)
+      ENABLED_SERVICES="jenkins"
+      run
+      ;;
+
     build)
       build_image
       ;;
