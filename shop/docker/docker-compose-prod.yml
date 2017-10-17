@@ -18,7 +18,7 @@ services:
       - APPLICATION_ENV=production
 
   yves:
-    image: "${IMAGE}:${VERSION)"
+    image: "${IMAGE}:${VERSION}"
     command: "run-yves"
     restart: always
     depends_on:
@@ -34,7 +34,7 @@ services:
       - APPLICATION_ENV=production
 
   zed:
-    image: "${IMAGE}:${VERSION)"
+    image: "${IMAGE}:${VERSION}"
     build:
       context: ..
       args:
