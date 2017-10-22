@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # services activated for this docker container instance will be added to this string
 ENABLED_SERVICES=""

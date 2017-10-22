@@ -4,12 +4,6 @@ export TERM=xterm
 
 WORKDIR="${WORKDIR:-$PWD}"
 
-# import default variables
-source $WORKDIR/docker/defaults.inc.sh
-
-# include custom build config on demand
-[ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
-
 ERROR_BKG=';41m' # background red
 GREEN_BKG=';42m' # background green
 BLUE_BKG='\e[44m' # background blue
@@ -72,24 +66,22 @@ writeErrorMessage() {
   fi
 }
 
+get_os() {
+    if [ -e /etc/debian_version ]; then 
+        echo "debian"
+    elif [ -e /etc/alpine-release ]; then 
+        echo "alpine"
+    fi
+}
 
-install_packages() {
-  local INSTALL_FLAGS=""
-  if [ -z "${APK_CACHE_REFRESHED}" ]; then
-    sectionText "Refreshing apk cache initially"
-    apk update >> $BUILD_LOG
-    export APK_CACHE_REFRESHED=yes
-  fi
-  if [ "$1" = "--build" ]; then
-    INSTALL_FLAGS="$INSTALL_FLAGS --virtual .build_deps"
-    shift
-  fi
+is_debian() {
+    [ "$(get_os)" == "debian" ] && return 0
+    return 1
+}
 
-  local PKG_LIST="$*"
-  if [ -n "$PKG_LIST" ]; then
-    sectionText "Installing package(s): $PKG_LIST"
-    apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
-  fi
+is_alpine() {
+    [ "$(get_os)" == "alpine" ] && return 0
+    return 1
 }
 
 exec_console() {
@@ -352,3 +344,70 @@ BUILD COMMANDS
 
 EOH
 }
+
+
+# arg1: extension name
+# arg2: list of build dependencies resolvable via distribution package pool
+php_ext_install() {
+  EXTENSION=$1
+  DEPS="$2"
+  
+  [ -n "$DEPS" ] && install_packages --build $DEPS
+  retry 3 docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
+}
+
+
+# filters all modules in extensions list by checking, if those extensions are already build
+# you can use this function to read from stdin (e.g. in a pipe) or give it an argument
+# it will stdout all not prebuild modules
+php_filter_prebuild_extensions() {
+  # get a list of already compiled modules
+  local PHP_PREBUILD_MODULES=`php -m | egrep '^([A-Za-z_]+)$' | tr '[:upper:]' '[:lower:]'`
+  
+  while read line; do
+    if ! echo "$PHP_PREBUILD_MODULES" | egrep "^($line)$"; then
+      echo "$line"
+    fi
+  done < ${1:-/dev/stdin}
+}
+
+
+# installs PHP extensions listed in $COMMON_PHP_EXTENSIONS and $PHP_EXTENSIONS
+php_install_all_extensions() {
+  docker-php-source extract
+  install_packages --build re2c
+  
+  # get a uniq list of extensions and filter already build extensions
+  local UNIQ_PHP_EXTENSION_LIST=`echo "$COMMON_PHP_EXTENSIONS $PHP_EXTENSIONS" | tr "[[:space:]]" "\n" | sort | uniq | php_filter_prebuild_extensions`
+  local PHP_EXTENSIONS_COUNT=`echo $UNIQ_PHP_EXTENSION_LIST | wc -w`
+  local PHP_EXTENSIONS_COUNTER="1"
+  
+  for ext in $UNIQ_PHP_EXTENSION_LIST; do
+    sectionText "Installing PHP extension ($PHP_EXTENSIONS_COUNTER/$PHP_EXTENSIONS_COUNT) $ext"
+    if type php_install_$ext; then
+      php_install_$ext
+    else
+      # try to install unknown extensions as it is possible, that they are part of the core
+      # TODO: check, if the ext is part of the core
+      php_ext_install $ext
+    fi >> $BUILD_LOG 2>&1
+    
+    let 'PHP_EXTENSIONS_COUNTER += 1'
+  done
+  
+  docker-php-source delete
+}
+
+
+# import default variables
+source $WORKDIR/docker/defaults.inc.sh
+source $WORKDIR/docker/defaults-alpine.inc.sh
+source $WORKDIR/docker/defaults-debian.inc.sh
+
+# import linux vendor specific functions
+source $WORKDIR/docker/common-alpine.inc.sh
+source $WORKDIR/docker/common-debian.inc.sh
+
+# include custom build config on demand
+[ -e "$WORKDIR/docker/build.conf" ] && source $WORKDIR/docker/build.conf
+
