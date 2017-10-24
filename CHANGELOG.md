@@ -3,6 +3,9 @@
 
 ## master
 
+* [fix] Change shebang of central shell scripts to bash in order to use
+  `${BASH_SOURCE[0]}`
+
 ## 0.9.2
 
 * [fix] Fix bump script
