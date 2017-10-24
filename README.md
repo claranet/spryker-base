@@ -17,9 +17,7 @@
     * [Spryker Configuration](#spryker-configuration)
     * [Docker Volumes](#docker-volumes)
 * [Conventions](#conventions)
-* [Create Custom Image](#create-custom-image)
-    * [Forking Demoshop](#forking-demoshop)
-    * [Starting from Scratch](#starting-from-scratch)
+* [Create Your Custom Image](#create-your-custom-image)
 * [Build & Run](#build--run)
 * [Configurations](#configurations)
     * [Runtime Environment Variables - Reference](#runtime-environment-variables---reference)
@@ -291,36 +289,21 @@ we have prepared for using this image here. This should answer all of the
 questions you might have.
 
 
-## Create Custom Image
-
-Either fork the [demoshop](https://github.com/claranet/spryker-demoshop) or
-start from scratch. For the latter you need to consider the following options.
-
-### Forking Demoshop
+## Create Your Custom Image
 
 Since the the reference implementation is the
 [demoshop](https://github.com/claranet/spryker-demoshop) which is maintained by
-us, this would be a pretty good starter.
+us, this is a pretty good starter. Either by just forking this repo or by starting from scratch.
 
-### Starting from Scratch
+If you want to start from scratch the only artifacts of interest which you need
+from the demoshop are:
+* `./docker/*`
+* `./Dockerfile`
+* `./.dockerignore`
+* `./config/Shared/config_local.php`
 
-We have prepared some kind of a [skeleton](/shop) with all required files you
-need to get started in order to bootstrapp your custom shop instance.
-
-```sh
-# change these parameters
-YOUR_SHOP="/path/to/your/shops/repository"
-
-# steps to prepare your shop
-mkdir -p $YOUR_SHOP && git init $YOUR_SHOP
-cp -an shop/* shop/.* "$YOUR_SHOP/"
-cd "$YOUR_SHOP"
-git add . && git commit -a -m "initial commit"
-```
-
-With this skeleton, you are ready to populate your repository with your code
-and customize it to your individual needs. The skeleton can be used untouched,
-if you want to use it for the demoshop.
+By this, you are ready to populate your repository with your code
+and customize it to your individual needs.
 
 Mind the `Dockerfile` which looks as clean as this:
 
