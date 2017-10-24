@@ -3,6 +3,7 @@
 
 ## master
 
+* [feature] Add development guide helping image maintainer and developer
 * [fix] Since spryker/setup got hardcoded directory pathes we need to
   workaround some of these till https://github.com/spryker/support/issues/143
   has been fixed

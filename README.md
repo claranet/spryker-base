@@ -592,7 +592,7 @@ In the yves/zed instance(s) you can find nginx, php-fpm and application logs wit
 
 ### Which base image are you using?
 
-We are depending on the official alpinelinux basing [php-fpm docker images](https://hub.docker.com/_/php/)
+We are depending on the official PHP images: https://hub.docker.com/_/php/
 
 ### Why using Alpine?
 
@@ -600,6 +600,9 @@ Very good question indeed! It is more or less a proof-of-concept which should
 demonstrate, that even heavy lifting projects can be hosted on Alpine. The
 expected benefits are reduced image sizes and faster build time as well as
 faster run times.
+
+Since this PoC hit several limitations, we are about to provide a debian based
+image as well.
 
 ### How to further speed up image build?
 
