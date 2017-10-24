@@ -3,8 +3,15 @@
 
 ## master
 
+* [fix] Since spryker/setup got hardcoded directory pathes we need to
+  workaround some of these till https://github.com/spryker/support/issues/143
+  has been fixed
+
+## 0.9.3
+
 * [fix] Change shebang of central shell scripts to bash in order to use
   `${BASH_SOURCE[0]}`
+* [change] Remove shop skeleton and refe to the demoshop instead
 
 ## 0.9.2
 

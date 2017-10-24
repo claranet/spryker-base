@@ -4,6 +4,9 @@ if is_in_list "jenkins" "$ENABLED_SERVICES"; then
 
   sectionText "Bootstrapping jenkins slave ..."
   install_packages openjdk8-jre
+  mkdir -p /data/shop/${APPLICATION_ENV}
+  ln -fvs /data/shop /data/shop/${APPLICATION_ENV}/current
+  ln -fvs /usr/local/bin/php /usr/bin/php
 
   sectionText "Waiting for jenkins master to be available ..."
   wait_for_http_service $JENKINS_URL
