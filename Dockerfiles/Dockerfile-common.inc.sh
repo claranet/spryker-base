@@ -82,23 +82,16 @@ CMD  [ "run-yves-and-zed" ]
 
 ONBUILD ARG NETRC
 
-ONBUILD COPY docker/ $WORKDIR/docker/
+ONBUILD COPY docker/*.sh $WORKDIR/docker/
+ONBUILD COPY docker/build.d $WORKDIR/docker/build.d
 ONBUILD RUN /entrypoint.sh rebuild-base
 
 
-ONBUILD COPY .* $WORKDIR/
-ONBUILD COPY assets/ $WORKDIR/assets
-ONBUILD COPY package.* composer.* yarn.* *.php $WORKDIR/
+ONBUILD COPY . $WORKDIR/
+ONBUILD COPY etc/ /etc/
+ONBUILD COPY docker $WORKDIR/docker
 ONBUILD RUN /entrypoint.sh build-deps
-
-ONBUILD COPY src/Pyz $WORKDIR/src/Pyz
-ONBUILD COPY config $WORKDIR/config
-ONBUILD COPY public $WORKDIR/public
 ONBUILD RUN /entrypoint.sh build-shop
-
-ONBUILD COPY codeception* $WORKDIR/
-ONBUILD COPY tests $WORKDIR/tests
-
 ONBUILD RUN /entrypoint.sh build-end
 EOF
 )
