@@ -3,6 +3,11 @@
 
 ## master
 
+## 0.9.5
+
+* [fix] fix the missing files in child images by changing the onbuild copy to a wildcard
+* [feature] optimize image build cache to leverage the base build more often
+
 ## 0.9.4
 
 * [feature] Add development guide helping image maintainer and developer
