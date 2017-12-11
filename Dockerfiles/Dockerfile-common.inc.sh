@@ -88,7 +88,6 @@ ONBUILD RUN /entrypoint.sh rebuild-base
 
 
 ONBUILD COPY . $WORKDIR/
-ONBUILD COPY etc/ /etc/
 ONBUILD COPY docker $WORKDIR/docker
 ONBUILD RUN /entrypoint.sh build-deps
 ONBUILD RUN /entrypoint.sh build-shop
