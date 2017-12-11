@@ -15,7 +15,7 @@ FROM=""
 HEADER=$(cat <<'EOF'
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
-      org.label-schema.version="0.9.4" \
+      org.label-schema.version="0.9.5" \
       org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce OS based Shop" \
       org.label-schema.vendor="Claranet GmbH" \
       org.label-schema.schema-version="1.0" \
