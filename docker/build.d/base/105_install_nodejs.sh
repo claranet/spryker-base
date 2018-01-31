@@ -37,10 +37,15 @@ sectionText "NodeJS package manager '$NPM' is supported"
 
 sectionText "Install nodejs version $NODEJS_VERSION"
 if [ "$NODEJS_VERSION" = "7" ]; then
-  install_packages nodejs-current
+  curl -sL https://deb.nodesource.com/setup_7.x | bash -
+  install_packages nodejs
 else
+  curl -sL https://deb.nodesource.com/setup_6.x | bash -
   install_packages nodejs
 fi
+
+# nodejs setup refreshes cache
+export APT_CACHE_REFRESHED=yes
 
 # install yarn if requested as package manager
 if [ "$NPM" = 'yarn' ]; then

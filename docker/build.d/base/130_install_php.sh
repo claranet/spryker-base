@@ -16,10 +16,13 @@ php_ext_install() {
   retry 3 docker-php-ext-install -j$COMPILE_JOBS $EXTENSION
 }
 
+#
+#  Pecl PHP extensions
+#
+
 # see https://pecl.php.net/package/imagick
 php_install_imagick() {
-  install_packages --build imagemagick-dev libtool
-  install_packages imagemagick
+  install_packages --build libmagickwand-6.q16-dev
 
   [ -z "$(php -m | grep imagick)" ] && pecl install imagick-$PHP_EXTENSION_IMAGICK
   docker-php-ext-enable imagick
@@ -27,88 +30,94 @@ php_install_imagick() {
 
 # see https://pecl.php.net/package/redis
 php_install_redis() {
-  install_packages --build redis
-  
   [ -z "$(php -m | grep redis)" ] && pecl install redis-$PHP_EXTENSION_REDIS
   docker-php-ext-enable redis
 }
 
+# see https://pecl.php.net/package/APCu
+php_install_apcu() {
+  pecl install APCu
+  docker-php-ext-enable $ext
+}
 
 #
 #  Core PHP extensions
 #
 php_install_gd() {
-  install_packages --build freetype-dev \
-        libjpeg-turbo-dev \
+  install_packages --build libfreetype6-dev \
+        libjpeg62-turbo-dev \
         libmcrypt-dev \
-        libpng-dev
+        libpng12-dev
   
   docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
   docker-php-ext-install -j$COMPILE_JOBS gd
   
-  install_packages libpng libjpeg-turbo freetype
+  #install_packages libpng12-0 libjpeg62-turbo libfreetype6
 }
 
 php_install_xdebug() {
   [ -z "$(php -m | grep xdebug)" ] && pecl install xdebug-$PHP_EXTENSION_XDEBUG
+  docker-php-ext-enable xdebug
 }
 
 php_install_opcache() {
-  php_ext_install opcache
+  php_ext_install $ext
 }
 
 php_install_bz2() {
-  php_ext_install $ext "bzip2-dev"
-  install_packages bzip2
-}
-
-php_install_curl() {
-  php_ext_install $ext "curl-dev"
-  install_packages libcurl
+  php_ext_install $ext "libbz2-dev"
 }
 
 php_install_mcrypt() {
   php_ext_install $ext "libmcrypt-dev"
-  install_packages libmcrypt
 }
 
 php_install_gmp() {
-  php_ext_install $ext "gmp-dev"
-  install_packages gmp
+  php_ext_install $ext "libgmp-dev"
 }
 
 php_install_intl() {
-  install_packages libintl icu-libs
-  php_ext_install $ext "icu-dev"
+  php_ext_install $ext "libicu-dev"
 }
 
 php_install_pgsql() {
-  php_ext_install $ext "postgresql-dev"
-  install_packages libpq
+  php_ext_install $ext "libpq-dev"
 }
 
 php_install_pdo_pgsql() {
-  php_ext_install $ext "postgresql-dev"
-  install_packages libpq
+  php_ext_install $ext "libpq-dev"
 }
 
 php_install_readline() {
-  php_ext_install $ext "readline-dev libedit-dev"
-  install_packages readline libedit
+  php_ext_install $ext "libreadline6-dev libedit-dev"
 }
 
 php_install_dom() {
   php_ext_install $ext "libxml2-dev"
-  install_packages libxml2
 }
 
 php_install_xml() {
   php_ext_install $ext "libxml2-dev"
-  install_packages libxml2
+}
+
+php_install_mbstring() {
+  php_ext_install $ext 
+}
+
+php_install_curl() {
+  php_ext_install $ext "libcurl4-openssl-dev"
 }
 
 php_install_zip() {
-  php_ext_install $ext "zlib-dev"
+  php_ext_install $ext "zlib1g-dev"
+}
+
+php_install_bcmath() {
+  php_ext_install $ext 
+}
+
+php_install_json() {
+  php_ext_install $ext 
 }
 
 # filters all modules in extensions list by checking, if those extensions are already build
@@ -138,6 +147,7 @@ php_install_all_extensions() {
   
   for ext in $UNIQ_PHP_EXTENSION_LIST; do
     sectionText "Installing PHP extension ($PHP_EXTENSIONS_COUNTER/$PHP_EXTENSIONS_COUNT) $ext"
+
     if type php_install_$ext; then
       php_install_$ext
     else
