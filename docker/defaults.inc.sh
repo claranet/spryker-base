@@ -15,7 +15,7 @@ COMMON_BUILD_DEPENDENCIES="ccache autoconf file g++ gcc libc-dev make pkgconf ba
 BUILD_DEPENDENCIES=""
 
 # Base dependencies to be installed
-COMMON_BASE_DEPENDENCIES="perl graphviz redis-tools"
+COMMON_BASE_DEPENDENCIES="perl graphviz redis-tools netcat"
 
 BASE_DEPENDENCIES=""
 
