@@ -1,18 +1,8 @@
-#!/bin/bash
-#
-# Order of variable substitution is as follows:
-#   - FROM
-#   - HEADER
-#   - PREPARE
-#   - FOOTER
-#
-set -a
 
-ELEMENTS=(FROM HEADER PREPARE FOOTER)
+# This needs to be substituted by build.sh
+FROM ${BASE_IMAGE:-php:7.1.13-fpm-jessie}
 
-FROM=""
-
-HEADER=$(cat <<'EOF'
+# HEADER
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="0.9.5" \
@@ -62,12 +52,13 @@ ENV APPLICATION_ENV="production" \
 
 COPY etc/ /etc/
 COPY docker $WORKDIR/docker
-EOF
-)
 
-PREPARE=""
+# PREPARE
+RUN mkdir -p /data/logs \
+    && ln -vfs /bin/bash /bin/sh \
+    && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
-FOOTER=$(cat <<'EOF'
+# FOOTER
 # Prepare base layer of image which includes base dependencies and php and all
 # the common modules. In prior versions this has been the task of the
 # particular downstream image.
@@ -88,9 +79,7 @@ ONBUILD RUN /entrypoint.sh rebuild-base
 
 
 ONBUILD COPY . $WORKDIR/
-ONBUILD COPY docker $WORKDIR/docker
 ONBUILD RUN /entrypoint.sh build-deps
 ONBUILD RUN /entrypoint.sh build-shop
 ONBUILD RUN /entrypoint.sh build-end
-EOF
-)
+
