@@ -20,19 +20,20 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT=php71 OS=debian LATEST=0.9.5
-  - VARIANT=php70 OS=debian 
+  - VARIANT="7.1.13-fpm-jessie" OS=debian LATEST=0.9.5
+  - VARIANT="7.0.27-fpm-jessie" OS=debian 
 
 before_script:
   - env | sort
   - export IMAGE="claranet/spryker-base"
-  - export TAG="${VARIANT:+-$VARIANT}${OS:+-$OS}"
+  - export BASE_IMAGE_TAG="${VARIANT:+-$VARIANT}"
+  - export BASE_IMAGE="php:${BASE_IMAGE_TAG}"
   - export VERSION="${TRAVIS_BRANCH:-${TRAVIS_TAG}}"
-  - export VERSION_TAG="${VERSION}${TAG}"
-  - export tagci="ci${VARIANT:+-$VARIANT}${OS:+-$OS}"
+  - export VERSION_TAG="${VERSION}-php-${BASE_IMAGE_TAG}"
+  - export tagci="ci${VARIANT:+-$VARIANT}"
 
 script:
-  - ./scripts/build.sh ./Dockerfiles/Dockerfile${TAG}.inc.sh
+  - ./scripts/build.sh ${BASE_IMAGE} 
   - docker images
   - echo "[INFO] Testing IMAGE $IMAGE:$VERSION_TAG ..."
   - docker run -it --rm $IMAGE:$VERSION_TAG php -i 
