@@ -6,6 +6,9 @@ install_packages nginx-common
 install_packages nginx-extras 
 install_packages nginx
 
+# remove default nginx configuration
+rm /etc/nginx/sites-enabled/default
+
 # remove default vhost config, if favour of our yves/zed vhosts
 #rm /etc/nginx/conf.d/default.conf
 
