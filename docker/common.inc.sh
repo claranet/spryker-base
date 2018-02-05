@@ -93,6 +93,12 @@ install_packages() {
   fi
 }
 
+install_java() {
+  # add java 8 backports to sources.list
+  echo deb http://http.debian.net/debian jessie-backports main >> /etc/apt/sources.list
+  apt-get update
+  apt install -qy -t jessie-backports openjdk-8-jre-headless ca-certificates-java
+}
 
 exec_console() {
   sectionText "Executing 'console $@'"
