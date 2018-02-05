@@ -20,8 +20,8 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT=php71 OS=alpine LATEST=0.9.5
-  - VARIANT=php70 OS=alpine 
+  - VARIANT=php71 OS=debian LATEST=0.9.5
+  - VARIANT=php70 OS=debian 
 
 before_script:
   - env | sort
