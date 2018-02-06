@@ -25,11 +25,11 @@ env:
 before_script:
   - env | sort
   - export IMAGE="claranet/spryker-base"
-  - export BASE_IMAGE_TAG="${VARIANT:+$VARIANT}"
+  - export BASE_IMAGE_TAG=$VARIANT
   - export BASE_IMAGE="php:${BASE_IMAGE_TAG}"
   - export VERSION="${TRAVIS_BRANCH:-${TRAVIS_TAG}}"
   - export VERSION_TAG="${VERSION}-php-${BASE_IMAGE_TAG}"
-  - export tagci="ci${VARIANT:+-$VARIANT}"
+  - export tagci="ci-$VARIANT"
 
 script:
   - ./scripts/build.sh ${BASE_IMAGE} 
