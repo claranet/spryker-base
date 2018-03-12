@@ -169,7 +169,7 @@ retry() {
     $command && break
     n=$(expr $n + 1)
     if [ $n -le $retries ] ; then
-      echo "Retry # $n"
+      echo "Retry #$n -- $*"
     else
       fail 2 "ERROR: Max retries. Unable to \`$command\`"
     fi

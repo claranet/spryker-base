@@ -3,7 +3,7 @@
 configure_jenkins() {
   sectionText "Configuring jenkins as the cronjob handler"
 
-  wait_for_http_service http://$JENKINS_HOST:$JENKINS_PORT
+  wait_for_http_service http://$JENKINS_URL
 
   # FIXME [bug01] until the code of the following cronsole command completely
   # relies on API calls, we need to workaround the issue with missing local

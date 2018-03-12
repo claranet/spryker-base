@@ -6,6 +6,7 @@
 
 
 <!-- vim-markdown-toc GFM -->
+
 * [What?](#what)
 * [Why?](#why)
 * [Design](#design)
@@ -359,8 +360,7 @@ file:
 * `ZED_DB_DATABASE="spryker"`
 * `ZED_DB_HOST="database"`
 * `ZED_DB_PORT="5432"`
-* `JENKINS_HOST="jenkins"`
-* `JENKINS_PORT="8080"`
+* `JENKINS_URL="http://jenkins:8080/"`
 * `RABBITMQ_HOST="rabbitmq"`
 * `RABBITMQ_PORT="5672"`
 * `RABBITMQ_USER="spryker"`
