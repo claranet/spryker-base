@@ -18,17 +18,17 @@ COMPILE_JOBS=$((`getconf _NPROCESSORS_ONLN`*2))
 #  Prepare
 #
 
-if ! is_in_list "$NODEJS_VERSION" "$SUPPORTED_NODEJS_VERSIONS"; then
-  errorText "NodeJS version '$NODEJS_VERSION' is not supported. Choose one of $SUPPORTED_NODEJS_VERSIONS. Abort!"
-  exit 1
-fi
-sectionText "NodeJS version $NODEJS_VERSION is supported"
+# if ! is_in_list "$NODEJS_VERSION" "$SUPPORTED_NODEJS_VERSIONS"; then
+#   errorText "NodeJS version '$NODEJS_VERSION' is not supported. Choose one of $SUPPORTED_NODEJS_VERSIONS. Abort!"
+#   exit 1
+# fi
+# sectionText "NodeJS version $NODEJS_VERSION is supported"
 
-if ! is_in_list "$NPM" "$SUPPORTED_NODEJS_PACKAGE_MANAGER"; then
-  errorText "NodeJS package manager '$NPM' is not supported. Choose one of $SUPPORTED_NODEJS_PACKAGE_MANAGER. Abort!"
-  exit 1
-fi
-sectionText "NodeJS package manager '$NPM' is supported"
+# if ! is_in_list "$NPM" "$SUPPORTED_NODEJS_PACKAGE_MANAGER"; then
+#   errorText "NodeJS package manager '$NPM' is not supported. Choose one of $SUPPORTED_NODEJS_PACKAGE_MANAGER. Abort!"
+#   exit 1
+# fi
+# sectionText "NodeJS package manager '$NPM' is supported"
 
 
 #
@@ -36,15 +36,16 @@ sectionText "NodeJS package manager '$NPM' is supported"
 #
 
 sectionText "Install nodejs version $NODEJS_VERSION"
-if [ "$NODEJS_VERSION" = "7" ]; then
-  install_packages --build nodejs-current
-else
-  install_packages --build nodejs
-fi
+sectionText " skipped as this is node8 fixed!"
+# if [ "$NODEJS_VERSION" = "7" ]; then
+#   install_packages --build nodejs-current
+# else
+#   install_packages --build nodejs
+# fi
 
 
 # install yarn if requested as package manager
-if [ "$NPM" = 'yarn' ]; then
-  sectionText "Install $NPM"
-  install_packages --build yarn
-fi
+# if [ "$NPM" = 'yarn' ]; then
+#   sectionText "Install $NPM"
+#   install_packages --build yarn
+# fi

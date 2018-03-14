@@ -1,5 +1,5 @@
 
-FROM php:7.0.21-fpm-alpine
+FROM php:7.1.15-fpm-alpine
 
 # see http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
@@ -56,6 +56,18 @@ RUN apk add --no-cache \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
+# bugfix to gain nodejs 8 support
+COPY --from=node:8-alpine /usr/local/bin /usr/local/bin
+COPY --from=node:8-alpine /usr/lib/libstdc++.so.6 /usr/lib/libstdc++.so.6
+COPY --from=node:8-alpine /usr/lib/libgcc_s.so.1  /usr/lib/libgcc_s.so.1
+
+COPY --from=node:8-alpine /opt/yarn /opt/yarn
+
+COPY --from=node:8-alpine /usr/local/lib/node_modules/npm/bin /usr/local/lib/node_modules/npm/bin
+COPY --from=node:8-alpine /usr/local/lib/node_modules/npm/lib /usr/local/lib/node_modules/npm/lib
+COPY --from=node:8-alpine /usr/local/lib/node_modules/npm/node_modules /usr/local/lib/node_modules/npm/node_modules
+COPY --from=node:8-alpine /usr/local/lib/node_modules/npm/package.json /usr/local/lib/node_modules/npm/package.json
+
 EXPOSE 80
 
 WORKDIR $WORKDIR
@@ -71,6 +83,7 @@ ONBUILD RUN /entrypoint.sh build-base
 ONBUILD COPY .* $WORKDIR/
 ONBUILD COPY assets/ $WORKDIR/assets
 ONBUILD COPY package.* composer.* yarn.* $WORKDIR/
+
 ONBUILD RUN /entrypoint.sh build-deps
 
 ONBUILD COPY src/Pyz $WORKDIR/src/Pyz

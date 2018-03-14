@@ -8,6 +8,7 @@ else
 fi
 
 sectionText "Diverting git transport from SSH to HTTPS ..."
-git config --global "url.https://".insteadof "git://git@"
+git config --global url."https://github.com/".insteadof git://github.com:
+git config --global url."https://".insteadof git://git@
 
 composer.phar config --global github-protocols https
