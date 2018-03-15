@@ -222,6 +222,20 @@ skip_cleanup() {
 }
 
 
+cleanup() {
+  sectionText "Removing build depedencies"
+  echo $BUILD_DEPS
+  apt-get remove -y $BUILD_DEPS >> $BUILD_LOG
+
+  sectionText "Cleaning up /tmp folder"
+  rm -rf /tmp/*
+
+  sectionText "Removing apt cache and lists"
+  rm -rf /var/chache/apt/*
+  rm -rf /var/lib/apt/lists/*
+}
+
+
 start_timer() {
   varname=${1:-'total'}
   now=$(date +%s)
