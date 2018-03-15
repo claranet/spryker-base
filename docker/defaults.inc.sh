@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 KEEP_DEVEL_TOOLS=false
 SKIP_CLEANUP=false

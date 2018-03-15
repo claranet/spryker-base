@@ -19,17 +19,17 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT="7.1.13-fpm-jessie" OS=debian LATEST=0.9.5
-  - VARIANT="7.0.27-fpm-jessie" OS=debian 
+  - VARIANT="7.1.13-fpm" OS=jessie LATEST=0.9.5
+  - VARIANT="7.0.27-fpm" OS=jessie
 
 before_script:
   - env | sort
   - export IMAGE="claranet/spryker-base"
-  - export BASE_IMAGE_TAG=$VARIANT
+  - export BASE_IMAGE_TAG=${VARIANT}${OS:+-$OS}
   - export BASE_IMAGE="php:${BASE_IMAGE_TAG}"
   - export VERSION="${TRAVIS_BRANCH:-${TRAVIS_TAG}}"
   - export VERSION_TAG="${VERSION}-php-${BASE_IMAGE_TAG}"
-  - export tagci="ci-$VARIANT"
+  - export tagci="ci-${BASE_IMAGE_TAG}"
 
 script:
   - ./scripts/build.sh ${BASE_IMAGE} 
