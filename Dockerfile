@@ -15,7 +15,9 @@ LABEL org.label-schema.name="spryker-base" \
 
 ENV WORKDIR=/data/shop \
     CONFIG_DIR=/mnt/configs \
-    PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/etc/php/ini
+    PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/etc/php/ini \
+    # jenkins jobs in devel mode are being assumed to be ran in this directory
+    destination_release_dir=/data/shop
 
 # Reference of spryker config related ENV vars
 ENV APPLICATION_ENV="production" \
