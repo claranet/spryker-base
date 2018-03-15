@@ -3,7 +3,7 @@
 if is_in_list "jenkins" "$ENABLED_SERVICES"; then
 
   sectionText "Bootstrapping jenkins slave ..."
-  install_packages openjdk8-jre
+  install_java
   mkdir -p /data/shop/${APPLICATION_ENV}
   ln -fvs /data/shop /data/shop/${APPLICATION_ENV}/current
   ln -fvs /usr/local/bin/php /usr/bin/php

@@ -75,21 +75,29 @@ writeErrorMessage() {
 
 install_packages() {
   local INSTALL_FLAGS=""
-  if [ -z "${APK_CACHE_REFRESHED}" ]; then
-    sectionText "Refreshing apk cache initially"
-    apk update >> $BUILD_LOG
-    export APK_CACHE_REFRESHED=yes
+  if [ -z "${APT_CACHE_REFRESHED}" ]; then
+    sectionText "Refreshing apt cache initially"
+    apt-get update >> $BUILD_LOG
+    export APT_CACHE_REFRESHED=yes
   fi
+
   if [ "$1" = "--build" ]; then
-    INSTALL_FLAGS="$INSTALL_FLAGS --virtual .build_deps"
     shift
+    BUILD_DEPS="$BUILD_DEPS $*"
   fi
 
   local PKG_LIST="$*"
   if [ -n "$PKG_LIST" ]; then
     sectionText "Installing package(s): $PKG_LIST"
-    apk add $INSTALL_FLAGS $PKG_LIST >> $BUILD_LOG
+    apt-get -q install -y -o Dpkg::Options::=--force-confdef $PKG_LIST >> $BUILD_LOG
   fi
+}
+
+install_java() {
+  # add java 8 backports to sources.list
+  echo deb http://http.debian.net/debian jessie-backports main >> /etc/apt/sources.list
+  apt-get update
+  apt install -qy -t jessie-backports openjdk-8-jre-headless ca-certificates-java
 }
 
 exec_console() {
