@@ -2,8 +2,7 @@
 # This needs to be substituted by build.sh
 FROM ${BASE_IMAGE:-php:7.1.13-fpm-jessie}
 
-# HEADER
-# see http://label-schema.org/rc1/
+# See http://label-schema.org/rc1/
 LABEL org.label-schema.name="spryker-base" \
       org.label-schema.version="0.9.5" \
       org.label-schema.description="Providing base infrastructure of a containerized Spryker Commerce OS based Shop" \
@@ -58,7 +57,6 @@ RUN mkdir -p /data/logs \
     && ln -vfs /bin/bash /bin/sh \
     && ln -vfs $WORKDIR/docker/entrypoint.sh /entrypoint.sh
 
-# FOOTER
 # Prepare base layer of image which includes base dependencies and php and all
 # the common modules. In prior versions this has been the task of the
 # particular downstream image.
