@@ -3,6 +3,15 @@
 
 ## master
 
+## 0.9.6
+
+* [BC change] Due to problems and limitations of musl lib c we've decided to
+  migrate off alpine based images over to debian ones. We will discontinue
+  alpine support from now on and will only maintain the newly introduced debian
+  flavour. As long as you shipped images without any further customizations
+  this should have no impact to you. Otherwise you need to review your custom
+  tooling.
+
 ## 0.9.5
 
 * [fix] fix the missing files in child images by changing the onbuild copy to a wildcard

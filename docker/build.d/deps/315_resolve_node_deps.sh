@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# specify alpinelinux packages via this variable (you may define it in your build.conf)
 NPM_DEPENDENCIES=${NPM_DEPENDENCIES:-}
 
 if [ ! -z "$NPM_DEPENDENCIES" ]; then

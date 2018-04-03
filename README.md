@@ -40,7 +40,7 @@
 * [FAQ](#faq)
     * [Where to find logs?](#where-to-find-logs)
     * [Which base image are you using?](#which-base-image-are-you-using)
-    * [Why using Alpine?](#why-using-alpine)
+    * [Why not using Alpine any more?](#why-not-using-alpine-any-more)
     * [How to further speed up image build?](#how-to-further-speed-up-image-build)
 * [Issues](#issues)
 
@@ -75,7 +75,7 @@ Core traits are:
 * Uses dockers `ONBUILD` trigger feature to hook into and control the child image build process
 * Provide reasonable default FPM/nginx configuration
 * Its open for customization by providing hookable build, init and configuration steps
-* Expects the base structure from the [spryker-demoshop](https://github.com/spryker/demoshop)
+* Expects the base structure like the [spryker-demoshop](https://github.com/spryker/demoshop)
 * No further constraints, you are absolutely free to design you shop the way you want it to
 
 
@@ -384,8 +384,8 @@ Those variables are to be provided via your project specific
 * `PROJECT` (mandatory) -- Controls the name prefix of the `docker-compose` created services
 * `IMAGE` (mandatory) -- What is the name of the resulting docker image?
 * `VERSION` (mandatory) -- Which version of the docker image are we working on?
-* `BUILD_DEPENDENCIES` -- Distribution (alpine) packages to be installed during build time
-* `BASE_DEPENDENCIES` -- Distribution (alpine) packages to be installed additionally
+* `BUILD_DEPENDENCIES` -- Distribution (debian) packages to be installed during build time
+* `BASE_DEPENDENCIES` -- Distribution (debian) packages to be installed additionally
 * `PHP_EXTENSIONS` -- Space seperated list of PHP extension to be installed
 * `NPM_DEPENDENCIES`-- Distribution packages which will be intalled prior to the NPM handling in the deps layer
 * `KEEP_DEVEL_TOOLS` (default: false) -- Shall development tools be installed and kept beyond the build?
@@ -594,15 +594,19 @@ In the yves/zed instance(s) you can find nginx, php-fpm and application logs wit
 
 We are depending on the official PHP images: https://hub.docker.com/_/php/
 
-### Why using Alpine?
+### Why not using Alpine any more?
 
-Very good question indeed! It is more or less a proof-of-concept which should
-demonstrate, that even heavy lifting projects can be hosted on Alpine. The
-expected benefits are reduced image sizes and faster build time as well as
-faster run times.
+Very good question indeed!
 
-Since this PoC hit several limitations, we are about to provide a debian based
-image as well.
+We've decided to go for alpine due to shorter image building times - both
+source build and package install. It has been more or less a proof-of-concept
+which should demonstrate, that even heavy lifting projects can be hosted on
+alpine. The expected benefits are reduced image sizes and faster build time as
+well as faster run times.
+
+Unfortunately it turns out that musl lib c introduces limitation which are
+unbearable in customer context - where versatility is the key. Since 0.9.6
+we've switched over to debian based images.
 
 ### How to further speed up image build?
 

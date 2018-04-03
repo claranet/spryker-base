@@ -6,10 +6,9 @@ How to push things forward. :)
 ## Build Matrix
 
 Since we are striving for supporting multiple PHP versions and OS vendors we
-span a matrix constituted by templates under `./Dockerfiles`. This templates
-are basically shell scripts which getting sourced by the top level files in a
-well sorted order. This permits us to reduce dedundancies and retains
-consistency across images.
+span a matrix constituted by the `./Dockerfile`. This file is being evaluated
+as template and a few variables - mostly governing which base image to derive
+from - are being substituted.
 
 ## Development and Release Procedure
 
@@ -21,9 +20,7 @@ In order to work on a new version, a common procedure looks like the following:
   indicates that we are working on the next upcoming version and to be able to
   refer to this image for testing purposes.
 * Make your changes to the source code
-* Build the image: 
-    * Either all images: `./scripts/build.sh` 
-    * Or a particular image: `./scripts/build.sh ./Dockerfiles/Dockerfile-php70-alpine.inc.sh` 
+* Build the image: `./scripts/build.sh`
 * Test against the demoshop
     * Checkout the repo under https://github.com/claranet/spryker-demoshop
     * Change the `FROM` line of the demoshop `Dockerfile` to the devel version
@@ -51,7 +48,7 @@ If all went well and your reached your desired state, then release this image:
       replaced with the new one
     * Commits these changes with proper commit msg
     * Tags this commit
-* Check of everything went well 
+* Check of everything went well
 * Push changes
     * `git push`
     * `git push --tags`
