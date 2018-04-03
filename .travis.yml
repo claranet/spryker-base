@@ -19,7 +19,7 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - VARIANT="7.1.13-fpm" OS=jessie LATEST=0.9.5
+  - VARIANT="7.1.13-fpm" OS=jessie LATEST=0.9.6
   - VARIANT="7.0.27-fpm" OS=jessie
 
 before_script:
