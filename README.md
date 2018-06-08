@@ -5,6 +5,9 @@
 [![docker pull badge](https://img.shields.io/docker/pulls/claranet/spryker-base.svg)](https://hub.docker.com/r/claranet/spryker-base/)
 
 
+**IMPORTANT NOTE: This project is deprecated! Please use the `claranet/spryker-demoshop` as a bootstrap reference or our `claranet/php` parent image for a more generic PHP use-case! We don't maintain this project anymore.**
+
+
 <!-- vim-markdown-toc GFM -->
 
 * [What?](#what)
